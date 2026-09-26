@@ -1,4 +1,3 @@
-// Write your code below:
 let div1 = document.getElementsByClassName("fruits")[0];
 
 let elements = div1.querySelectorAll("*");
