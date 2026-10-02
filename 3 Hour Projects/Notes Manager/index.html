@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notes Manager</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <h1>NoteBook: Notes Manager</h1>
+
+    <div class="main-layout">
+      <!-- LEFT: Add Note -->
+      <div id="add-note-container">
+        <h2>Add a New Note</h2>
+
+        <form id="add-note-form">
+          <label for="note_title">Title:</label>
+
+          <input
+            type="text"
+            id="note_title"
+            name="note_title"
+            placeholder="Note Title"
+            required
+          />
+
+          <label for="note_description">Description:</label>
+
+          <textarea
+            id="note_description"
+            name="note_description"
+            placeholder="Note Description"
+            required
+          ></textarea>
+
+          <button type="submit">Add Note</button>
+        </form>
+      </div>
+
+      <!-- CENTER: Search + Notes -->
+      <div class="notes-area">
+        <h2>Find Notes Here</h2>
+
+        <hr />
+
+        <input id="search-input" type="text" placeholder="Search notes..." />
+        <div id="stats">
+          <h3 id="total-notes">Total Notes: 0</h3>
+          <h3 id="now-showing">Now Showing: 0</h3>
+        </div>
+        <div id="list-container">
+          <ul id="notesList">
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="index.js"></script>
+  </body>
+</html>

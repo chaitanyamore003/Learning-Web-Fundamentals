@@ -1,0 +1,244 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f4f6f8;
+  color: #222;
+  padding: 35px 40px;
+}
+
+/* =========================
+   Main Heading
+========================= */
+
+h1 {
+  text-align: center;
+  font-size: 32px;
+  color: #1f2937;
+  margin-bottom: 35px;
+}
+
+/* =========================
+   Main Layout
+========================= */
+
+.main-layout {
+  display: grid;
+
+  grid-template-columns: 400px minmax(500px, 700px);
+
+  gap: 100px;
+
+  align-items: start;
+
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* =========================
+   Add Note - LEFT
+========================= */
+
+#add-note-container {
+  background: white;
+
+  padding: 25px;
+
+  border-radius: 10px;
+
+  border: 1px solid #e5e7eb;
+}
+
+#add-note-container h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #374151;
+}
+
+/* =========================
+   Form
+========================= */
+
+#add-note-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#add-note-form label {
+  font-weight: 600;
+  color: #374151;
+  margin-top: 5px;
+}
+
+#add-note-form input,
+#add-note-form textarea {
+  width: 100%;
+
+  padding: 12px;
+
+  border: 1px solid #d1d5db;
+
+  border-radius: 7px;
+
+  font-size: 15px;
+
+  font-family: inherit;
+
+  outline: none;
+}
+
+#add-note-form input:focus,
+#add-note-form textarea:focus {
+  border-color: #2563eb;
+}
+
+#add-note-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* =========================
+   Add Button
+========================= */
+
+#add-note-form button {
+  margin-top: 10px;
+
+  padding: 12px;
+
+  border: none;
+
+  border-radius: 7px;
+
+  background: #2563eb;
+
+  color: white;
+
+  font-size: 16px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+#add-note-form button:hover {
+  background: #1d4ed8;
+}
+
+/* =========================
+   Search / Notes - CENTER
+========================= */
+
+.notes-area {
+  width: 100%;
+}
+
+.notes-area h2 {
+  text-align: center;
+  color: #374151;
+  margin-bottom: 15px;
+}
+
+.notes-area hr {
+  border: none;
+  border-top: 1px solid #d1d5db;
+  margin-bottom: 25px;
+}
+
+/* =========================
+   Search
+========================= */
+
+#search-input {
+  display: block;
+
+  width: 600px;
+  max-width: 100%;
+
+  margin: 0 auto 25px;
+
+  padding: 12px 15px;
+
+  border: 1px solid #d1d5db;
+
+  border-radius: 8px;
+
+  font-size: 16px;
+
+  outline: none;
+}
+
+#search-input:focus {
+  border-color: #2563eb;
+}
+
+/* =========================
+   Notes List
+========================= */
+
+#list-container {
+  width: 100%;
+}
+
+#notesList {
+  list-style: none;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 18px;
+}
+
+/* =========================
+   Individual Note
+========================= */
+
+#notesList li {
+  display: flex;
+  justify-content: space-between;
+  background: white;
+
+  padding: 20px;
+
+  border-radius: 10px;
+
+  border: 1px solid #e5e7eb;
+}
+
+.delete-btn {
+  background: #ef4444;
+
+  color: white;
+
+  border: none;
+
+  padding: 8px 12px;
+
+  border-radius: 5px;
+
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+}
+
+/*=========================
+   Stats
+========================= */
+
+#stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+#stats h3 {
+  color: #374151;
+  font-size: 16px;
+}
