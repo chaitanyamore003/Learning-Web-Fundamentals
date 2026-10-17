@@ -1,14 +1,14 @@
-const getCartItems = (req, res) => {
+const getCartForUser = (req, res) => {
   res.send(`<h2>Fetching cart for user with ID: ${req.params.userId}</h2>`);
 };
 
-const addCartItems = (req, res) => {
+const addProductToCart = (req, res) => {
   res.send(
     `<h2>Adding product to cart for user with ID: ${req.params.userId}</h2>`,
   );
 };
 
 module.exports = {
-  getCartItems,
-  addCartItems,
+  getCartForUser,
+  addProductToCart,
 };
