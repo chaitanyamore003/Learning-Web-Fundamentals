@@ -1,13 +1,15 @@
+const userService = require("../services/user.service");
+
 const getAllUsers = (req, res) => {
-  res.send(`<h2>Fetching all users</h2>`);
+  res.send(userService.getUsers());
 };
 
 const addUser = (req, res) => {
-  res.send(`<h2>Adding a new user</h2>`);
+  res.send(userService.addUser());
 };
 
 const getUserById = (req, res) => {
-  res.send(`<h2>Fetching user with ID: ${req.params.id}</h2>`);
+  res.send(userService.getUserWithId(req.params.id));
 };
 
 module.exports = {
