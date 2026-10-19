@@ -40,5 +40,5 @@ app.use("/", (req, res) => {
 });
 
 app.listen(process.env.PORT, () => {
-  console.log("server is started on http://localhost:3000");
+  console.log(`server is started on http://localhost:${process.env.PORT}`);
 });
