@@ -47,7 +47,28 @@ const queries = [
   paymentsTableCreationQuery,
 ];
 
+// Replace your database.connect() block with this:
+const initializeDatabase = (callback) => {
+  database.connect((err) => {
+    if (err) return callback(err);
+
+    let completed = 0;
+
+    queries.forEach((query) => {
+      database.query(query, (err) => {
+        if (err) return callback(err);
+
+        completed++;
+
+        if (completed === queries.length) {
+          callback(null);
+        }
+      });
+    });
+  });
+};
+
 module.exports = {
   database,
-  queries,
+  initializeDatabase,
 };

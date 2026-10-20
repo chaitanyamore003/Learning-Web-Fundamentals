@@ -1,32 +1,24 @@
+require("dotenv").config();
+
 const express = require("express");
-const { database, queries } = require("./database");
+const { initializeDatabase } = require("./database");
+const userRouter = require("./routes/user.routes");
+const busRouter = require("./routes/bus.routes");
 
 const app = express();
 
-database.connect((err) => {
+app.use(express.json());
+
+app.use("/users", userRouter);
+app.use("/buses", busRouter);
+
+initializeDatabase((err) => {
   if (err) {
-    console.log(err);
+    console.error("Database initialization failed:", err.message);
     return;
   }
 
-  console.log("Database connection successful");
-
-  let completed = 0;
-
-  queries.forEach((query) => {
-    database.query(query, (err) => {
-      if (err) {
-        console.log(err);
-        return;
-      }
-
-      completed++;
-
-      if (completed === queries.length) {
-        app.listen(process.env.PORT, () => {
-          console.log(`Server running on port ${process.env.PORT}`);
-        });
-      }
-    });
+  app.listen(process.env.PORT, () => {
+    console.log(`Server running on port ${process.env.PORT}`);
   });
 });
