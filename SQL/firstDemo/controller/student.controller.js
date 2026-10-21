@@ -75,9 +75,7 @@ const deleteEntry = async (req, res) => {
 
     if (!deleted) {
       res.status(404).send(`Student to Delete Not Found`);
-    }
-
-    res.send(`Student with id: ${id} Deleted Successfully`);
+    } else res.send(`Student with id: ${id} Deleted Successfully`);
   } catch (err) {
     res.status(500).send(`Unable to Delete the Student`);
   }

@@ -1,5 +1,5 @@
 //using sequelize
-const { Sequelize, Model } = require("sequelize");
+const { Sequelize } = require("sequelize");
 
 const sequelize = new Sequelize("testdb", "root", "root", {
   host: "localhost",

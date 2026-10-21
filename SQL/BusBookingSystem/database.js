@@ -1,74 +1,93 @@
-require("dotenv").config();
-const mysql = require("mysql2");
+const { Sequelize } = require("sequelize");
 
-const database = mysql.createConnection({
+const database = new Sequelize("testdb", "root", "root", {
   host: "localhost",
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  dialect: "mysql",
 });
 
-//creating tables
+//testing the connection using IFFE Function
+(async () => {
+  try {
+    await database.authenticate();
+    console.log("Database connection successful");
+  } catch (err) {
+    console.log(err);
+  }
+})();
 
-//user table
-const userTableCreationQuery = `CREATE TABLE IF NOT EXISTS Users(
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(20),
-    email VARCHAR(20)
-)`;
+module.exports = database;
 
-//buses table
-const busesTableCreationQuery = `CREATE TABLE IF NOT EXISTS Buses(
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    busNumber INT,
-    totalSeats INT,
-    availableSeats INT
-)`;
+// require("dotenv").config();
+// const mysql = require("mysql2");
 
-//bookings table
-const bookingsTableCreationQuery = `CREATE TABLE IF NOT EXISTS Bookings(
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    seatNumber INT
-)`;
+// const database = mysql.createConnection({
+//   host: "localhost",
+//   user: process.env.DB_USER,
+//   password: process.env.DB_PASSWORD,
+//   database: process.env.DB_NAME,
+// });
 
-//payments table
-const paymentsTableCreationQuery = `CREATE TABLE IF NOT EXISTS Payments(
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    amountPaid INT,
-    paymentStatus BOOLEAN
-)`;
+// //creating tables
 
-//executing the queries
+// //user table
+// const userTableCreationQuery = `CREATE TABLE IF NOT EXISTS Users(
+//     id INT AUTO_INCREMENT PRIMARY KEY,
+//     name VARCHAR(20),
+//     email VARCHAR(20)
+// )`;
 
-const queries = [
-  userTableCreationQuery,
-  busesTableCreationQuery,
-  bookingsTableCreationQuery,
-  paymentsTableCreationQuery,
-];
+// //buses table
+// const busesTableCreationQuery = `CREATE TABLE IF NOT EXISTS Buses(
+//     id INT AUTO_INCREMENT PRIMARY KEY,
+//     busNumber INT,
+//     totalSeats INT,
+//     availableSeats INT
+// )`;
 
-// Replace your database.connect() block with this:
-const initializeDatabase = (callback) => {
-  database.connect((err) => {
-    if (err) return callback(err);
+// //bookings table
+// const bookingsTableCreationQuery = `CREATE TABLE IF NOT EXISTS Bookings(
+//     id INT AUTO_INCREMENT PRIMARY KEY,
+//     seatNumber INT
+// )`;
 
-    let completed = 0;
+// //payments table
+// const paymentsTableCreationQuery = `CREATE TABLE IF NOT EXISTS Payments(
+//     id INT AUTO_INCREMENT PRIMARY KEY,
+//     amountPaid INT,
+//     paymentStatus BOOLEAN
+// )`;
 
-    queries.forEach((query) => {
-      database.query(query, (err) => {
-        if (err) return callback(err);
+// //executing the queries
 
-        completed++;
+// const queries = [
+//   userTableCreationQuery,
+//   busesTableCreationQuery,
+//   bookingsTableCreationQuery,
+//   paymentsTableCreationQuery,
+// ];
 
-        if (completed === queries.length) {
-          callback(null);
-        }
-      });
-    });
-  });
-};
+// // Replace your database.connect() block with this:
+// const initializeDatabase = (callback) => {
+//   database.connect((err) => {
+//     if (err) return callback(err);
 
-module.exports = {
-  database,
-  initializeDatabase,
-};
+//     let completed = 0;
+
+//     queries.forEach((query) => {
+//       database.query(query, (err) => {
+//         if (err) return callback(err);
+
+//         completed++;
+
+//         if (completed === queries.length) {
+//           callback(null);
+//         }
+//       });
+//     });
+//   });
+// };
+
+// module.exports = {
+//   database,
+//   initializeDatabase,
+// };

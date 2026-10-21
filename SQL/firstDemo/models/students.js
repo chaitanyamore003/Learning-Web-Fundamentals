@@ -1,5 +1,5 @@
 //from the sequelize module
-const { Sequelize, DataTypes, Model } = require("sequelize");
+const { DataTypes } = require("sequelize");
 
 //from our db-connection
 const sequelize = require("../utils/db-connection");
