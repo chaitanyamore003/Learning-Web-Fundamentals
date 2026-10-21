@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>User Management</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <main class="page-container">
+      <section class="user-card">
+        <header class="page-header">
+          <h1 class="page-title">User Management</h1>
+          <p class="page-subtitle">Add and manage your users easily.</p>
+        </header>
+
+        <form id="userForm" class="user-form">
+          <div class="form-group">
+            <label for="username" class="form-label">Username</label>
+            <input
+              type="text"
+              name="username"
+              id="username"
+              class="form-input"
+              placeholder="Enter your name"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email" class="form-label">Email</label>
+            <input
+              type="email"
+              name="email"
+              id="email"
+              class="form-input"
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+
+          <button type="submit" id="submitBtn" class="btn btn-primary">
+            Add User
+          </button>
+        </form>
+
+        <p id="statusMessage" class="status-message" role="status"></p>
+
+        <section class="users-section">
+          <h2 class="section-title">Users List</h2>
+          <ul id="userList" class="user-list"></ul>
+        </section>
+      </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
+    <script src="users.js"></script>
+  </body>
+</html>
