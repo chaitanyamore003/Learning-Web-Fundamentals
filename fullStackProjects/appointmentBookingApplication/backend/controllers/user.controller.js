@@ -104,6 +104,11 @@ const addUser = async (req, res) => {
   }
 };
 
+const addingValuesToStudentAndIdentityTable = async (req, res) => {
+  try {
+  } catch (err) {}
+};
+
 module.exports = {
   getUsers,
   updateUser,
