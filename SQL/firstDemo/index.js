@@ -13,7 +13,7 @@ app.use("/", (req, res) => {
   res.send("<h1>HI There</h1>");
 });
 
-db.sync({ force: true })
+db.sync({ force: false })
   .then(() => {
     app.listen(process.env.PORT, () => {
       console.log(`server is started on http://localhost:${process.env.PORT}`);
