@@ -39,7 +39,9 @@ const addBus = async (req, res) => {
 
     res.send(`Bus with Number: ${busNumber} has been added successfully`);
   } catch (err) {
-    return res.status(500).send("Unable to Add the bus");
+    return res.status(500).json({
+      err: err.message,
+    });
   }
 };
 

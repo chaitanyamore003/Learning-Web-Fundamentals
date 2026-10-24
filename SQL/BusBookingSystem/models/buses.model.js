@@ -8,7 +8,7 @@ const Buses = database.define("Buses", {
     autoIncrement: true,
   },
   busNumber: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING,
     unique: true,
     allowNull: false,
   },

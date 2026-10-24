@@ -1,3 +1,9 @@
+const {
+  bookingsModel,
+  busModel,
+  userModel,
+} = require("../models/associations");
+
 const createBooking = async (req, res) => {
   try {
     const { userId, busId, seatNumber } = req.body;
