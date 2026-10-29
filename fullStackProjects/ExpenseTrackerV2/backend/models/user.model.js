@@ -1,4 +1,4 @@
-const { DataTypes} = require("sequelize");
+const { DataTypes } = require("sequelize");
 const db = require("../utils/database");
 
 const users = db.define("Users", {
@@ -15,6 +15,10 @@ const users = db.define("Users", {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
   },
 });
 

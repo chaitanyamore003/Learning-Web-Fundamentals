@@ -94,13 +94,19 @@
       .login-link a:hover {
         text-decoration: underline;
       }
+      #responseMessage {
+        margin-top: 15px;
+        text-align: center;
+        font-size: 14px;
+        overflow-wrap: anywhere;
+      }
     </style>
   </head>
   <body>
     <main>
       <h1>Create an Account</h1>
 
-      <form action="http://localhost:3000/users/signup" method="POST">
+      <form onsubmit="formSubmit(event)">
         <div>
           <label for="name">Name</label>
           <input
@@ -139,6 +145,8 @@
         </p>
 
         <button type="submit">Sign Up</button>
+
+        <p id="responseMessage"></p>
       </form>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>

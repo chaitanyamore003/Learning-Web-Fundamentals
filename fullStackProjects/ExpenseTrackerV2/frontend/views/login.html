@@ -102,7 +102,7 @@
     <main>
       <h1>Welcome Back</h1>
 
-      <form action="/login" method="POST">
+      <form onsubmit="formSubmit(event)">
         <div>
           <label for="email">Email</label>
           <input
@@ -131,7 +131,10 @@
         </p>
 
         <button type="submit">Login</button>
+        <p id="responseMessage"></p>
       </form>
     </main>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="../js/login.js"></script>
   </body>
 </html>

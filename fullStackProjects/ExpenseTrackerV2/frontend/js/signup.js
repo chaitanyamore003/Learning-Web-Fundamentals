@@ -1,13 +1,24 @@
-const baseUrl = "http://localhost:3000/users";
+const formSubmit = async (event) => {
+  event.preventDefault();
 
-const formSubmit = async (e) => {
-  const name = e.target.name.value;
-  const email = e.target.email.value;
-  const password = e.target.password.value;
+  const name = event.target.name.value;
+  const email = event.target.email.value;
+  const password = event.target.password.value;
+  const responseMessage = document.getElementById("responseMessage");
 
-  await axios.post(`${baseUrl}/signup`, {
-    name,
-    email,
-    password,
-  });
+  try {
+    const response = await axios.post("http://localhost:3000/users/signup", {
+      name,
+      email,
+      password,
+    });
+
+    responseMessage.textContent = response.data.message;
+    responseMessage.style.color = "green";
+  } catch (error) {
+    responseMessage.textContent =
+      error.response?.data?.message || "Something went wrong";
+
+    responseMessage.style.color = "red";
+  }
 };
