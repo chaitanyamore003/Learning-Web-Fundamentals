@@ -1,11 +1,12 @@
 const formSubmit = async (e) => {
-  const name = e.target.name.value;
+  e.preventDefault();
+  const email = e.target.email.value;
   const password = e.target.password.value;
   const responseMessage = document.getElementById("responseMessage");
 
   try {
     const response = await axios.post("http://localhost:3000/users/login", {
-      name,
+      email,
       password,
     });
 

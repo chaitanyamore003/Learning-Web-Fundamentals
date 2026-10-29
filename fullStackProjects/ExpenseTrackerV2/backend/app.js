@@ -3,12 +3,14 @@ require("dotenv").config();
 const db = require("./utils/database");
 const userRouter = require("./routes/user.routes");
 const cors = require("cors");
+const morgan = require("morgan");
 
 require("./models/user.model");
 
 const app = express();
 
 app.use(cors());
+app.use(morgan("dev"));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());

@@ -1,3 +1,4 @@
+const { response } = require("express");
 const userModel = require("../models/user.model");
 
 /** user signup */
@@ -46,6 +47,47 @@ const signup = async (req, res) => {
   }
 };
 
+/** user login */
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    //check if email exists or not
+    const emailExists = await userModel.findOne({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!emailExists) {
+      return res.status(404).json({
+        success: false,
+        message: "email is not registered",
+      });
+    }
+
+    //check if password is correct
+    if (emailExists.password != password) {
+      return res.status(401).json({
+        success: false,
+        message: "password is incorrect",
+      });
+    }
+
+    //login the user
+    return res.status(200).json({
+      success: true,
+      message: "user login successful",
+      user: emailExists,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "user login failed",
+    });
+  }
+};
+
 /**get all registered users */
 const getUsers = async (req, res) => {
   try {
@@ -67,4 +109,5 @@ const getUsers = async (req, res) => {
 module.exports = {
   signup,
   getUsers,
+  login,
 };
