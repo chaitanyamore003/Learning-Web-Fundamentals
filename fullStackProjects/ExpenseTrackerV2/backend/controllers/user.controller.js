@@ -60,13 +60,13 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     //check if email exists or not
-    const emailExists = await userModel.findOne({
+    const userExists = await userModel.findOne({
       where: {
         email: email,
       },
     });
 
-    if (!emailExists) {
+    if (!userExists) {
       return res.status(404).json({
         success: false,
         message: "email is not registered",
@@ -74,7 +74,8 @@ const login = async (req, res) => {
     }
 
     //check if password is correct
-    if (emailExists.password != password) {
+    const passwordMatch = await bcrypt.compare(password, userExists.password);
+    if (!passwordMatch) {
       return res.status(401).json({
         success: false,
         message: "password is incorrect",
@@ -85,7 +86,7 @@ const login = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "user login successful",
-      user: emailExists,
+      user: userExists,
     });
   } catch (err) {
     return res.status(500).json({
