@@ -10,6 +10,11 @@ const formSubmit = async (e) => {
       password,
     });
 
+    if (response.data.success) {
+      setLoggedIn(true);
+      window.location.href = "expense.html";
+    }
+
     responseMessage.textContent = response.data.message;
     responseMessage.style.color = "green";
   } catch (error) {
@@ -17,5 +22,13 @@ const formSubmit = async (e) => {
       error.response?.data?.message || "Something went wrong";
 
     responseMessage.style.color = "red";
+  }
+};
+
+const setLoggedIn = (success) => {
+  if (success) {
+    localStorage.setItem("loggedIn", JSON.stringify(true));
+  } else {
+    localStorage.setItem("loggedIn", JSON.stringify(false));
   }
 };

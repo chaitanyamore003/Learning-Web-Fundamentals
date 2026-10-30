@@ -15,6 +15,10 @@ const formSubmit = async (event) => {
 
     responseMessage.textContent = response.data.message;
     responseMessage.style.color = "green";
+
+    if (response.data.success) {
+      window.location.href = "login.html";
+    }
   } catch (error) {
     responseMessage.textContent =
       error.response?.data?.message || "Something went wrong";
