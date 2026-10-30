@@ -1,5 +1,6 @@
 const formSubmit = async (e) => {
   e.preventDefault();
+
   const email = e.target.email.value;
   const password = e.target.password.value;
   const responseMessage = document.getElementById("responseMessage");
@@ -11,24 +12,17 @@ const formSubmit = async (e) => {
     });
 
     if (response.data.success) {
-      setLoggedIn(true);
-      window.location.href = "expense.html";
-    }
+      localStorage.setItem("token", response.data.token);
 
-    responseMessage.textContent = response.data.message;
-    responseMessage.style.color = "green";
+      window.location.href = "expense.html";
+    } else {
+      responseMessage.textContent = response.data.message;
+      responseMessage.style.color = "red";
+    }
   } catch (error) {
     responseMessage.textContent =
       error.response?.data?.message || "Something went wrong";
 
     responseMessage.style.color = "red";
-  }
-};
-
-const setLoggedIn = (success) => {
-  if (success) {
-    localStorage.setItem("loggedIn", JSON.stringify(true));
-  } else {
-    localStorage.setItem("loggedIn", JSON.stringify(false));
   }
 };

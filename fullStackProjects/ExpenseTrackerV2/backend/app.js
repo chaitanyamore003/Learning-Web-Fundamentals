@@ -6,8 +6,7 @@ const expenseRouter = require("./routes/expense.routes");
 const cors = require("cors");
 const morgan = require("morgan");
 
-require("./models/user.model");
-require("./models/expense.model");
+require("./models/associations");
 
 const app = express();
 

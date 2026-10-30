@@ -1,15 +1,14 @@
-const api = "http://localhost:3000/expenses";
+const token = localStorage.getItem("token");
+
+const api = axios.create({
+  baseURL: "http://localhost:3000/expenses",
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
 
 const checkLoggedIn = () => {
-  const loggedIn = localStorage.getItem("loggedIn");
-
-  if (!loggedIn) {
-    return false;
-  }
-
-  const status = JSON.parse(loggedIn);
-
-  return status === true;
+  return !!localStorage.getItem("token");
 };
 
 if (!checkLoggedIn()) {
@@ -19,7 +18,8 @@ if (!checkLoggedIn()) {
 // Display all expenses
 const displayExpenses = async () => {
   try {
-    const response = await axios.get(api);
+    const response = await api.get("/");
+
     const expenses = response.data.expenses;
 
     const expensesContainer = document.getElementById("expensesContainer");
@@ -83,7 +83,7 @@ const addExpense = async (e) => {
     const category = e.target.category.value;
     const description = e.target.description.value;
 
-    const response = await axios.post(`${api}/add`, {
+    const response = await api.post("/add", {
       amount,
       category,
       description,

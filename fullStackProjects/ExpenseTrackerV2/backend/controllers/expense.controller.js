@@ -1,8 +1,13 @@
-const expenseModel = require("../models/expense.model");
+const { expenseModel } = require("../models/associations");
 
 const getAllExpenses = async (req, res) => {
   try {
-    const expenses = await expenseModel.findAll();
+    const userId = req.user.userId;
+    const expenses = await expenseModel.findAll({
+      where: {
+        UserId: userId,
+      },
+    });
 
     return res.status(200).json({
       success: true,
@@ -21,16 +26,19 @@ const getAllExpenses = async (req, res) => {
 
 const addExpense = async (req, res) => {
   try {
+    const userId = req.user.userId;
+
     const { amount, category, description } = req.body;
 
-    const expenseCreated = await expenseModel.create({
+    await expenseModel.create({
       expenseAmount: amount,
       category,
       description,
+      UserId: userId,
     });
 
     return res.status(201).json({
-      success: false,
+      success: true,
       message: "new expense created successfully",
     });
   } catch (err) {
@@ -44,11 +52,14 @@ const addExpense = async (req, res) => {
 
 const deleteExpense = async (req, res) => {
   try {
+    const userId = req.user.userId;
+
     const { id } = req.params;
 
     const deleted = await expenseModel.destroy({
       where: {
         id,
+        UserId: userId,
       },
     });
 

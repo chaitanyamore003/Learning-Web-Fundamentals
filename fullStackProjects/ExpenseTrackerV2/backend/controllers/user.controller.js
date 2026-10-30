@@ -1,5 +1,7 @@
 const bcrypt = require("bcrypt");
-const userModel = require("../models/user.model");
+const { userModel } = require("../models/associations");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 /** user signup */
 const signup = async (req, res) => {
@@ -59,6 +61,14 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    //validating required fields
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      });
+    }
+
     //check if email exists or not
     const userExists = await userModel.findOne({
       where: {
@@ -82,11 +92,17 @@ const login = async (req, res) => {
       });
     }
 
+    //crete and send the token
+    const token = await jwt.sign(
+      { userId: userExists.id },
+      process.env.JWT_SECRET,
+    );
+
     //login the user
     return res.status(200).json({
       success: true,
       message: "user login successful",
-      user: userExists,
+      token,
     });
   } catch (err) {
     return res.status(500).json({
