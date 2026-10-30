@@ -1,4 +1,4 @@
-const { response } = require("express");
+const bcrypt = require("bcrypt");
 const userModel = require("../models/user.model");
 
 /** user signup */
@@ -26,18 +26,25 @@ const signup = async (req, res) => {
         message: "email already exists",
       });
     }
+    const saltRounds = 10;
+
+    const passwordHash = await bcrypt.hash(password, saltRounds);
 
     //store the user
     const user = await userModel.create({
       name: name,
       email: email,
-      password: password,
+      password: passwordHash,
     });
 
     return res.status(201).json({
       success: true,
       message: "user signup successful",
-      user: user,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
     });
   } catch (err) {
     return res.status(500).json({
