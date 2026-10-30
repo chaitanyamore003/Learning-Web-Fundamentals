@@ -3,6 +3,7 @@ const formSubmit = async (event) => {
 
   const name = event.target.name.value;
   const email = event.target.email.value;
+  const phone = event.target.phone.value;
   const password = event.target.password.value;
   const responseMessage = document.getElementById("responseMessage");
 
@@ -10,6 +11,7 @@ const formSubmit = async (event) => {
     const response = await axios.post("http://localhost:3000/users/signup", {
       name,
       email,
+      phone,
       password,
     });
 

@@ -1,14 +1,13 @@
 const bcrypt = require("bcrypt");
 const { userModel } = require("../models/associations");
 const jwt = require("jsonwebtoken");
-require("dotenv").config();
 
 /** user signup */
 const signup = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, phone } = req.body;
     //checking if all fields are recieved or not
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !phone) {
       return res.status(400).json({
         success: false,
         message: "all the fields are required",
@@ -25,9 +24,24 @@ const signup = async (req, res) => {
     if (emailExist) {
       return res.status(409).json({
         success: false,
-        message: "email already exists",
+        message: "email already registered",
       });
     }
+
+    //checking duplicate phone no
+    const phoneExists = await userModel.findOne({
+      where: {
+        phone,
+      },
+    });
+
+    if (phoneExists) {
+      return res.status(409).json({
+        success: false,
+        message: "phone number already registered",
+      });
+    }
+
     const saltRounds = 10;
 
     const passwordHash = await bcrypt.hash(password, saltRounds);
@@ -37,6 +51,7 @@ const signup = async (req, res) => {
       name: name,
       email: email,
       password: passwordHash,
+      phone: phone,
     });
 
     return res.status(201).json({
@@ -46,6 +61,7 @@ const signup = async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
       },
     });
   } catch (err) {
