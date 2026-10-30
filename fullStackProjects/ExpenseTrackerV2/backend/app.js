@@ -27,7 +27,7 @@ app.use((req, res) => {
   });
 });
 
-db.sync({ force: true })
+db.sync({ force: false })
   .then(() => {
     app.listen(process.env.PORT, () => {
       console.log(`server is running successful on port ${process.env.PORT}`);

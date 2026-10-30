@@ -10,6 +10,8 @@ const getAllExpenses = async (req, res) => {
       expenses,
     });
   } catch (err) {
+    console.log(err.message);
+
     return res.status(500).json({
       success: false,
       message: "failed to fetch all expenses",
@@ -21,7 +23,7 @@ const addExpense = async (req, res) => {
   try {
     const { amount, category, description } = req.body;
 
-    const expenseCreated = expenseModel.create({
+    const expenseCreated = await expenseModel.create({
       expenseAmount: amount,
       category,
       description,
@@ -32,6 +34,7 @@ const addExpense = async (req, res) => {
       message: "new expense created successfully",
     });
   } catch (err) {
+    console.log(err.message);
     return res.status(500).json({
       success: false,
       message: "adding expense failed",
