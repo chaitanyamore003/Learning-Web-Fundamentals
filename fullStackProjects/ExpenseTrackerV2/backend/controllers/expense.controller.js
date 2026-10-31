@@ -1,5 +1,5 @@
-const { where } = require("sequelize");
-const { expenseModel } = require("../models/associations");
+const { expenseModel, userModel } = require("../models/associations");
+const db = require("../utils/database");
 
 const getAllExpenses = async (req, res) => {
   try {
@@ -26,61 +26,107 @@ const getAllExpenses = async (req, res) => {
 };
 
 const addExpense = async (req, res) => {
+  const transaction = await db.transaction();
+
   try {
     const userId = req.user.userId;
-
     const { amount, category, description } = req.body;
 
-    await expenseModel.create({
-      expenseAmount: amount,
-      category,
-      description,
-      UserId: userId,
-    });
+    // Create expense
+    await expenseModel.create(
+      {
+        expenseAmount: amount,
+        category,
+        description,
+        UserId: userId,
+      },
+      { transaction },
+    );
+
+    // Update user's total expense
+    await userModel.increment(
+      { totalExpense: amount },
+      {
+        where: { id: userId },
+        transaction,
+      },
+    );
+
+    await transaction.commit();
 
     return res.status(201).json({
       success: true,
-      message: "new expense created successfully",
+      message: "New expense created successfully",
     });
   } catch (err) {
+    await transaction.rollback();
+
     console.log(err.message);
+
     return res.status(500).json({
       success: false,
-      message: "adding expense failed",
+      message: "Adding expense failed",
     });
   }
 };
 
 const deleteExpense = async (req, res) => {
+  const transaction = await db.transaction();
+
   try {
     const userId = req.user.userId;
-
     const { id } = req.params;
 
-    const deleted = await expenseModel.destroy({
+    // Find expense belonging to this user
+    const expense = await expenseModel.findOne({
       where: {
         id,
         UserId: userId,
       },
+      transaction,
     });
 
-    //if expense not found
-    if (!deleted) {
+    if (!expense) {
+      await transaction.rollback();
+
       return res.status(404).json({
         success: false,
-        message: "expense not found",
+        message: "Expense not found",
       });
     }
 
-    //deletion success
+    // Delete expense
+    await expense.destroy({ transaction });
+
+    // Decrease user's total expense
+    await userModel.decrement(
+      {
+        totalExpense: expense.expenseAmount,
+      },
+      {
+        where: {
+          id: userId,
+        },
+        transaction,
+      },
+    );
+
+    await transaction.commit();
+
     return res.status(200).json({
       success: true,
-      message: "expense deleted successfully",
+      message: "Expense deleted successfully",
     });
   } catch (err) {
+    if (!transaction.finished) {
+      await transaction.rollback();
+    }
+
+    console.log(err.message);
+
     return res.status(500).json({
       success: false,
-      message: "failed to delete the expense",
+      message: "Failed to delete the expense",
     });
   }
 };
@@ -116,38 +162,70 @@ const getExpense = async (req, res) => {
 };
 
 const updateExpense = async (req, res) => {
+  const transaction = await db.transaction();
+
   try {
     const { id } = req.params;
+    const userId = req.user.userId;
     const { amount, category, description } = req.body;
 
-    const [updated] = await expenseModel.update(
+    // 1. Find the existing expense
+    const expense = await expenseModel.findOne({
+      where: {
+        id,
+        UserId: userId,
+      },
+      transaction,
+    });
+
+    if (!expense) {
+      await transaction.rollback();
+
+      return res.status(404).json({
+        success: false,
+        message: "Expense not found",
+      });
+    }
+
+    // 2. Calculate the difference
+    const difference = Number(amount) - Number(expense.expenseAmount);
+
+    // 3. Update the expense
+    await expense.update(
       {
         expenseAmount: amount,
         category,
         description,
       },
+      { transaction },
+    );
+
+    // 4. Update user's total expense
+    await userModel.increment(
+      {
+        totalExpense: difference,
+      },
       {
         where: {
-          id,
-          UserId: req.user.userId,
+          id: userId,
         },
+        transaction,
       },
     );
 
-    if (!updated) {
-      return res.status(404).json({
-        success: false,
-        message: "Expense not found or no changes made",
-      });
-    }
+    // 5. Commit transaction
+    await transaction.commit();
 
     return res.status(200).json({
       success: true,
       message: "Expense updated successfully",
     });
   } catch (err) {
+    if (!transaction.finished) {
+      await transaction.rollback();
+    }
+
     console.error("Update Expense Error:", err);
-    console.error("SQL Error:", err.parent?.sqlMessage);
 
     return res.status(500).json({
       success: false,

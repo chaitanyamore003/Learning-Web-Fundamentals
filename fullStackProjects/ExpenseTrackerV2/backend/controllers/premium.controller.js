@@ -1,5 +1,4 @@
-const { userModel, expenseModel } = require("../models/associations");
-const { Sequelize } = require("sequelize");
+const { userModel } = require("../models/associations");
 
 const getLeaderboard = async (req, res) => {
   try {
@@ -25,30 +24,8 @@ const getLeaderboard = async (req, res) => {
 
     // Fetch all users and calculate their all-time expenses
     const leaderboard = await userModel.findAll({
-      attributes: [
-        "id",
-        "name",
-        [
-          Sequelize.fn(
-            "COALESCE",
-            Sequelize.fn("SUM", Sequelize.col("Expenses.expenseAmount")),
-            0,
-          ),
-          "totalExpense",
-        ],
-      ],
-
-      include: [
-        {
-          model: expenseModel,
-          attributes: [],
-          required: false,
-        },
-      ],
-
-      group: ["Users.id", "Users.name"],
-
-      order: [[Sequelize.literal("totalExpense"), "DESC"]],
+      attributes: ["id", "name", "totalExpense"],
+      order: [["totalExpense", "DESC"]],
     });
 
     return res.status(200).json({
