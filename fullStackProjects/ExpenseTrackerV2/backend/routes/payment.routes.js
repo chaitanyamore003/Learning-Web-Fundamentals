@@ -8,10 +8,10 @@ const router = express.Router();
 router.post("/create-order", authenticateUser, paymentController.createOrder);
 
 // Verify payment
-// router.post(
-//   "/verify-payment",
-//   authenticateUser,
-//   paymentController.verifyPayment,
-// );
+router.post(
+  "/verify-payment",
+  authenticateUser,
+  paymentController.verifyPayment,
+);
 
 module.exports = router;

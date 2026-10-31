@@ -3,13 +3,665 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+
+    <title>ExpenseFlow | Smart Expense Management</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background: #080d1a;
+        color: #f8fafc;
+        min-height: 100vh;
+      }
+
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+
+      /* Navigation */
+      .navbar {
+        width: 100%;
+        max-width: 1200px;
+        margin: auto;
+        padding: 25px 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -1px;
+      }
+
+      .logo-icon {
+        width: 38px;
+        height: 38px;
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        border-radius: 11px;
+        display: grid;
+        place-items: center;
+        font-size: 20px;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+        font-size: 14px;
+        color: #a5b0c4;
+      }
+
+      .nav-links a:hover {
+        color: white;
+      }
+
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .btn {
+        padding: 11px 19px;
+        border-radius: 9px;
+        font-size: 14px;
+        font-weight: 600;
+        transition: 0.25s ease;
+        display: inline-block;
+      }
+
+      .btn-outline {
+        border: 1px solid #334155;
+        color: #e2e8f0;
+      }
+
+      .btn-outline:hover {
+        background: #1e293b;
+      }
+
+      .btn-primary {
+        background: #7c5cf5;
+        color: white;
+        box-shadow: 0 5px 20px rgba(124, 92, 245, 0.2);
+      }
+
+      .btn-primary:hover {
+        background: #6945e8;
+        transform: translateY(-2px);
+      }
+
+      /* Hero section */
+      .hero {
+        max-width: 1200px;
+        margin: auto;
+        min-height: 650px;
+        padding: 100px 30px 90px;
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        align-items: center;
+        gap: 65px;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 13px;
+        border: 1px solid #37305d;
+        background: rgba(124, 92, 245, 0.1);
+        color: #b9a8ff;
+        border-radius: 30px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 25px;
+      }
+
+      .tag-dot {
+        width: 7px;
+        height: 7px;
+        background: #a78bfa;
+        border-radius: 50%;
+      }
+
+      .hero h1 {
+        font-size: clamp(42px, 5vw, 64px);
+        line-height: 1.12;
+        letter-spacing: -3px;
+        font-weight: 800;
+        margin-bottom: 23px;
+      }
+
+      .gradient-text {
+        background: linear-gradient(90deg, #a78bfa, #818cf8);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .hero-description {
+        max-width: 510px;
+        color: #94a3b8;
+        font-size: 16px;
+        line-height: 1.8;
+        margin-bottom: 32px;
+      }
+
+      .hero-buttons {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+
+      .hero-buttons .btn {
+        padding: 14px 23px;
+      }
+
+      .trust-text {
+        color: #64748b;
+        font-size: 12px;
+        margin-top: 25px;
+      }
+
+      /* Dashboard preview */
+      .preview-wrapper {
+        position: relative;
+      }
+
+      .glow {
+        position: absolute;
+        width: 320px;
+        height: 320px;
+        background: #7048e8;
+        filter: blur(130px);
+        opacity: 0.2;
+        top: 10%;
+        left: 15%;
+        z-index: -1;
+      }
+
+      .dashboard {
+        background: #111a2c;
+        border: 1px solid #26344d;
+        border-radius: 18px;
+        padding: 24px;
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.35);
+      }
+
+      .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+      }
+
+      .dashboard-header h3 {
+        font-size: 15px;
+      }
+
+      .dashboard-header span {
+        font-size: 11px;
+        color: #94a3b8;
+        background: #1e293b;
+        padding: 7px 10px;
+        border-radius: 7px;
+      }
+
+      .balance-card {
+        background: linear-gradient(120deg, #6945df, #4f46e5);
+        border-radius: 13px;
+        padding: 22px;
+        margin-bottom: 20px;
+      }
+
+      .balance-card p {
+        color: #ddd6fe;
+        font-size: 12px;
+        margin-bottom: 10px;
+      }
+
+      .balance-card h2 {
+        font-size: 30px;
+        margin-bottom: 13px;
+      }
+
+      .balance-card small {
+        color: #ddd6fe;
+        font-size: 11px;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 13px;
+        margin-bottom: 25px;
+      }
+
+      .stat-card {
+        background: #1a263a;
+        border: 1px solid #29364c;
+        padding: 16px;
+        border-radius: 11px;
+      }
+
+      .stat-card p {
+        font-size: 11px;
+        color: #94a3b8;
+        margin-bottom: 10px;
+      }
+
+      .stat-card h3 {
+        font-size: 19px;
+      }
+
+      .income {
+        color: #4ade80;
+      }
+
+      .expense {
+        color: #fb7185;
+      }
+
+      .recent-heading {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        margin-bottom: 16px;
+      }
+
+      .recent-heading span {
+        color: #a78bfa;
+        font-size: 11px;
+      }
+
+      .transaction {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #26344a;
+      }
+
+      .transaction:last-child {
+        border-bottom: none;
+      }
+
+      .transaction-info {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+      }
+
+      .transaction-icon {
+        width: 35px;
+        height: 35px;
+        background: #25314a;
+        border-radius: 9px;
+        display: grid;
+        place-items: center;
+      }
+
+      .transaction-info h4 {
+        font-size: 12px;
+        margin-bottom: 4px;
+      }
+
+      .transaction-info p {
+        font-size: 10px;
+        color: #94a3b8;
+      }
+
+      .transaction-amount {
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      /* Features */
+      .features {
+        max-width: 1200px;
+        margin: auto;
+        padding: 55px 30px 100px;
+        text-align: center;
+      }
+
+      .section-label {
+        color: #a78bfa;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 15px;
+      }
+
+      .features h2 {
+        font-size: 34px;
+        letter-spacing: -1px;
+        margin-bottom: 14px;
+      }
+
+      .section-description {
+        color: #94a3b8;
+        font-size: 14px;
+        line-height: 1.7;
+        margin-bottom: 45px;
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        text-align: left;
+      }
+
+      .feature-card {
+        background: #111a2c;
+        border: 1px solid #26344d;
+        padding: 27px;
+        border-radius: 14px;
+        transition: 0.25s ease;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-5px);
+        border-color: #7960e8;
+      }
+
+      .feature-icon {
+        width: 45px;
+        height: 45px;
+        background: rgba(124, 92, 245, 0.15);
+        border-radius: 11px;
+        display: grid;
+        place-items: center;
+        font-size: 21px;
+        margin-bottom: 20px;
+      }
+
+      .feature-card h3 {
+        font-size: 16px;
+        margin-bottom: 11px;
+      }
+
+      .feature-card p {
+        font-size: 13px;
+        line-height: 1.8;
+        color: #94a3b8;
+      }
+
+      /* Footer */
+      footer {
+        border-top: 1px solid #1e293b;
+        padding: 25px 30px;
+        text-align: center;
+        color: #64748b;
+        font-size: 12px;
+      }
+
+      /* Responsive design */
+      @media (max-width: 850px) {
+        .hero {
+          grid-template-columns: 1fr;
+          padding-top: 65px;
+          gap: 55px;
+        }
+
+        .hero-content {
+          text-align: center;
+        }
+
+        .hero-description {
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .hero-buttons {
+          justify-content: center;
+        }
+
+        .preview-wrapper {
+          max-width: 520px;
+          width: 100%;
+          margin: auto;
+        }
+
+        .feature-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .nav-links {
+          display: none;
+        }
+      }
+
+      @media (max-width: 550px) {
+        .navbar {
+          padding: 18px;
+        }
+
+        .logo {
+          font-size: 18px;
+        }
+
+        .nav-actions {
+          gap: 7px;
+        }
+
+        .nav-actions .btn {
+          padding: 9px 11px;
+          font-size: 12px;
+        }
+
+        .hero {
+          padding: 65px 20px;
+        }
+
+        .hero h1 {
+          letter-spacing: -2px;
+        }
+
+        .dashboard {
+          padding: 17px;
+        }
+
+        .feature-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .features h2 {
+          font-size: 27px;
+        }
+      }
+    </style>
   </head>
+
   <body>
-    <h1>Home Page</h1>
-    <a href="signup.html">SignUp Page</a>
-    <a href="login.html">Login Page</a>
-    <a href="expense.html">Add Expenses</a>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <a href="home.html" class="logo">
+        <span class="logo-icon">₹</span>
+        ExpenseFlow
+      </a>
+
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#about">About</a>
+      </div>
+
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-outline">Login</a>
+        <a href="signup.html" class="btn btn-primary">Get Started</a>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <main>
+      <section class="hero">
+        <div class="hero-content">
+          <div class="tag">
+            <span class="tag-dot"></span>
+            SMARTER PERSONAL FINANCE MANAGEMENT
+          </div>
+
+          <h1>
+            Take control of your money.
+            <span class="gradient-text">Own your future.</span>
+          </h1>
+
+          <p class="hero-description">
+            Track your daily expenses, understand your spending habits, and stay
+            in control of your finances — all from one simple and powerful
+            platform.
+          </p>
+
+          <div class="hero-buttons">
+            <a href="signup.html" class="btn btn-primary">
+              Start Managing Expenses →
+            </a>
+
+            <a href="login.html" class="btn btn-outline">
+              Explore Your Dashboard
+            </a>
+          </div>
+
+          <p class="trust-text">
+            Simple expense tracking. Better financial decisions.
+          </p>
+        </div>
+
+        <!-- Dashboard Preview (illustrative sample data) -->
+        <div class="preview-wrapper">
+          <div class="glow"></div>
+
+          <div class="dashboard">
+            <div class="dashboard-header">
+              <h3>Financial Overview</h3>
+              <span>Sample Dashboard</span>
+            </div>
+
+            <div class="balance-card">
+              <p>Total Balance</p>
+              <h2>₹ 45,850.00</h2>
+              <small>Illustrative dashboard preview</small>
+            </div>
+
+            <div class="stats">
+              <div class="stat-card">
+                <p>↑ Total Income</p>
+                <h3 class="income">₹60,000</h3>
+              </div>
+
+              <div class="stat-card">
+                <p>↓ Total Expenses</p>
+                <h3 class="expense">₹14,150</h3>
+              </div>
+            </div>
+
+            <div class="recent-heading">
+              <h4>Recent Transactions</h4>
+              <span>View all</span>
+            </div>
+
+            <div class="transaction">
+              <div class="transaction-info">
+                <div class="transaction-icon">🍔</div>
+                <div>
+                  <h4>Food & Dining</h4>
+                  <p>Today · Personal</p>
+                </div>
+              </div>
+              <span class="transaction-amount expense">- ₹450</span>
+            </div>
+
+            <div class="transaction">
+              <div class="transaction-info">
+                <div class="transaction-icon">🚕</div>
+                <div>
+                  <h4>Transportation</h4>
+                  <p>Yesterday · Travel</p>
+                </div>
+              </div>
+              <span class="transaction-amount expense">- ₹280</span>
+            </div>
+
+            <div class="transaction">
+              <div class="transaction-info">
+                <div class="transaction-icon">💼</div>
+                <div>
+                  <h4>Monthly Salary</h4>
+                  <p>Income · Salary</p>
+                </div>
+              </div>
+              <span class="transaction-amount income">+ ₹60,000</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features Section -->
+      <section class="features" id="features">
+        <p class="section-label">Why ExpenseFlow?</p>
+
+        <h2>Everything you need to manage money</h2>
+
+        <p class="section-description">
+          Take charge of your finances with tools designed to make expense
+          management easier.
+        </p>
+
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Track Expenses</h3>
+            <p>
+              Record and organize your daily expenses to understand where your
+              money goes.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🔐</div>
+            <h3>Secure Account</h3>
+            <p>
+              Access your personal expense records through your authenticated
+              account.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">⭐</div>
+            <h3>Premium Membership</h3>
+            <p>
+              Unlock premium features through a convenient integrated payment
+              experience.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer id="about">
+      © 2026 ExpenseFlow. Built to make personal finance simpler.
+    </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   </body>
 </html>

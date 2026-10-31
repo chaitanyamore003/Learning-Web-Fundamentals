@@ -3,163 +3,391 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sign Up</title>
+
+    <title>Sign Up | ExpenseFlow</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
 
     <style>
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        font-family: Arial, sans-serif;
+        font-family: "Inter", sans-serif;
       }
 
       body {
         min-height: 100vh;
+        background: #080d1a;
+        color: #f8fafc;
+        display: flex;
+        flex-direction: column;
+      }
+
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+
+      /* Navigation */
+      .navbar {
+        width: 100%;
+        max-width: 1200px;
+        margin: auto;
+        padding: 22px 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 21px;
+        font-weight: 800;
+        letter-spacing: -1px;
+      }
+
+      .logo-icon {
+        width: 38px;
+        height: 38px;
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        border-radius: 11px;
+        display: grid;
+        place-items: center;
+        font-size: 20px;
+      }
+
+      .home-link {
+        color: #94a3b8;
+        font-size: 13px;
+        transition: color 0.2s;
+      }
+
+      .home-link:hover {
+        color: white;
+      }
+
+      /* Main Layout */
+      .main-container {
+        flex: 1;
         display: flex;
         justify-content: center;
         align-items: center;
-        background: #f1f5f9;
+        padding: 35px 20px 55px;
       }
 
-      main {
+      .signup-card {
         width: 100%;
-        max-width: 400px;
-        padding: 30px;
-        margin: 20px;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        max-width: 460px;
+        background: #111a2c;
+        border: 1px solid #26344d;
+        border-radius: 18px;
+        padding: 35px 38px;
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
       }
 
-      h1 {
+      .signup-icon {
+        width: 52px;
+        height: 52px;
+        background: rgba(124, 92, 245, 0.15);
+        border: 1px solid #493b7d;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        font-size: 25px;
+        margin: 0 auto 20px;
+      }
+
+      .signup-card h1 {
         text-align: center;
-        margin-bottom: 25px;
-        color: #1e293b;
+        font-size: 27px;
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin-bottom: 10px;
       }
 
-      form div {
+      .subtitle {
+        text-align: center;
+        color: #94a3b8;
+        font-size: 13px;
+        line-height: 1.7;
+        margin-bottom: 28px;
+      }
+
+      /* Form */
+      .form-group {
         margin-bottom: 18px;
       }
 
       label {
         display: block;
-        margin-bottom: 8px;
-        font-weight: bold;
-        color: #334155;
+        font-size: 13px;
+        font-weight: 600;
+        color: #e2e8f0;
+        margin-bottom: 9px;
       }
 
       input {
         width: 100%;
-        padding: 12px;
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
-        font-size: 15px;
+        padding: 13px 15px;
+        background: #0b1220;
+        border: 1px solid #334155;
+        border-radius: 9px;
+        color: white;
+        font-size: 14px;
         outline: none;
-        transition: border-color 0.2s;
+        transition: 0.2s ease;
+      }
+
+      input::placeholder {
+        color: #64748b;
       }
 
       input:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
       }
 
-      button {
-        width: 100%;
-        padding: 12px;
-        background: #2563eb;
-        color: white;
+      .password-wrapper {
+        position: relative;
+      }
+
+      .password-wrapper input {
+        padding-right: 55px;
+      }
+
+      .toggle-password {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: auto;
+        padding: 5px;
+        background: transparent;
         border: none;
-        border-radius: 6px;
-        font-size: 16px;
-        font-weight: bold;
+        color: #94a3b8;
+        font-size: 12px;
         cursor: pointer;
-        transition: background 0.2s;
       }
 
-      button:hover {
-        background: #1d4ed8;
+      .toggle-password:hover {
+        color: white;
+        background: transparent;
       }
 
-      .login-link {
-        margin-bottom: 18px;
-        text-align: center;
+      .input-hint {
+        display: block;
+        color: #64748b;
+        font-size: 11px;
+        margin-top: 7px;
+      }
+
+      /* Signup Button */
+      .signup-btn {
+        width: 100%;
+        padding: 14px;
+        margin-top: 8px;
+        background: linear-gradient(100deg, #7c5cf5, #6366f1);
+        border: none;
+        border-radius: 9px;
+        color: white;
         font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.25s ease;
       }
 
-      .login-link a {
-        color: #2563eb;
-        text-decoration: none;
+      .signup-btn:hover {
+        background: linear-gradient(100deg, #6945e8, #4f46e5);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(124, 92, 245, 0.2);
       }
 
-      .login-link a:hover {
-        text-decoration: underline;
+      .signup-btn:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+        transform: none;
       }
+
+      /* Response Message */
       #responseMessage {
         margin-top: 15px;
         text-align: center;
-        font-size: 14px;
+        font-size: 13px;
+        line-height: 1.5;
         overflow-wrap: anywhere;
+      }
+
+      /* Login Link */
+      .login-link {
+        margin-top: 24px;
+        text-align: center;
+        color: #94a3b8;
+        font-size: 13px;
+      }
+
+      .login-link a {
+        color: #a78bfa;
+        font-weight: 600;
+      }
+
+      .login-link a:hover {
+        color: #c4b5fd;
+        text-decoration: underline;
+      }
+
+      footer {
+        text-align: center;
+        padding: 20px;
+        color: #64748b;
+        font-size: 11px;
+      }
+
+      @media (max-width: 500px) {
+        .navbar {
+          padding: 18px;
+        }
+
+        .signup-card {
+          padding: 28px 22px;
+        }
+
+        .signup-card h1 {
+          font-size: 24px;
+        }
       }
     </style>
   </head>
+
   <body>
-    <main>
-      <h1>Create an Account</h1>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <a href="home.html" class="logo">
+        <span class="logo-icon">₹</span>
+        ExpenseFlow
+      </a>
 
-      <form onsubmit="formSubmit(event)">
-        <div>
-          <label for="name">Name</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            placeholder="Enter your name"
-            required
-          />
-        </div>
+      <a href="home.html" class="home-link"> ← Back to Home </a>
+    </nav>
 
-        <div>
-          <label for="email">Email</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="Enter your email"
-            required
-          />
-        </div>
-        <div>
-          <label for="phone">Phone</label>
-          <input
-            type="tel"
-            id="phone"
-            name="phone"
-            placeholder="eg - 911"
-            required
-          />
-        </div>
+    <!-- Signup Form -->
+    <main class="main-container">
+      <section class="signup-card">
+        <div class="signup-icon">👤</div>
 
-        <div>
-          <label for="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="Enter your password"
-            minlength="8"
-            required
-          />
-        </div>
-        <p class="login-link">
-          Already have an account? <a href="login.html">Login</a>
+        <h1>Create Your Account</h1>
+
+        <p class="subtitle">
+          Join ExpenseFlow and start managing your finances smarter.
         </p>
 
-        <button type="submit">Sign Up</button>
+        <form onsubmit="formSubmit(event)">
+          <div class="form-group">
+            <label for="name">Full Name</label>
 
-        <p id="responseMessage"></p>
-      </form>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder="Enter your full name"
+              autocomplete="name"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address</label>
+
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Enter your email address"
+              autocomplete="email"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              placeholder="Enter your 10-digit mobile number"
+              autocomplete="tel"
+              inputmode="numeric"
+              pattern="[6-9][0-9]{9}"
+              maxlength="10"
+              title="Enter a valid 10-digit Indian mobile number"
+              required
+            />
+
+            <span class="input-hint">
+              Enter your 10-digit Indian mobile number.
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+
+            <div class="password-wrapper">
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Create a strong password"
+                minlength="8"
+                autocomplete="new-password"
+                required
+              />
+
+              <button type="button" class="toggle-password" id="togglePassword">
+                Show
+              </button>
+            </div>
+
+            <span class="input-hint">
+              Password must contain at least 8 characters.
+            </span>
+          </div>
+
+          <button type="submit" class="signup-btn">Create Account →</button>
+
+          <p id="responseMessage" role="status" aria-live="polite"></p>
+        </form>
+
+        <p class="login-link">
+          Already have an account?
+          <a href="login.html">Login</a>
+        </p>
+      </section>
     </main>
+
+    <footer>© 2026 ExpenseFlow. All rights reserved.</footer>
+
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="../js/signup.js"></script>
+
+    <script>
+      // Toggle password visibility
+      const togglePassword = document.getElementById("togglePassword");
+      const passwordInput = document.getElementById("password");
+
+      togglePassword.addEventListener("click", () => {
+        const isPassword = passwordInput.type === "password";
+
+        passwordInput.type = isPassword ? "text" : "password";
+        togglePassword.textContent = isPassword ? "Hide" : "Show";
+      });
+    </script>
   </body>
 </html>
