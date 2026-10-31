@@ -5,6 +5,7 @@ const db = require("./utils/database");
 const userRouter = require("./routes/user.routes");
 const expenseRouter = require("./routes/expense.routes");
 const paymentRouter = require("./routes/payment.routes");
+const premiumRouter = require("./routes/premium.routes");
 
 const cors = require("cors");
 const morgan = require("morgan");
@@ -21,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // Serve frontend static files
-app.use(express.static(path.join(__dirname, "../frontend")));
+app.use(express.static(path.join(__dirname, "../frontend/views")));
 
 // Payment result page
 app.get("/payment-result.html", (req, res) => {
@@ -32,6 +33,7 @@ app.get("/payment-result.html", (req, res) => {
 app.use("/users", userRouter);
 app.use("/expenses", expenseRouter);
 app.use("/payment", paymentRouter);
+app.use("/premium", premiumRouter);
 
 // 404 handler
 app.use((req, res) => {
@@ -42,8 +44,9 @@ app.use((req, res) => {
 });
 
 // Database synchronization
-db.sync({ alter: true })
+db.sync()
   .then(() => {
+    console.log("Database synchronization successful");
     app.listen(process.env.PORT, () => {
       console.log(`Server running on port ${process.env.PORT}`);
     });

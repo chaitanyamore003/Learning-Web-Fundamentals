@@ -1,7 +1,3 @@
-// ============================================================
-// 1. AUTHENTICATION
-// ============================================================
-
 // Retrieve the JWT token stored after successful login.
 const token = localStorage.getItem("token");
 
@@ -10,9 +6,8 @@ if (!token) {
   window.location.href = "login.html";
 }
 
-// ============================================================
-// 2. AXIOS API INSTANCES
-// ============================================================
+//edit id
+let editId = null;
 
 // Axios instance for expense-related operations.
 const api = axios.create({
@@ -39,16 +34,18 @@ const premiumApi = axios.create({
 });
 
 // ============================================================
-// 3. DOM ELEMENTS
+//  DOM ELEMENTS
 // ============================================================
 
 const buyPremiumBtn = document.getElementById("buyPremiumBtn");
 const viewLeaderboardBtn = document.getElementById("viewLeaderboardBtn");
 const expensesContainer = document.getElementById("expensesContainer");
 const responseMessage = document.getElementById("responseMessage");
+const expenseForm = document.getElementById("expenseForm");
+const submitBtn = document.querySelector(".submit-btn");
 
 // ============================================================
-// 4. CASHFREE INITIALIZATION
+// CASHFREE INITIALIZATION
 // ============================================================
 
 // Initialize Cashfree in Sandbox mode for testing payments.
@@ -57,7 +54,7 @@ const cashfree = Cashfree({
 });
 
 // ============================================================
-// 5. CHECK PREMIUM MEMBERSHIP STATUS
+// CHECK PREMIUM MEMBERSHIP STATUS
 // ============================================================
 
 const checkPremiumStatus = async () => {
@@ -73,7 +70,7 @@ const checkPremiumStatus = async () => {
     const user = response.data.user;
 
     // Display buttons according to the user's membership status.
-    if (user.isPremium) {
+    if (user.premiumStatus) {
       buyPremiumBtn.hidden = true;
       viewLeaderboardBtn.hidden = false;
     } else {
@@ -95,24 +92,24 @@ const checkPremiumStatus = async () => {
 
 buyPremiumBtn.addEventListener("click", async () => {
   try {
-    // Disable the button to prevent repeated order creation.
     buyPremiumBtn.disabled = true;
     buyPremiumBtn.textContent = "Processing...";
 
-    // Step 1: Request the backend to create a Cashfree order.
-    const response = await paymentApi.post("/create-order", {});
+    const response = await paymentApi.post("/create-order");
 
-    const { paymentSessionId, orderId } = response.data;
+    const { paymentSessionId, orderId, mockPayment } = response.data;
 
-    // Ensure that Cashfree returned a valid payment session.
+    // Development mock payment: skip Cashfree checkout
+    if (mockPayment) {
+      window.location.href = `payment-result.html?order_id=${encodeURIComponent(orderId)}`;
+      return;
+    }
+
+    // Real Cashfree payment
     if (!paymentSessionId) {
       throw new Error("Payment session ID not received");
     }
 
-    console.log("Order created successfully:", orderId);
-
-    // Step 2: Open Cashfree's hosted checkout page.
-    // Cashfree redirects the user after checkout.
     await cashfree.checkout({
       paymentSessionId,
       redirectTarget: "_self",
@@ -125,9 +122,8 @@ buyPremiumBtn.addEventListener("click", async () => {
         "Unable to initiate payment. Please try again.",
     );
 
-    // Re-enable the button if payment initiation fails.
     buyPremiumBtn.disabled = false;
-    buyPremiumBtn.textContent = "✦ Buy Premium";
+    buyPremiumBtn.textContent = "Buy Premium Membership";
   }
 });
 
@@ -228,27 +224,41 @@ const addExpense = async (e) => {
     const category = e.target.category.value;
     const description = e.target.description.value;
 
-    // Send the new expense to the backend.
-    const response = await api.post("/add", {
-      amount,
-      category,
-      description,
-    });
+    if (editId !== null) {
+      // UPDATE EXISTING EXPENSE
+      const response = await api.put(`/update/${editId}`, {
+        amount,
+        category,
+        description,
+      });
 
-    // Clear the form after successful insertion.
+      responseMessage.textContent = response.data.message;
+
+      // Reset edit mode after successful update.
+      editId = null;
+      submitBtn.textContent = "+ Add Expense";
+    } else {
+      // ADD NEW EXPENSE
+      const response = await api.post("/add", {
+        amount,
+        category,
+        description,
+      });
+
+      responseMessage.textContent = response.data.message;
+    }
+
+    // Clear the form after successful operation.
     e.target.reset();
 
-    // Display the backend's success message.
-    responseMessage.textContent = response.data.message;
-
-    // Refresh the expense list to display the new expense.
+    // Refresh the expense list.
     await displayExpenses();
   } catch (error) {
-    console.error("Failed to add expense:", error);
+    console.error("Expense operation failed:", error);
 
     responseMessage.textContent =
       error.response?.data?.message ||
-      "Unable to add expense. Please try again.";
+      "Unable to process expense. Please try again.";
   }
 };
 
@@ -276,7 +286,30 @@ const deleteExpense = async (expenseId) => {
 };
 
 // ============================================================
-// 11. INITIALIZE DASHBOARD
+// 11. EDIT EXPENSE
+// ============================================================
+
+const editExpense = async (id) => {
+  try {
+    const response = await api.get(`/${id}`);
+
+    // Extract the actual expense object
+    const details = response.data.expense;
+
+    // Fill the details in the form
+    editId = id;
+    expenseForm.amount.value = details.expenseAmount;
+    expenseForm.category.value = details.category;
+    expenseForm.description.value = details.description;
+
+    submitBtn.textContent = "Edit Expense";
+  } catch (err) {
+    console.error("Expense fetch request failed:", err.response?.data || err);
+  }
+};
+
+// ============================================================
+// 12. INITIALIZE DASHBOARD
 // ============================================================
 
 // Run these operations only when the user is authenticated.

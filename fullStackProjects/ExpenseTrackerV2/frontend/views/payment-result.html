@@ -3,11 +3,88 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Payment Result</title>
+    <title>ExpenseFlow | Payment Result</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #0b1020;
+        color: #f1f5f9;
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+
+      .result-card {
+        width: 100%;
+        max-width: 450px;
+        padding: 35px;
+        text-align: center;
+        background: #151c30;
+        border: 1px solid #27324b;
+        border-radius: 16px;
+      }
+
+      h2 {
+        margin-bottom: 15px;
+      }
+
+      p {
+        color: #94a3b8;
+        line-height: 1.6;
+      }
+
+      #paymentMessage.success {
+        color: #34d399;
+      }
+
+      #paymentMessage.error {
+        color: #f87171;
+      }
+
+      #paymentMessage.pending {
+        color: #fbbf24;
+      }
+
+      button {
+        margin-top: 25px;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        background: #7c3aed;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #6d28d9;
+      }
+    </style>
   </head>
+
   <body>
-    <h2>Verifying your payment...</h2>
-    <p id="paymentMessage">Please wait while we verify your transaction.</p>
+    <div class="result-card">
+      <h2>Verifying your payment...</h2>
+
+      <p id="paymentMessage">Please wait while we verify your transaction.</p>
+
+      <button
+        id="dashboardBtn"
+        hidden
+        onclick="window.location.href = 'expense.html'"
+      >
+        Go to Dashboard
+      </button>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="../js/payment-result.js"></script>

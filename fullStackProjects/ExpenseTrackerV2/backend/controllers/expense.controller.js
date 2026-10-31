@@ -1,3 +1,4 @@
+const { where } = require("sequelize");
 const { expenseModel } = require("../models/associations");
 
 const getAllExpenses = async (req, res) => {
@@ -84,8 +85,81 @@ const deleteExpense = async (req, res) => {
   }
 };
 
+const getExpense = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const expense = await expenseModel.findOne({
+      where: {
+        id,
+      },
+    });
+
+    if (!expense) {
+      return res.status(404).json({
+        success: false,
+        message: "expense not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "expense fetched successfully",
+      expense,
+    });
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({
+      success: false,
+      message: "unable the fetch the expense",
+    });
+  }
+};
+
+const updateExpense = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { amount, category, description } = req.body;
+
+    const [updated] = await expenseModel.update(
+      {
+        expenseAmount: amount,
+        category,
+        description,
+      },
+      {
+        where: {
+          id,
+          UserId: req.user.userId,
+        },
+      },
+    );
+
+    if (!updated) {
+      return res.status(404).json({
+        success: false,
+        message: "Expense not found or no changes made",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Expense updated successfully",
+    });
+  } catch (err) {
+    console.error("Update Expense Error:", err);
+    console.error("SQL Error:", err.parent?.sqlMessage);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update expense",
+    });
+  }
+};
+
 module.exports = {
   getAllExpenses,
   deleteExpense,
   addExpense,
+  getExpense,
+  updateExpense,
 };

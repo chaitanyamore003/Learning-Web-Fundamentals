@@ -121,6 +121,7 @@ const login = async (req, res) => {
       token,
     });
   } catch (err) {
+    console.log(err.message);
     return res.status(500).json({
       success: false,
       message: "user login failed",
@@ -128,20 +129,61 @@ const login = async (req, res) => {
   }
 };
 
-/**get all registered users */
+/** Get all registered users */
 const getUsers = async (req, res) => {
   try {
-    const users = await userModel.findAll();
+    const users = await userModel.findAll({
+      attributes: ["id", "name"],
+    });
 
     return res.status(200).json({
       success: true,
       message: "All users fetched successfully",
-      users: users,
+      users,
     });
   } catch (err) {
+    console.error(err);
+
     return res.status(500).json({
       success: false,
-      message: "fetching all users failed",
+      message: "Fetching all users failed",
+    });
+  }
+};
+
+/** get user details */
+const getMe = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const user = await userModel.findOne({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "user not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "user found",
+      user: {
+        userId: user.id,
+        name: user.name,
+        email: user.email,
+        premiumStatus: user.isPremium,
+      },
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      success: false,
+      message: "failed to fetch user details",
     });
   }
 };
@@ -150,4 +192,5 @@ module.exports = {
   signup,
   getUsers,
   login,
+  getMe,
 };
