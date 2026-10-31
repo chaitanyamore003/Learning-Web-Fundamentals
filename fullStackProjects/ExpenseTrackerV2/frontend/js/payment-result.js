@@ -4,7 +4,7 @@ const paymentMessage = document.getElementById("paymentMessage");
 
 // Use the same origin as the payment-result page
 const paymentApi = axios.create({
-  baseURL: `${window.location.origin}/payment`,
+  baseURL: `http://localhost:3000/payment`,
   timeout: 15000,
   headers: {
     Authorization: `Bearer ${token}`,
@@ -12,22 +12,33 @@ const paymentApi = axios.create({
 });
 
 // Redirect after displaying the result
-const redirectToLogin = () => {
-  setTimeout(() => {
-    window.location.href =
-      "http://127.0.0.1:5500/fullStackProjects/ExpenseTrackerV2/frontend/views/login.html";
-  }, 3000);
+const startCountdown = () => {
+  const countdown = document.getElementById("countdown");
+  const timer = document.getElementById("timer");
+
+  countdown.hidden = false;
+
+  let seconds = 5;
+  timer.textContent = seconds;
+
+  const interval = setInterval(() => {
+    seconds--;
+
+    timer.textContent = seconds;
+
+    if (seconds <= 0) {
+      clearInterval(interval);
+      window.location.href = "login.html";
+    }
+  }, 1000);
 };
 
 const verifyPayment = async () => {
   try {
-    console.log("Payment result script loaded");
-
     if (!token) {
       paymentMessage.textContent =
         "Login session not found. Please log in to check your transaction.";
-
-      redirectToLogin();
+      startCountdown();
       return;
     }
 
@@ -38,7 +49,7 @@ const verifyPayment = async () => {
 
     if (!orderId) {
       paymentMessage.textContent = "Invalid order ID.";
-      redirectToLogin();
+      startCountdown();
       return;
     }
 
@@ -47,8 +58,6 @@ const verifyPayment = async () => {
     const response = await paymentApi.post("/verify-payment", {
       orderId,
     });
-
-    console.log("Verification response:", response.data);
 
     const { status, message } = response.data;
 
@@ -68,8 +77,7 @@ const verifyPayment = async () => {
 
       paymentMessage.className = "pending";
     }
-
-    redirectToLogin();
+    startCountdown();
   } catch (error) {
     console.error("Payment verification error:", error.response?.data || error);
 
@@ -85,8 +93,7 @@ const verifyPayment = async () => {
       paymentMessage.textContent =
         error.response?.data?.message || "Unable to verify your payment.";
     }
-
-    redirectToLogin();
+    startCountdown();
   }
 };
 
