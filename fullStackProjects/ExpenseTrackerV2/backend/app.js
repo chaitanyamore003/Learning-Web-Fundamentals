@@ -6,6 +6,7 @@ const userRouter = require("./routes/user.routes");
 const expenseRouter = require("./routes/expense.routes");
 const paymentRouter = require("./routes/payment.routes");
 const premiumRouter = require("./routes/premium.routes");
+const passwordRouter = require("./routes/password.routes");
 
 const cors = require("cors");
 const morgan = require("morgan");
@@ -34,6 +35,8 @@ app.use("/users", userRouter);
 app.use("/expenses", expenseRouter);
 app.use("/payment", paymentRouter);
 app.use("/premium", premiumRouter);
+app.use("/password", passwordRouter);
+
 
 // 404 handler
 app.use((req, res) => {

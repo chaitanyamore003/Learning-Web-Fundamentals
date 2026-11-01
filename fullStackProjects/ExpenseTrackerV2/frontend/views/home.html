@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>ExpenseFlow | Smart Expense Management</title>
+    <title>ExpenseFlow | AI-Powered Expense Management</title>
+    <meta
+      name="description"
+      content="ExpenseFlow uses AI to categorize every expense automatically. Add, edit and delete transactions in seconds — and unlock leaderboards and detailed reports with Premium."
+    />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,655 +17,803 @@
       rel="stylesheet"
     />
 
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        font-family: "Inter", sans-serif;
-        background: #080d1a;
-        color: #f8fafc;
-        min-height: 100vh;
-      }
-
-      a {
-        text-decoration: none;
-        color: inherit;
-      }
-
-      /* Navigation */
-      .navbar {
-        width: 100%;
-        max-width: 1200px;
-        margin: auto;
-        padding: 25px 30px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-
-      .logo {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 22px;
-        font-weight: 800;
-        letter-spacing: -1px;
-      }
-
-      .logo-icon {
-        width: 38px;
-        height: 38px;
-        background: linear-gradient(135deg, #8b5cf6, #6366f1);
-        border-radius: 11px;
-        display: grid;
-        place-items: center;
-        font-size: 20px;
-      }
-
-      .nav-links {
-        display: flex;
-        align-items: center;
-        gap: 28px;
-        font-size: 14px;
-        color: #a5b0c4;
-      }
-
-      .nav-links a:hover {
-        color: white;
-      }
-
-      .nav-actions {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-
-      .btn {
-        padding: 11px 19px;
-        border-radius: 9px;
-        font-size: 14px;
-        font-weight: 600;
-        transition: 0.25s ease;
-        display: inline-block;
-      }
-
-      .btn-outline {
-        border: 1px solid #334155;
-        color: #e2e8f0;
-      }
-
-      .btn-outline:hover {
-        background: #1e293b;
-      }
-
-      .btn-primary {
-        background: #7c5cf5;
-        color: white;
-        box-shadow: 0 5px 20px rgba(124, 92, 245, 0.2);
-      }
-
-      .btn-primary:hover {
-        background: #6945e8;
-        transform: translateY(-2px);
-      }
-
-      /* Hero section */
-      .hero {
-        max-width: 1200px;
-        margin: auto;
-        min-height: 650px;
-        padding: 100px 30px 90px;
-        display: grid;
-        grid-template-columns: 1.1fr 0.9fr;
-        align-items: center;
-        gap: 65px;
-      }
-
-      .tag {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 13px;
-        border: 1px solid #37305d;
-        background: rgba(124, 92, 245, 0.1);
-        color: #b9a8ff;
-        border-radius: 30px;
-        font-size: 12px;
-        font-weight: 600;
-        margin-bottom: 25px;
-      }
-
-      .tag-dot {
-        width: 7px;
-        height: 7px;
-        background: #a78bfa;
-        border-radius: 50%;
-      }
-
-      .hero h1 {
-        font-size: clamp(42px, 5vw, 64px);
-        line-height: 1.12;
-        letter-spacing: -3px;
-        font-weight: 800;
-        margin-bottom: 23px;
-      }
-
-      .gradient-text {
-        background: linear-gradient(90deg, #a78bfa, #818cf8);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-      }
-
-      .hero-description {
-        max-width: 510px;
-        color: #94a3b8;
-        font-size: 16px;
-        line-height: 1.8;
-        margin-bottom: 32px;
-      }
-
-      .hero-buttons {
-        display: flex;
-        gap: 14px;
-        flex-wrap: wrap;
-      }
-
-      .hero-buttons .btn {
-        padding: 14px 23px;
-      }
-
-      .trust-text {
-        color: #64748b;
-        font-size: 12px;
-        margin-top: 25px;
-      }
-
-      /* Dashboard preview */
-      .preview-wrapper {
-        position: relative;
-      }
-
-      .glow {
-        position: absolute;
-        width: 320px;
-        height: 320px;
-        background: #7048e8;
-        filter: blur(130px);
-        opacity: 0.2;
-        top: 10%;
-        left: 15%;
-        z-index: -1;
-      }
-
-      .dashboard {
-        background: #111a2c;
-        border: 1px solid #26344d;
-        border-radius: 18px;
-        padding: 24px;
-        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.35);
-      }
-
-      .dashboard-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 25px;
-      }
-
-      .dashboard-header h3 {
-        font-size: 15px;
-      }
-
-      .dashboard-header span {
-        font-size: 11px;
-        color: #94a3b8;
-        background: #1e293b;
-        padding: 7px 10px;
-        border-radius: 7px;
-      }
-
-      .balance-card {
-        background: linear-gradient(120deg, #6945df, #4f46e5);
-        border-radius: 13px;
-        padding: 22px;
-        margin-bottom: 20px;
-      }
-
-      .balance-card p {
-        color: #ddd6fe;
-        font-size: 12px;
-        margin-bottom: 10px;
-      }
-
-      .balance-card h2 {
-        font-size: 30px;
-        margin-bottom: 13px;
-      }
-
-      .balance-card small {
-        color: #ddd6fe;
-        font-size: 11px;
-      }
-
-      .stats {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 13px;
-        margin-bottom: 25px;
-      }
-
-      .stat-card {
-        background: #1a263a;
-        border: 1px solid #29364c;
-        padding: 16px;
-        border-radius: 11px;
-      }
-
-      .stat-card p {
-        font-size: 11px;
-        color: #94a3b8;
-        margin-bottom: 10px;
-      }
-
-      .stat-card h3 {
-        font-size: 19px;
-      }
-
-      .income {
-        color: #4ade80;
-      }
-
-      .expense {
-        color: #fb7185;
-      }
-
-      .recent-heading {
-        display: flex;
-        justify-content: space-between;
-        font-size: 13px;
-        margin-bottom: 16px;
-      }
-
-      .recent-heading span {
-        color: #a78bfa;
-        font-size: 11px;
-      }
-
-      .transaction {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 0;
-        border-bottom: 1px solid #26344a;
-      }
-
-      .transaction:last-child {
-        border-bottom: none;
-      }
-
-      .transaction-info {
-        display: flex;
-        align-items: center;
-        gap: 11px;
-      }
-
-      .transaction-icon {
-        width: 35px;
-        height: 35px;
-        background: #25314a;
-        border-radius: 9px;
-        display: grid;
-        place-items: center;
-      }
-
-      .transaction-info h4 {
-        font-size: 12px;
-        margin-bottom: 4px;
-      }
-
-      .transaction-info p {
-        font-size: 10px;
-        color: #94a3b8;
-      }
-
-      .transaction-amount {
-        font-size: 12px;
-        font-weight: 600;
-      }
-
-      /* Features */
-      .features {
-        max-width: 1200px;
-        margin: auto;
-        padding: 55px 30px 100px;
-        text-align: center;
-      }
-
-      .section-label {
-        color: #a78bfa;
-        font-size: 12px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        margin-bottom: 15px;
-      }
-
-      .features h2 {
-        font-size: 34px;
-        letter-spacing: -1px;
-        margin-bottom: 14px;
-      }
-
-      .section-description {
-        color: #94a3b8;
-        font-size: 14px;
-        line-height: 1.7;
-        margin-bottom: 45px;
-      }
-
-      .feature-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-        text-align: left;
-      }
-
-      .feature-card {
-        background: #111a2c;
-        border: 1px solid #26344d;
-        padding: 27px;
-        border-radius: 14px;
-        transition: 0.25s ease;
-      }
-
-      .feature-card:hover {
-        transform: translateY(-5px);
-        border-color: #7960e8;
-      }
-
-      .feature-icon {
-        width: 45px;
-        height: 45px;
-        background: rgba(124, 92, 245, 0.15);
-        border-radius: 11px;
-        display: grid;
-        place-items: center;
-        font-size: 21px;
-        margin-bottom: 20px;
-      }
-
-      .feature-card h3 {
-        font-size: 16px;
-        margin-bottom: 11px;
-      }
-
-      .feature-card p {
-        font-size: 13px;
-        line-height: 1.8;
-        color: #94a3b8;
-      }
-
-      /* Footer */
-      footer {
-        border-top: 1px solid #1e293b;
-        padding: 25px 30px;
-        text-align: center;
-        color: #64748b;
-        font-size: 12px;
-      }
-
-      /* Responsive design */
-      @media (max-width: 850px) {
-        .hero {
-          grid-template-columns: 1fr;
-          padding-top: 65px;
-          gap: 55px;
-        }
-
-        .hero-content {
-          text-align: center;
-        }
-
-        .hero-description {
-          margin-left: auto;
-          margin-right: auto;
-        }
-
-        .hero-buttons {
-          justify-content: center;
-        }
-
-        .preview-wrapper {
-          max-width: 520px;
-          width: 100%;
-          margin: auto;
-        }
-
-        .feature-grid {
-          grid-template-columns: 1fr 1fr;
-        }
-
-        .nav-links {
-          display: none;
-        }
-      }
-
-      @media (max-width: 550px) {
-        .navbar {
-          padding: 18px;
-        }
-
-        .logo {
-          font-size: 18px;
-        }
-
-        .nav-actions {
-          gap: 7px;
-        }
-
-        .nav-actions .btn {
-          padding: 9px 11px;
-          font-size: 12px;
-        }
-
-        .hero {
-          padding: 65px 20px;
-        }
-
-        .hero h1 {
-          letter-spacing: -2px;
-        }
-
-        .dashboard {
-          padding: 17px;
-        }
-
-        .feature-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .features h2 {
-          font-size: 27px;
-        }
-      }
-    </style>
+    <link rel="stylesheet" href="../css/home.css" />
   </head>
 
   <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-      <a href="home.html" class="logo">
-        <span class="logo-icon">₹</span>
-        ExpenseFlow
-      </a>
+    <!-- ================= Navigation ================= -->
+    <header class="navbar">
+      <div class="container navbar-inner">
+        <a href="home.html" class="logo" aria-label="ExpenseFlow home">
+          <span class="logo-mark" aria-hidden="true">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
+          </span>
+          <span class="logo-text">ExpenseFlow</span>
+        </a>
 
-      <div class="nav-links">
-        <a href="#features">Features</a>
-        <a href="#about">About</a>
-      </div>
+        <nav class="nav-links" aria-label="Primary">
+          <a href="#features">Features</a>
+          <a href="#ai">AI Categorization</a>
+          <a href="#premium" class="nav-pro">
+            Premium
+            <span class="badge-pro">Pro</span>
+          </a>
+        </nav>
 
-      <div class="nav-actions">
-        <a href="login.html" class="btn btn-outline">Login</a>
-        <a href="signup.html" class="btn btn-primary">Get Started</a>
-      </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <main>
-      <section class="hero">
-        <div class="hero-content">
-          <div class="tag">
-            <span class="tag-dot"></span>
-            SMARTER PERSONAL FINANCE MANAGEMENT
-          </div>
-
-          <h1>
-            Take control of your money.
-            <span class="gradient-text">Own your future.</span>
-          </h1>
-
-          <p class="hero-description">
-            Track your daily expenses, understand your spending habits, and stay
-            in control of your finances — all from one simple and powerful
-            platform.
-          </p>
-
-          <div class="hero-buttons">
-            <a href="signup.html" class="btn btn-primary">
-              Start Managing Expenses →
-            </a>
-
-            <a href="login.html" class="btn btn-outline">
-              Explore Your Dashboard
-            </a>
-          </div>
-
-          <p class="trust-text">
-            Simple expense tracking. Better financial decisions.
-          </p>
+        <div class="nav-actions">
+          <a href="login.html" class="btn btn-outline">Log in</a>
+          <a href="signup.html" class="btn btn-primary">Get started</a>
         </div>
+      </div>
+    </header>
 
-        <!-- Dashboard Preview (illustrative sample data) -->
-        <div class="preview-wrapper">
-          <div class="glow"></div>
+    <main>
+      <!-- ================= Hero ================= -->
+      <section class="hero">
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <span class="badge">
+              <span class="badge-dot"></span>
+              AI-powered expense tracking
+            </span>
 
-          <div class="dashboard">
-            <div class="dashboard-header">
-              <h3>Financial Overview</h3>
-              <span>Sample Dashboard</span>
+            <h1>
+              Every expense,
+              <span class="gradient-text">automatically categorized.</span>
+            </h1>
+
+            <p class="hero-lead">
+              ExpenseFlow reads your transactions and files them into the right
+              category in seconds. Add, edit or remove any expense with a single
+              tap — then see exactly where your money goes.
+            </p>
+
+            <div class="hero-actions">
+              <a href="signup.html" class="btn btn-primary">
+                Start free
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </a>
+              <a href="login.html" class="btn btn-outline">View live demo</a>
             </div>
 
-            <div class="balance-card">
-              <p>Total Balance</p>
-              <h2>₹ 45,850.00</h2>
-              <small>Illustrative dashboard preview</small>
-            </div>
-
-            <div class="stats">
-              <div class="stat-card">
-                <p>↑ Total Income</p>
-                <h3 class="income">₹60,000</h3>
+            <div class="hero-proof">
+              <div class="proof-item">
+                <strong>98.4%</strong>
+                <span>Auto-categorization accuracy</span>
               </div>
-
-              <div class="stat-card">
-                <p>↓ Total Expenses</p>
-                <h3 class="expense">₹14,150</h3>
+              <div class="proof-item">
+                <strong>&lt; 2s</strong>
+                <span>Average categorization time</span>
+              </div>
+              <div class="proof-item">
+                <strong>24</strong>
+                <span>Smart spending categories</span>
               </div>
             </div>
+          </div>
 
-            <div class="recent-heading">
-              <h4>Recent Transactions</h4>
-              <span>View all</span>
-            </div>
+          <!-- Dashboard preview (illustrative sample data) -->
+          <div class="preview">
+            <div class="preview-glow" aria-hidden="true"></div>
 
-            <div class="transaction">
-              <div class="transaction-info">
-                <div class="transaction-icon">🍔</div>
-                <div>
-                  <h4>Food & Dining</h4>
-                  <p>Today · Personal</p>
+            <div
+              class="dash"
+              role="img"
+              aria-label="Sample ExpenseFlow dashboard"
+            >
+              <div class="dash-top">
+                <h3>Financial overview</h3>
+                <div class="dash-meta">
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v5l3 2" />
+                  </svg>
+                  March 2026
                 </div>
               </div>
-              <span class="transaction-amount expense">- ₹450</span>
-            </div>
 
-            <div class="transaction">
-              <div class="transaction-info">
-                <div class="transaction-icon">🚕</div>
-                <div>
-                  <h4>Transportation</h4>
-                  <p>Yesterday · Travel</p>
+              <div class="balance">
+                <p>Total balance</p>
+                <h2>₹ 45,850.00</h2>
+                <small>+ ₹12,400 vs. last month</small>
+              </div>
+
+              <div class="stat-row">
+                <div class="stat">
+                  <p>Income</p>
+                  <h4 class="amount-in">₹ 60,000</h4>
+                </div>
+                <div class="stat">
+                  <p>Expenses</p>
+                  <h4 class="amount-out">₹ 14,150</h4>
                 </div>
               </div>
-              <span class="transaction-amount expense">- ₹280</span>
-            </div>
 
-            <div class="transaction">
-              <div class="transaction-info">
-                <div class="transaction-icon">💼</div>
-                <div>
-                  <h4>Monthly Salary</h4>
-                  <p>Income · Salary</p>
-                </div>
+              <div class="chart" aria-hidden="true">
+                <i style="height: 38%"></i>
+                <i style="height: 62%"></i>
+                <i style="height: 47%"></i>
+                <i style="height: 78%"></i>
+                <i style="height: 55%"></i>
+                <i style="height: 92%"></i>
+                <i style="height: 66%"></i>
+                <i style="height: 84%"></i>
+                <i style="height: 44%"></i>
+                <i style="height: 70%"></i>
               </div>
-              <span class="transaction-amount income">+ ₹60,000</span>
+
+              <div class="dash-list-head">
+                <h4>Recent transactions</h4>
+                <span>View all</span>
+              </div>
+
+              <div class="tx">
+                <div class="tx-left">
+                  <div class="tx-icon">🍽</div>
+                  <div class="tx-info">
+                    <h4>Swiggy order</h4>
+                    <div class="tx-tags">
+                      <span class="tx-cat">
+                        <svg
+                          width="9"
+                          height="9"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <path
+                            d="M12 2l2.2 6.6H21l-5.4 4 2.1 6.6L12 15.2 6.3 19.2l2.1-6.6L3 8.6h6.8z"
+                          />
+                        </svg>
+                        Food &amp; Dining
+                      </span>
+                      <span class="tx-date">Today</span>
+                    </div>
+                  </div>
+                </div>
+                <span class="tx-amount amount-out">− ₹450</span>
+              </div>
+
+              <div class="tx">
+                <div class="tx-left">
+                  <div class="tx-icon">🚕</div>
+                  <div class="tx-info">
+                    <h4>Uber ride</h4>
+                    <div class="tx-tags">
+                      <span class="tx-cat">Transport</span>
+                      <span class="tx-date">Yesterday</span>
+                    </div>
+                  </div>
+                </div>
+                <span class="tx-amount amount-out">− ₹280</span>
+              </div>
+
+              <div class="tx">
+                <div class="tx-left">
+                  <div class="tx-icon">💼</div>
+                  <div class="tx-info">
+                    <h4>Monthly salary</h4>
+                    <div class="tx-tags">
+                      <span class="tx-cat">Income</span>
+                      <span class="tx-date">Mar 1</span>
+                    </div>
+                  </div>
+                </div>
+                <span class="tx-amount amount-in">+ ₹60,000</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Features Section -->
-      <section class="features" id="features">
-        <p class="section-label">Why ExpenseFlow?</p>
-
-        <h2>Everything you need to manage money</h2>
-
-        <p class="section-description">
-          Take charge of your finances with tools designed to make expense
-          management easier.
-        </p>
-
-        <div class="feature-grid">
-          <div class="feature-card">
-            <div class="feature-icon">📊</div>
-            <h3>Track Expenses</h3>
+      <!-- ================= Features ================= -->
+      <section class="section" id="features">
+        <div class="container">
+          <div class="section-head">
+            <span class="eyebrow">Core features</span>
+            <h2>Built for how you actually spend</h2>
             <p>
-              Record and organize your daily expenses to understand where your
-              money goes.
+              From the moment an expense lands, ExpenseFlow categorizes it,
+              stores it safely, and keeps your records editable — so your data
+              always stays accurate.
             </p>
           </div>
 
-          <div class="feature-card">
-            <div class="feature-icon">🔐</div>
-            <h3>Secure Account</h3>
+          <div class="feature-grid">
+            <article class="feature">
+              <div class="feature-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 3v4M12 17v4M3 12h4M17 12h4" />
+                  <path d="M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8" />
+                  <path d="M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8" />
+                </svg>
+              </div>
+              <h3>AI categorization</h3>
+              <p>
+                Every new transaction is analysed and tagged automatically —
+                Food, Transport, Utilities and 21 more categories. No manual
+                sorting required.
+              </p>
+            </article>
+
+            <article class="feature">
+              <div class="feature-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+                </svg>
+              </div>
+              <h3>Full expense control</h3>
+              <p>
+                Add an expense in seconds, edit any detail later, or delete a
+                duplicate instantly. Your ledger stays exactly how you want it.
+              </p>
+            </article>
+
+            <article class="feature">
+              <div class="feature-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M18 20V10M12 20V4M6 20v-6" />
+                </svg>
+              </div>
+              <h3>Live spending insights</h3>
+              <p>
+                See totals update in real time as you add or change entries, so
+                your balance and category breakdowns are never out of date.
+              </p>
+            </article>
+
+            <article class="feature">
+              <div class="feature-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  <path d="M9 12l2 2 4-4" />
+                </svg>
+              </div>
+              <h3>Secure by default</h3>
+              <p>
+                Your records live behind an authenticated account. Sign in
+                securely and access your expense history only from your session.
+              </p>
+            </article>
+
+            <article class="feature">
+              <div class="feature-tag">Premium</div>
+              <div class="feature-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M8 21h8M12 17v4" />
+                  <path d="M7 4h10v4a5 5 0 0 1-10 0z" />
+                  <path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3" />
+                </svg>
+              </div>
+              <h3>Spending leaderboard</h3>
+              <p>
+                Premium members can compare spending discipline on a live
+                leaderboard and see how their habits stack up against others.
+              </p>
+            </article>
+
+            <article class="feature">
+              <div class="feature-tag">Premium</div>
+              <div class="feature-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 2 2 7l10 5 10-5-10-5z" />
+                  <path d="M2 17l10 5 10-5" />
+                  <path d="M2 12l10 5 10-5" />
+                </svg>
+              </div>
+              <h3>Detailed reports</h3>
+              <p>
+                Generate monthly and category-level reports, track trends over
+                time, and export a clean summary whenever you need it.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= AI section ================= -->
+      <section class="section ai-section" id="ai">
+        <div class="container ai-grid">
+          <div class="ai-copy">
+            <span class="eyebrow">AI categorization</span>
+            <h2>Stop sorting expenses by hand</h2>
             <p>
-              Access your personal expense records through your authenticated
-              account.
+              Our model looks at the merchant, amount and timing of each
+              transaction and assigns the most likely category — instantly. You
+              stay in control and can correct any label with a single edit.
+            </p>
+
+            <ul class="ai-list">
+              <li>
+                <span class="check" aria-hidden="true">
+                  <svg
+                    width="11"
+                    height="11"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                </span>
+                <span
+                  ><strong>Automatic tagging</strong> on every new expense, with
+                  a confidence score you can inspect.</span
+                >
+              </li>
+              <li>
+                <span class="check" aria-hidden="true">
+                  <svg
+                    width="11"
+                    height="11"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                </span>
+                <span
+                  ><strong>Learns your corrections</strong> — override a
+                  category once and similar expenses follow suit.</span
+                >
+              </li>
+              <li>
+                <span class="check" aria-hidden="true">
+                  <svg
+                    width="11"
+                    height="11"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                </span>
+                <span
+                  ><strong>Cleaner reports</strong> — consistent categories make
+                  your monthly summaries far more useful.</span
+                >
+              </li>
+            </ul>
+          </div>
+
+          <div
+            class="ai-card"
+            role="img"
+            aria-label="Example of AI categorization"
+          >
+            <div class="ai-card-top">
+              <h4>
+                <span class="live-dot" aria-hidden="true"></span>
+                AI categorization
+              </h4>
+              <span class="badge-soft">Auto</span>
+            </div>
+
+            <div class="ai-input">
+              <span class="label">New expense detected</span>
+              <strong>Swiggy · ₹450</strong>
+              <em>Yesterday, 8:42 PM · Card ending 4417</em>
+            </div>
+
+            <div class="ai-flow" aria-hidden="true">
+              <span class="line"></span>
+              <span>analysing merchant &amp; context</span>
+              <span class="line"></span>
+            </div>
+
+            <div class="ai-result">
+              <div class="ai-result-head">
+                <h5>Categorized</h5>
+                <span class="confidence">98% confidence</span>
+              </div>
+              <div class="chips">
+                <span class="chip">🍽 Food &amp; Dining</span>
+                <span class="chip sub">Online delivery</span>
+              </div>
+            </div>
+
+            <p class="ai-foot">
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+              </svg>
+              Not right? Edit the category anytime.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= Premium / pricing ================= -->
+      <section class="section" id="premium">
+        <div class="container">
+          <div class="section-head">
+            <span class="eyebrow">Plans</span>
+            <h2>Free to start. Premium to go deeper.</h2>
+            <p>
+              Track and manage expenses for free. Upgrade to Premium to unlock
+              the spending leaderboard and full reporting.
             </p>
           </div>
 
-          <div class="feature-card">
-            <div class="feature-icon">⭐</div>
-            <h3>Premium Membership</h3>
+          <div class="pricing">
+            <div class="plan">
+              <h3>Free</h3>
+              <p class="plan-sub">Everything you need to stay organized</p>
+              <div class="price">
+                <strong>₹0</strong>
+                <span>/ forever</span>
+              </div>
+              <p class="plan-note">No card required.</p>
+
+              <ul>
+                <li>
+                  <span class="dot" aria-hidden="true">✓</span>
+                  Add, edit and delete expenses
+                </li>
+                <li>
+                  <span class="dot" aria-hidden="true">✓</span>
+                  AI categorization for new expenses
+                </li>
+                <li>
+                  <span class="dot" aria-hidden="true">✓</span>
+                  Basic monthly totals &amp; balance
+                </li>
+                <li>
+                  <span class="dot" aria-hidden="true">✓</span>
+                  Secure authenticated account
+                </li>
+                <li class="muted">
+                  <span class="dot" aria-hidden="true">—</span>
+                  Spending leaderboard
+                </li>
+                <li class="muted">
+                  <span class="dot" aria-hidden="true">—</span>
+                  Detailed reports &amp; export
+                </li>
+              </ul>
+
+              <a href="signup.html" class="btn btn-outline"
+                >Create free account</a
+              >
+            </div>
+
+            <div class="plan featured">
+              <span class="plan-flag">Most popular</span>
+              <h3>Premium</h3>
+              <p class="plan-sub">For people who want the full picture</p>
+              <div class="price">
+                <strong>₹299</strong>
+                <span>/ month</span>
+              </div>
+              <p class="plan-note">Billed monthly · cancel anytime.</p>
+
+              <ul>
+                <li>
+                  <span class="dot" aria-hidden="true">✓</span>
+                  Everything in Free
+                </li>
+                <li>
+                  <span class="dot" aria-hidden="true">✓</span>
+                  Unlimited expense history
+                </li>
+                <li>
+                  <span class="dot" aria-hidden="true">✓</span>
+                  <strong>Spending leaderboard</strong> access
+                </li>
+                <li>
+                  <span class="dot" aria-hidden="true">✓</span>
+                  <strong>Detailed reports</strong> by month &amp; category
+                </li>
+                <li>
+                  <span class="dot" aria-hidden="true">✓</span>
+                  Export summaries for tax &amp; budgeting
+                </li>
+                <li>
+                  <span class="dot" aria-hidden="true">✓</span>
+                  Priority support
+                </li>
+              </ul>
+
+              <a href="signup.html" class="btn btn-primary"
+                >Upgrade to Premium</a
+              >
+            </div>
+          </div>
+
+          <!-- Premium previews -->
+          <div class="premium-previews">
+            <div class="mini-panel">
+              <div class="mini-panel-head">
+                <h4>
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#fbbf24"
+                    stroke-width="1.9"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M8 21h8M12 17v4" />
+                    <path d="M7 4h10v4a5 5 0 0 1-10 0z" />
+                    <path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3" />
+                  </svg>
+                  Leaderboard
+                </h4>
+                <small>This month</small>
+              </div>
+
+              <div class="board-row">
+                <span class="rank top">1</span>
+                <span class="avatar">AK</span>
+                <span class="board-name">Ananya K.</span>
+                <span class="board-val">92 pts</span>
+              </div>
+              <div class="board-row">
+                <span class="rank top">2</span>
+                <span class="avatar">RS</span>
+                <span class="board-name">Rahul S.</span>
+                <span class="board-val">88 pts</span>
+              </div>
+              <div class="board-row you">
+                <span class="rank">3</span>
+                <span class="avatar">You</span>
+                <span class="board-name">Your position</span>
+                <span class="board-val">84 pts</span>
+              </div>
+              <div class="board-row">
+                <span class="rank">4</span>
+                <span class="avatar">MP</span>
+                <span class="board-name">Meera P.</span>
+                <span class="board-val">79 pts</span>
+              </div>
+            </div>
+
+            <div class="mini-panel">
+              <div class="mini-panel-head">
+                <h4>
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#a78bfa"
+                    stroke-width="1.9"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M18 20V10M12 20V4M6 20v-6" />
+                  </svg>
+                  Monthly report
+                </h4>
+                <small>March 2026</small>
+              </div>
+
+              <div class="report-bars">
+                <div class="report-bar">
+                  <p><span>Housing</span><b>₹18,000</b></p>
+                  <div class="track"><i style="width: 82%"></i></div>
+                </div>
+                <div class="report-bar">
+                  <p><span>Food &amp; Dining</span><b>₹6,400</b></p>
+                  <div class="track">
+                    <i class="alt" style="width: 52%"></i>
+                  </div>
+                </div>
+                <div class="report-bar">
+                  <p><span>Transport</span><b>₹3,150</b></p>
+                  <div class="track"><i style="width: 30%"></i></div>
+                </div>
+                <div class="report-bar">
+                  <p><span>Subscriptions</span><b>₹1,900</b></p>
+                  <div class="track">
+                    <i class="warm" style="width: 20%"></i>
+                  </div>
+                </div>
+              </div>
+
+              <div class="report-foot">
+                <span>Total tracked: ₹29,450</span>
+                <span>Export CSV</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= CTA ================= -->
+      <section class="cta">
+        <div class="container">
+          <div class="cta-box">
+            <h2>Your expenses, finally in order</h2>
             <p>
-              Unlock premium features through a convenient integrated payment
-              experience.
+              Create a free account and let AI categorize your first expenses in
+              under a minute. Upgrade any time for leaderboards and full
+              reports.
             </p>
+            <div class="cta-actions">
+              <a href="signup.html" class="btn btn-primary">Get started free</a>
+              <a href="login.html" class="btn btn-outline">Log in</a>
+            </div>
           </div>
         </div>
       </section>
     </main>
 
-    <!-- Footer -->
-    <footer id="about">
-      © 2026 ExpenseFlow. Built to make personal finance simpler.
-    </footer>
+    <!-- ================= Footer ================= -->
+    <footer>
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <a href="home.html" class="logo">
+              <span class="logo-mark" aria-hidden="true">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
+                </svg>
+              </span>
+              <span class="logo-text">ExpenseFlow</span>
+            </a>
+            <p>
+              AI-powered expense management that keeps your spending organized,
+              accurate and easy to understand.
+            </p>
+          </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+          <div class="footer-col">
+            <h5>Product</h5>
+            <a href="#features">Features</a>
+            <a href="#ai">AI categorization</a>
+            <a href="#premium">Premium</a>
+            <a href="signup.html">Get started</a>
+          </div>
+
+          <div class="footer-col">
+            <h5>Account</h5>
+            <a href="login.html">Log in</a>
+            <a href="signup.html">Sign up</a>
+            <a href="#premium">Upgrade plan</a>
+          </div>
+
+          <div class="footer-col">
+            <h5>Company</h5>
+            <a href="#about">About</a>
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+          </div>
+        </div>
+
+        <div class="footer-bottom" id="about">
+          <span>© 2026 ExpenseFlow. All rights reserved.</span>
+          <span>Built to make personal finance simpler.</span>
+        </div>
+      </div>
+    </footer>
   </body>
 </html>

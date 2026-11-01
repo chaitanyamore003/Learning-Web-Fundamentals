@@ -14,7 +14,7 @@ const formSubmit = async (e) => {
     if (response.data.success) {
       localStorage.setItem("token", response.data.token);
 
-      window.location.href = "expense.html";
+      window.location.href = "dashboard.html";
     } else {
       responseMessage.textContent = response.data.message;
       responseMessage.style.color = "red";

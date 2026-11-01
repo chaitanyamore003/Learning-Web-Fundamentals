@@ -1,0 +1,409 @@
+/* ============================================================
+   ExpenseFlow — Payment result
+   ============================================================ */
+
+/* ---------- Design tokens (shared across pages) ---------- */
+:root {
+  --bg: #070c17;
+  --surface: #0e1626;
+  --surface-2: #121c2e;
+  --border: #1f2c42;
+  --border-strong: #2b3b57;
+
+  --text: #eef2f9;
+  --muted: #94a3b8;
+  --muted-2: #64748b;
+
+  --primary: #7c5cf5;
+  --primary-hover: #6a47ee;
+  --primary-soft: rgba(124, 92, 245, 0.14);
+
+  --green: #34d399;
+  --red: #f87171;
+  --amber: #fbbf24;
+
+  --radius: 10px;
+  --radius-lg: 18px;
+  --shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+}
+
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Keeps `hidden` authoritative over display rules below */
+[hidden] {
+  display: none !important;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  color: var(--text);
+  line-height: 1.6;
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(
+      700px 440px at 50% -10%,
+      rgba(124, 92, 245, 0.18),
+      transparent 70%
+    ),
+    radial-gradient(
+      620px 420px at 50% 112%,
+      rgba(56, 189, 248, 0.06),
+      transparent 70%
+    );
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+svg {
+  display: block;
+}
+
+/* ============================================================
+   Shell
+   ============================================================ */
+.result-wrapper {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.logo-mark {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  box-shadow: 0 6px 18px rgba(124, 92, 245, 0.35);
+}
+
+/* ============================================================
+   Result card
+   ============================================================ */
+.result-card {
+  width: 100%;
+  padding: 38px 34px 30px;
+  text-align: center;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-strong);
+  background: linear-gradient(180deg, #101a2c, #0d1524);
+  box-shadow: var(--shadow);
+}
+
+.result-card h2 {
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 10px;
+}
+
+/* ============================================================
+   Status icon + state-driven variants
+   ============================================================ */
+.status-icon {
+  position: relative;
+  width: 62px;
+  height: 62px;
+  margin: 0 auto 22px;
+  border-radius: 19px;
+  display: grid;
+  place-items: center;
+  color: #c4b3ff;
+  background: var(--primary-soft);
+  border: 1px solid #34295e;
+  transition:
+    color 0.3s ease,
+    background 0.3s ease,
+    border-color 0.3s ease;
+}
+
+/* Rotating accent ring while the state is unresolved */
+.status-icon::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 210deg,
+    rgba(167, 139, 250, 0.9) 330deg,
+    transparent 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: spin 1.8s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Only one icon is visible at a time */
+.ic {
+  display: none;
+  position: relative;
+  z-index: 1;
+}
+
+.ic-wait {
+  display: block;
+}
+
+/* ---- Success state ---- */
+body:has(#paymentMessage.success) .status-icon {
+  color: var(--green);
+  background: rgba(52, 211, 153, 0.12);
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+/* ---- Error state ---- */
+body:has(#paymentMessage.error) .status-icon {
+  color: var(--red);
+  background: rgba(248, 113, 113, 0.12);
+  border-color: rgba(248, 113, 113, 0.3);
+}
+
+/* ---- Pending / retry state ---- */
+body:has(#paymentMessage.pending) .status-icon {
+  color: var(--amber);
+  background: rgba(251, 191, 36, 0.12);
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+/* Stop the ring and swap the glyph once a final state lands */
+body:has(#paymentMessage.success) .status-icon::after,
+body:has(#paymentMessage.error) .status-icon::after {
+  animation: none;
+  background: none;
+}
+
+body:has(#paymentMessage.success) .ic-wait,
+body:has(#paymentMessage.error) .ic-wait,
+body:has(#paymentMessage.pending) .ic-wait {
+  display: none;
+}
+
+body:has(#paymentMessage.success) .ic-success,
+body:has(#paymentMessage.error) .ic-error {
+  display: block;
+}
+
+/* ============================================================
+   Messages
+   ============================================================ */
+#paymentMessage {
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+#paymentMessage.success {
+  color: var(--green);
+}
+
+#paymentMessage.error {
+  color: var(--red);
+}
+
+#paymentMessage.pending {
+  color: var(--amber);
+}
+
+/* ============================================================
+   Redirect countdown
+   ============================================================ */
+#countdown {
+  margin-top: 16px;
+  padding: 10px 14px;
+  display: inline-block;
+  font-size: 12.5px;
+  color: var(--muted);
+  border-radius: 9px;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+#countdown span {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--amber);
+}
+
+/* ============================================================
+   Button
+   ============================================================ */
+.btn-primary {
+  width: 100%;
+  margin-top: 26px;
+  padding: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  background: linear-gradient(100deg, #7c5cf5, #6366f1);
+  box-shadow: 0 8px 24px rgba(124, 92, 245, 0.26);
+  transition:
+    background 0.25s ease,
+    transform 0.2s ease,
+    box-shadow 0.25s ease;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(100deg, #6945e8, #4f46e5);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(124, 92, 245, 0.32);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* ============================================================
+   Supporting notes
+   ============================================================ */
+.secure-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  width: 100%;
+  justify-content: center;
+  font-size: 11.5px;
+  color: var(--muted-2);
+}
+
+.secure-note svg {
+  flex: none;
+  color: var(--muted-2);
+}
+
+.fineprint {
+  font-size: 11.5px;
+  color: var(--muted-2);
+  text-align: center;
+}
+
+.fineprint a {
+  color: #a78bfa;
+  font-weight: 600;
+}
+
+.fineprint a:hover {
+  text-decoration: underline;
+}
+
+/* ============================================================
+   Accessibility
+   ============================================================ */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid #a78bfa;
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 420px) {
+  body {
+    padding: 24px 16px;
+  }
+
+  .result-card {
+    padding: 30px 22px 24px;
+    border-radius: 16px;
+  }
+
+  .result-card h2 {
+    font-size: 19px;
+  }
+
+  .status-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 17px;
+    margin-bottom: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .status-icon::after {
+    animation: none;
+    background: none;
+  }
+}
