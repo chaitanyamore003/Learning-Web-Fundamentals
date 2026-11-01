@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Demo 1</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background: #f4f6fb;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: white;
+        width: 100%;
+        max-width: 650px;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 10px;
+        color: #222;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #777;
+        margin-bottom: 25px;
+      }
+
+      textarea {
+        width: 100%;
+        height: 130px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 16px;
+        resize: vertical;
+        outline: none;
+      }
+
+      textarea:focus {
+        border-color: #6366f1;
+      }
+
+      button {
+        width: 100%;
+        padding: 14px;
+        margin-top: 15px;
+        border: none;
+        border-radius: 8px;
+        background: #6366f1;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #4f46e5;
+      }
+
+      button:disabled {
+        background: #999;
+        cursor: not-allowed;
+      }
+
+      .response-box {
+        margin-top: 25px;
+        padding: 20px;
+        background: #f8f8ff;
+        border-radius: 8px;
+        border: 1px solid #e0e0ff;
+        display: none;
+      }
+
+      .response-box h3 {
+        margin-bottom: 12px;
+        color: #444;
+      }
+
+      #response {
+        color: #333;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .error {
+        color: #dc2626;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>✨ AI Assistant</h1>
+      <p class="subtitle">Ask anything and get an AI-generated response.</p>
+
+      <textarea id="prompt" placeholder="Enter your prompt here..."></textarea>
+
+      <button id="generateBtn" onclick="generateResponse()">
+        Generate Response
+      </button>
+
+      <div class="response-box" id="responseBox">
+        <h3>AI Response</h3>
+        <p id="response"></p>
+      </div>
+    </div>
+
+    <script src="../js/home.js"></script>
+  </body>
+</html>
