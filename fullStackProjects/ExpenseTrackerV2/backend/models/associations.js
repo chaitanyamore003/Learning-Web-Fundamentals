@@ -1,6 +1,7 @@
 const userModel = require("./user.model");
 const expenseModel = require("./expense.model");
 const orderModel = require("./order.model");
+const forgotPasswordModel = require("./forgotPassword.model");
 
 // User - Expense (One-to-Many)
 userModel.hasMany(expenseModel);
@@ -10,8 +11,13 @@ expenseModel.belongsTo(userModel);
 userModel.hasMany(orderModel);
 orderModel.belongsTo(userModel);
 
+// User - ForgotPassword (One-to-Many)
+userModel.hasMany(forgotPasswordModel);
+forgotPasswordModel.belongsTo(userModel);
+
 module.exports = {
   userModel,
   expenseModel,
   orderModel,
+  forgotPasswordModel,
 };
