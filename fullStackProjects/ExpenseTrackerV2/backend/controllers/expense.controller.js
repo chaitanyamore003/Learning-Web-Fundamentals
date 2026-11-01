@@ -1,5 +1,6 @@
 const { expenseModel, userModel } = require("../models/associations");
 const db = require("../utils/database");
+const { main } = require("../utils/ai");
 
 const getAllExpenses = async (req, res) => {
   try {
@@ -30,7 +31,11 @@ const addExpense = async (req, res) => {
 
   try {
     const userId = req.user.userId;
-    const { amount, category, description } = req.body;
+    const { amount, description } = req.body;
+
+    //generating category through ai
+    const prompt = `Categorize the following expense description into one of the following categories: Food, Transportation, Entertainment, Utilities, Healthcare, Education, Shopping, Travel, or Other. Description: "${description}"`;
+    const category = await main(prompt);
 
     // Create expense
     await expenseModel.create(

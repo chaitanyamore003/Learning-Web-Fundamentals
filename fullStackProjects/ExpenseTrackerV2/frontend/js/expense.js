@@ -221,14 +221,12 @@ const addExpense = async (e) => {
   try {
     // Retrieve values from the expense form.
     const amount = e.target.amount.value;
-    const category = e.target.category.value;
     const description = e.target.description.value;
 
     if (editId !== null) {
       // UPDATE EXISTING EXPENSE
       const response = await api.put(`/update/${editId}`, {
         amount,
-        category,
         description,
       });
 
@@ -241,7 +239,6 @@ const addExpense = async (e) => {
       // ADD NEW EXPENSE
       const response = await api.post("/add", {
         amount,
-        category,
         description,
       });
 
@@ -299,7 +296,6 @@ const editExpense = async (id) => {
     // Fill the details in the form
     editId = id;
     expenseForm.amount.value = details.expenseAmount;
-    expenseForm.category.value = details.category;
     expenseForm.description.value = details.description;
 
     submitBtn.textContent = "Edit Expense";
