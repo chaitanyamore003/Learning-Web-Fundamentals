@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import AuthLayout from "./layouts/authLayout"; // Ensure casing matches your file name
 import Dashboard from "./pages/Dashboard";
+import Expenses from "./pages/Expenses";
 
 import ProtectedRoute from "./components/auth/ProtectedRoutes";
 import PublicRoute from "./components/auth/PublicRoutes";
@@ -25,9 +26,9 @@ function App() {
 
       {/* Protected routes */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        {/* <Route path="/expenses" element={<Expenses />} />
-        <Route path="/leaderboard" element={<Leaderboard />} /> */}
+        <Route path="user/dashboard" element={<Dashboard />} />
+        <Route path="user/expenses" element={<Expenses />} />
+        {/* <Route path="user/leaderboard" element={<Leaderboard />} /> */}
       </Route>
     </Routes>
   );

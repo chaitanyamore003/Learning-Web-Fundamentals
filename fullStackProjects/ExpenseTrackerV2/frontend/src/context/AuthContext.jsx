@@ -7,60 +7,61 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Restore authentication when the application loads
+  // Fetch authenticated user
+  const fetchCurrentUser = async () => {
+    try {
+      const response = await api.get("/users/me");
+      setUser(response.data.user);
+      return response.data.user;
+    } catch (error) {
+      localStorage.removeItem("token");
+      setUser(null);
+      throw error;
+    }
+  };
+
+  // Restore authentication when application loads
   useEffect(() => {
-    const fetchCurrentUser = async () => {
+    const initializeAuth = async () => {
       const token = localStorage.getItem("token");
 
-      if (!token) {
-        setLoading(false);
-        return;
+      if (token) {
+        try {
+          await fetchCurrentUser();
+        } catch (error) {
+          console.error("Authentication Error:", error);
+        }
       }
 
-      try {
-        const response = await api.get("/users/me");
-        setUser(response.data.user);
-      } catch (error) {
-        console.error("Authentication Error:", error);
-        localStorage.removeItem("token");
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
+      setLoading(false);
     };
 
-    fetchCurrentUser();
+    initializeAuth();
   }, []);
 
   // Login
   const login = async (credentials) => {
     const response = await api.post("/users/login", credentials);
 
-    const { token, user } = response.data;
+    const { token } = response.data;
 
     localStorage.setItem("token", token);
-    setUser(user);
 
-    return response.data;
+    const user = await fetchCurrentUser();
+
+    return user;
   };
 
   // Signup
   const signup = async (userData) => {
     const response = await api.post("/users/signup", userData);
-
     return response.data;
   };
 
   // Logout
-  const logout = async () => {
-    try {
-      await api.post("/users/logout");
-    } catch (error) {
-      console.error("Logout Error:", error);
-    } finally {
-      localStorage.removeItem("token");
-      setUser(null);
-    }
+  const logout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
   };
 
   return (
@@ -90,3 +91,5 @@ export const useAuth = () => {
 
   return context;
 };
+
+export default AuthContext;

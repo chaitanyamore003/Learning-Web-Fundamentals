@@ -29,7 +29,8 @@ const Login = () => {
       await login(formData);
 
       // If successful, navigate to the dashboard
-      navigate("/dashboard");
+      // FIXED: Added leading slash to make it an absolute path
+      navigate("/user/dashboard");
     } catch (err) {
       // Handle API errors gracefully
       setError(
@@ -224,7 +225,7 @@ const Login = () => {
         <button
           type="submit"
           disabled={loading}
-          className={`mt-6 flex w-full items-center justify-center gap-2 rounded-xl border-2 py-4 text-base font-bold transition-all hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-70 ${
+          className={`cursor-pointer mt-6 flex w-full items-center justify-center gap-2 rounded-xl border-2 py-4 text-base font-bold transition-all hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-70 ${
             isDarkMode
               ? "border-[#B9FF66] bg-[#B9FF66] text-[#191A23] shadow-[4px_4px_0_0_#ffffff]"
               : "border-[#191A23] bg-[#191A23] text-white shadow-[4px_4px_0_0_#B9FF66]"

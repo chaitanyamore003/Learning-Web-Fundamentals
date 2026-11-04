@@ -30,12 +30,12 @@ const Footer = () => {
         <div
           className={`rounded-[24px] border p-8 transition-colors duration-300 sm:p-10 lg:p-12 ${
             isDarkMode
-              ? "border-[#1E293B] bg-[#0F141E] text-white" // Clean, flat dark card matching the image
-              : "border-gray-200 bg-white text-[#191A23] shadow-sm" // Clean, flat light card
+              ? "border-[#1E293B] bg-[#0F141E] text-white"
+              : "border-gray-200 bg-white text-[#191A23] shadow-sm"
           }`}
         >
           <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-12 lg:gap-8">
-            {/* Brand & Description (Spans 4 cols) */}
+            {/* Brand & Description */}
             <div className="lg:col-span-4">
               <Link
                 to="/"
@@ -67,7 +67,7 @@ const Footer = () => {
               </p>
             </div>
 
-            {/* Product Links (Spans 3 cols) */}
+            {/* Product Links */}
             <div className="lg:col-span-3 lg:col-start-6">
               <h4
                 className={`mb-5 text-sm font-semibold ${isDarkMode ? "text-gray-200" : "text-gray-900"}`}
@@ -88,7 +88,7 @@ const Footer = () => {
               </ul>
             </div>
 
-            {/* Company Links (Spans 3 cols) */}
+            {/* Company Links */}
             <div className="lg:col-span-3">
               <h4
                 className={`mb-5 text-sm font-semibold ${isDarkMode ? "text-gray-200" : "text-gray-900"}`}
@@ -109,7 +109,7 @@ const Footer = () => {
               </ul>
             </div>
 
-            {/* Socials & Copyright (Spans 2 cols) */}
+            {/* Socials & Copyright */}
             <div className="flex flex-col lg:col-span-2 lg:items-end">
               <div className="flex items-center gap-3">
                 {/* YouTube */}
@@ -186,15 +186,19 @@ const Footer = () => {
       </div>
 
       {/* 2. Massive Edge-to-Edge Branding Text */}
-      <div className="mt-16 flex w-full justify-center overflow-hidden sm:mt-24">
+      {/* Changed mt-16 to mt-10 to bring the whole block up slightly */}
+      <div className="mt-10 flex w-full justify-center overflow-hidden sm:mt-14">
         <h1
-          className={`select-none whitespace-nowrap text-[16vw] font-extrabold leading-[0.65] tracking-tighter transition-colors duration-300 ${
+          className={`select-none whitespace-nowrap text-[16vw] font-extrabold leading-[0.75] tracking-tighter transition-colors duration-300 ${
             isDarkMode ? "text-[#1A2332]" : "text-[#191A23]/10"
           }`}
-          // Pushes the text slightly below the screen to crop it exactly like the picture
-          style={{ marginBottom: "-3vw" }}
+          // Changed from -3vw to -1vw to show 75% of the text instead of 50%
+          style={{ marginBottom: "-1vw" }}
         >
-          ExpenseFlow
+          Expense{" "}
+          <span id="brand" className="text-[#B9FF66]">
+            Flow
+          </span>
         </h1>
       </div>
     </footer>

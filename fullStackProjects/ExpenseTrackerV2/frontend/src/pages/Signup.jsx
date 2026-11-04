@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { useTheme } from "../context/ThemeContext"; // Adjust path if needed
+import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
+import { Link, useNavigate } from "react-router-dom"; // Added Link for routing
 
 const Signup = () => {
   const { isDarkMode } = useTheme();
@@ -10,17 +12,58 @@ const Signup = () => {
     phone: "",
     password: "",
   });
+
+  const { signup } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+
+  // New state to manage success/error messages
+  const [status, setStatus] = useState({ type: "", text: "" });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    // Clear message when user starts typing again
+    if (status.text) setStatus({ type: "", text: "" });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    // Add your signup API call here
-    setTimeout(() => setLoading(false), 1500); // Simulated delay
+    setStatus({ type: "", text: "" }); // Reset message on new submit
+
+    try {
+      setLoading(true);
+
+      const signupUser = await signup(formData);
+
+      // Simulate 2-second processing delay
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      if (signupUser.success) {
+        setStatus({
+          type: "success",
+          text:
+            signupUser.message ||
+            "Account created successfully! Redirecting...",
+        });
+
+        setTimeout(() => navigate("/login"), 2000);
+      } else {
+        setStatus({
+          type: "error",
+          text: signupUser.message || "Failed to create account.",
+        });
+      }
+    } catch (error) {
+      console.error("Signup failed:", error);
+
+      const message =
+        error.response?.data?.message ||
+        "Something went wrong. Please try again.";
+
+      setStatus({ type: "error", text: message });
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Reusable input styling class
@@ -37,7 +80,7 @@ const Signup = () => {
   return (
     <>
       {/* Header */}
-      <div className="mb-8 text-center">
+      <div className="mb-6 text-center">
         <h2 className="text-3xl font-bold tracking-tight">Create an account</h2>
         <p
           className={`mt-2 text-sm font-medium ${
@@ -47,6 +90,52 @@ const Signup = () => {
           Start tracking your expenses with AI.
         </p>
       </div>
+
+      {/* Dynamic Success/Error Message Box */}
+      {status.text && (
+        <div
+          className={`mb-6 flex items-start gap-3 rounded-xl border-2 p-4 text-sm font-bold ${
+            status.type === "success"
+              ? "border-green-600 bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+              : "border-red-600 bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+          }`}
+        >
+          {/* Icon */}
+          <div className="mt-0.5 shrink-0">
+            {status.type === "success" ? (
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            ) : (
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            )}
+          </div>
+          <p>{status.text}</p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Full Name */}
@@ -341,12 +430,12 @@ const Signup = () => {
         <span className={isDarkMode ? "text-gray-400" : "text-gray-500"}>
           Already have an account?{" "}
         </span>
-        <a
-          href="#login"
+        <Link
+          to="/login"
           className="font-bold underline decoration-2 underline-offset-4 transition-colors hover:text-[#B9FF66]"
         >
           Log in
-        </a>
+        </Link>
       </div>
     </>
   );

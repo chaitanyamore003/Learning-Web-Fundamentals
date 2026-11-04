@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
+import api from "../../services/api";
 
 const Navbar = () => {
   const { isDarkMode, toggleTheme } = useTheme();
@@ -17,16 +18,16 @@ const Navbar = () => {
 
   // 2. Base app links for all logged-in users
   const appLinks = [
-    { name: "Dashboard", href: "/dashboard" },
-    { name: "Expenses", href: "/expenses" },
+    { name: "Dashboard", href: "/user/dashboard" },
+    { name: "Expenses", href: "/user/expenses" },
   ];
 
   // 3. Conditionally add Premium links
-  // Note: Ensure your AuthContext user object actually has an `isPremium` boolean property!
-  if (user?.isPremium) {
+  // Note: Ensure your AuthContext user object actually has an `premiumStatus` boolean property!
+  if (user?.premiumStatus) {
     appLinks.push(
-      { name: "Leaderboard", href: "/leaderboard" },
-      { name: "Reports", href: "/reports" },
+      { name: "Leaderboard", href: "user/leaderboard" },
+      { name: "Reports", href: "user/reports" },
     );
   }
 
@@ -42,7 +43,7 @@ const Navbar = () => {
       <div className="mx-auto flex max-w-7xl items-center justify-between">
         {/* Logo */}
         <Link
-          to={isAuthenticated ? "/dashboard" : "/"}
+          to={"/"}
           className={`flex items-center gap-2 text-2xl font-bold tracking-tight transition-colors ${
             isDarkMode ? "text-white" : "text-[#191A23]"
           }`}
@@ -148,8 +149,8 @@ const Navbar = () => {
 
                 {/* Logout Button */}
                 <button
-                  onClick={logout}
-                  className={`ml-2 text-[15px] font-bold underline decoration-2 underline-offset-4 transition-colors ${
+                  onClick={() => logout()}
+                  className={`cursor-pointer ml-2 text-[15px] font-bold underline decoration-2 underline-offset-4 transition-colors ${
                     isDarkMode
                       ? "text-gray-400 hover:text-white"
                       : "text-gray-500 hover:text-[#191A23]"
