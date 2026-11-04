@@ -1,11 +1,7 @@
-// ============================================================
-// Attendance Management — Frontend Logic
-// ============================================================
-
 // Base API endpoint
 const API = "http://localhost:3000/attendance";
 
-// ---- Cached DOM elements ----
+// selecting requiered DOM elements
 const dateInput = document.getElementById("attendanceDate");
 const message = document.getElementById("message");
 const attendanceSection = document.getElementById("attendanceSection");
@@ -24,18 +20,18 @@ let date = ""; // selected date, format YYYY-MM-DD
 let students = []; // students displayed in the attendance table
 let marked = false; // whether attendance for `date` is already saved
 
-// ============================================================
-// Small helpers
-// ============================================================
+//helper functions
 
 // Display a status message to the user
-function showMessage(text) {
+function showMessage(text, type = "info") {
   message.textContent = text;
+  message.dataset.type = type;
 }
 
 // Centralized error display (used by every API call)
+
 function showError(error) {
-  showMessage(error.response?.data?.message || error.message);
+  showMessage(error.response?.data?.message || error.message, "error");
   console.error(error);
 }
 
@@ -48,26 +44,15 @@ function getTodayString() {
   return `${year}-${month}-${day}`;
 }
 
-// Normalize whatever the backend returns into a consistent { id, name }.
-// Supports `id`, Mongo's `_id`, or `studentId`.
-function normalizeStudent(raw = {}) {
-  return {
-    id: raw.id ?? raw._id ?? raw.studentId,
-    name: raw.name,
-  };
-}
-
 // Pre-fill the date input with today's date
 dateInput.value = getTodayString();
 
-// ============================================================
-// Search attendance for the selected date
-// ============================================================
+// search attendance for the selected date
 searchBtn.addEventListener("click", async () => {
   date = dateInput.value;
 
   if (!date) {
-    return showMessage("Please select a date.");
+    return showMessage("Please select a date.", "info");
   }
 
   try {
@@ -80,11 +65,15 @@ searchBtn.addEventListener("click", async () => {
       ? data.attendance.map((record) => {
           const student = record.studentModel || record.student || {};
           return {
-            ...normalizeStudent(student),
+            id: student.id,
+            name: student.name,
             status: record.status,
           };
         })
-      : data.students.map(normalizeStudent);
+      : data.students.map((student) => ({
+          id: student.id,
+          name: student.name,
+        }));
 
     // Guard against duplicate ids (they would collapse radio groups).
     const seen = new Set();
@@ -98,19 +87,20 @@ searchBtn.addEventListener("click", async () => {
     attendanceSection.hidden = false;
     reportSection.hidden = true;
 
-    showMessage(
-      marked
-        ? "Attendance already marked."
-        : "Select attendance for every student.",
-    );
+    if (marked) {
+      showMessage(`Attendance for ${date} is already marked.`, "info");
+    } else {
+      showMessage(
+        `Attendance for ${date} is not marked yet. You can mark it now.`,
+        "info",
+      );
+    }
   } catch (error) {
     showError(error);
   }
 });
 
-// ============================================================
-// Render the attendance table (mark mode OR summary mode)
-// ============================================================
+// render the attendance table based on the current state (date, students, marked)
 function renderAttendance() {
   attendanceTitle.textContent = marked
     ? "Attendance Summary"
@@ -125,6 +115,7 @@ function renderAttendance() {
   `;
 
   attendanceBody.innerHTML = "";
+
   students.forEach((student) =>
     attendanceBody.appendChild(buildAttendanceRow(student)),
   );
@@ -171,9 +162,7 @@ function buildRadio(value, studentId) {
   return label;
 }
 
-// ============================================================
-// Save attendance for the selected date
-// ============================================================
+// mark attendance for the selected date
 markBtn.addEventListener("click", async () => {
   const attendance = [];
   const rows = attendanceBody.querySelectorAll("tr");
@@ -185,7 +174,7 @@ markBtn.addEventListener("click", async () => {
     const selected = row.querySelector('input[type="radio"]:checked');
 
     if (!selected) {
-      return showMessage(`Please select attendance for ${name}.`);
+      return showMessage(`Please select attendance for ${name}.`, "error");
     }
 
     attendance.push({ studentId, status: selected.value });
@@ -195,7 +184,7 @@ markBtn.addEventListener("click", async () => {
     await axios.post(`${API}/mark`, { date, attendance });
 
     marked = true;
-    showMessage("Attendance marked successfully.");
+    showMessage("Attendance marked successfully.", "success");
 
     // Reload saved attendance from the server.
     searchBtn.click();
@@ -204,9 +193,7 @@ markBtn.addEventListener("click", async () => {
   }
 });
 
-// ============================================================
-// Load the attendance report for all students
-// ============================================================
+// getting the attendance report
 reportBtn.addEventListener("click", async () => {
   try {
     const { data } = await axios.get(`${API}/report`);
@@ -219,7 +206,7 @@ reportBtn.addEventListener("click", async () => {
     reportSection.hidden = false;
     attendanceSection.hidden = true;
 
-    showMessage("Report loaded.");
+    showMessage("Report loaded.", "success");
   } catch (error) {
     showError(error);
   }

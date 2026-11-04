@@ -17,36 +17,21 @@ require("./models/associations");
 const app = express();
 
 // Middlewares
-app.use(cors());
+
+app.use(
+  cors({
+    origin: "http://localhost:3500",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, "../frontend")));
-
-// Payment result page
-app.get("/payment-result.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/views/payment-result.html"));
-});
-
-// Frontend pages
-app.get("/login.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/views/login.html"));
-});
-
-app.get("/home.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/views/home.html"));
-});
-
-app.get("/dashboard.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/views/dashboard.html"));
-});
-
-// Signup page
-app.get("/signup.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/views/signup.html"));
-});
 
 // API routes
 app.use("/users", userRouter);

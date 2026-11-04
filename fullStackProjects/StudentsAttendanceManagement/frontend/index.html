@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Student Attendance Manager</title>
     <link rel="stylesheet" href="index.css" />
+
+    <!-- Load JavaScript after HTML parsing -->
     <script src="index.js" defer></script>
   </head>
   <body>
     <h1>Student Attendance Manager</h1>
 
+    <!-- Section to select a date and access attendance features -->
     <section>
       <label for="attendanceDate">Select Date:</label>
       <input type="date" id="attendanceDate" required />
@@ -18,21 +21,26 @@
       <button id="reportBtn">Fetch Attendance Report</button>
     </section>
 
+    <!-- Display success, error, and informational messages -->
     <p id="message" role="status"></p>
 
+    <!-- Attendance section displayed after searching for a date -->
     <section id="attendanceSection" hidden>
       <h2 id="attendanceTitle">Attendance</h2>
 
       <p id="attendanceDateLabel"></p>
 
+      <!-- Display student attendance records -->
       <table>
         <thead id="attendanceHead"></thead>
         <tbody id="attendanceBody"></tbody>
       </table>
 
+      <!-- Submit attendance records for the selected date -->
       <button id="markBtn" hidden>Mark Attendance</button>
     </section>
 
+    <!-- Section displaying overall attendance statistics -->
     <section id="reportSection" hidden>
       <h2>Attendance Report</h2>
 
@@ -49,6 +57,8 @@
         <tbody id="reportBody"></tbody>
       </table>
     </section>
+
+    <!-- Import Axios for making HTTP requests to the backend API -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   </body>
 </html>

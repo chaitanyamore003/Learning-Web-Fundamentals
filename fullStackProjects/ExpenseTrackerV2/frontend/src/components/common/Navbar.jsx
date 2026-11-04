@@ -1,18 +1,37 @@
 import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
-import { Link } from "react-router-dom"; // Assuming you are using react-router
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const { isDarkMode, toggleTheme } = useTheme();
   const { user, isAuthenticated, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const navLinks = [
-    { name: "Features", href: "#features" },
-    { name: "AI Categorization", href: "#ai" },
-    { name: "Premium", href: "#premium" },
+  // 1. Marketing links for non-logged-in users
+  const marketingLinks = [
+    { name: "Features", href: "/#features" },
+    { name: "AI Categorization", href: "/#ai" },
+    { name: "Premium", href: "/#premium" },
   ];
+
+  // 2. Base app links for all logged-in users
+  const appLinks = [
+    { name: "Dashboard", href: "/dashboard" },
+    { name: "Expenses", href: "/expenses" },
+  ];
+
+  // 3. Conditionally add Premium links
+  // Note: Ensure your AuthContext user object actually has an `isPremium` boolean property!
+  if (user?.isPremium) {
+    appLinks.push(
+      { name: "Leaderboard", href: "/leaderboard" },
+      { name: "Reports", href: "/reports" },
+    );
+  }
+
+  // Pick the correct array to render
+  const navLinks = isAuthenticated ? appLinks : marketingLinks;
 
   return (
     <nav
@@ -23,31 +42,16 @@ const Navbar = () => {
       <div className="mx-auto flex max-w-7xl items-center justify-between">
         {/* Logo */}
         <Link
-          to="/"
+          to={isAuthenticated ? "/dashboard" : "/"}
           className={`flex items-center gap-2 text-2xl font-bold tracking-tight transition-colors ${
             isDarkMode ? "text-white" : "text-[#191A23]"
           }`}
         >
-          <span
-            className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-              isDarkMode
-                ? "bg-[#B9FF66] text-[#191A23]"
-                : "bg-[#191A23] text-white"
-            }`}
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
-            </svg>
-          </span>
+          <img
+            src="/expenseflow-logo.svg"
+            alt="ExpenseFlow Logo"
+            className="h-8 w-8 object-contain"
+          />
           ExpenseFlow
         </Link>
 
@@ -55,16 +59,16 @@ const Navbar = () => {
         <ul className="hidden items-center gap-8 lg:flex">
           {navLinks.map((link) => (
             <li key={link.name}>
-              <a
-                href={link.href}
-                className={`text-[16px] font-normal transition-colors ${
+              <Link
+                to={link.href}
+                className={`text-[16px] font-medium transition-colors ${
                   isDarkMode
                     ? "text-gray-300 hover:text-white"
                     : "text-[#191A23] hover:text-gray-600"
                 }`}
               >
                 {link.name}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
@@ -118,7 +122,7 @@ const Navbar = () => {
             )}
           </button>
 
-          {/* Desktop Auth CTA Buttons */}
+          {/* Desktop Auth Section */}
           <div className="hidden items-center gap-4 lg:flex">
             {isAuthenticated ? (
               <>
@@ -127,29 +131,25 @@ const Navbar = () => {
                   <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#191A23] bg-[#B9FF66] text-sm font-bold text-[#191A23] dark:border-gray-600">
                     {user?.name?.charAt(0).toUpperCase() || "U"}
                   </div>
-                  <span
-                    className={`text-sm font-medium ${isDarkMode ? "text-white" : "text-[#191A23]"}`}
-                  >
-                    {user?.name?.split(" ")[0] || "User"}
-                  </span>
+                  <div className="flex flex-col">
+                    <span
+                      className={`text-sm font-bold leading-tight ${isDarkMode ? "text-white" : "text-[#191A23]"}`}
+                    >
+                      {user?.name?.split(" ")[0] || "User"}
+                    </span>
+                    {/* Optional: Add a tiny "PRO" badge next to the name if they are premium */}
+                    {user?.isPremium && (
+                      <span className="text-[10px] font-black uppercase tracking-wider text-[#B9FF66]">
+                        Premium
+                      </span>
+                    )}
+                  </div>
                 </div>
-
-                {/* Dashboard Button */}
-                <Link
-                  to="/dashboard"
-                  className={`inline-flex items-center justify-center rounded-xl border-2 px-6 py-2.5 text-[15px] font-bold transition-colors ${
-                    isDarkMode
-                      ? "border-[#B9FF66] bg-[#B9FF66] text-[#191A23] hover:bg-transparent hover:text-[#B9FF66]"
-                      : "border-[#191A23] bg-[#191A23] text-white hover:bg-[#B9FF66] hover:text-[#191A23]"
-                  }`}
-                >
-                  Dashboard
-                </Link>
 
                 {/* Logout Button */}
                 <button
                   onClick={logout}
-                  className={`text-[15px] font-bold underline decoration-2 underline-offset-4 transition-colors ${
+                  className={`ml-2 text-[15px] font-bold underline decoration-2 underline-offset-4 transition-colors ${
                     isDarkMode
                       ? "text-gray-400 hover:text-white"
                       : "text-gray-500 hover:text-[#191A23]"
@@ -192,7 +192,6 @@ const Navbar = () => {
             }`}
           >
             {isMobileMenuOpen ? (
-              // Close Icon
               <svg
                 width="24"
                 height="24"
@@ -207,7 +206,6 @@ const Navbar = () => {
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
             ) : (
-              // Hamburger Icon
               <svg
                 width="24"
                 height="24"
@@ -239,15 +237,15 @@ const Navbar = () => {
           <ul className="flex flex-col gap-4">
             {navLinks.map((link) => (
               <li key={link.name}>
-                <a
-                  href={link.href}
+                <Link
+                  to={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`block text-lg font-medium ${
                     isDarkMode ? "text-gray-300" : "text-[#191A23]"
                   }`}
                 >
                   {link.name}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
@@ -261,29 +259,25 @@ const Navbar = () => {
                   <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#191A23] bg-[#B9FF66] text-sm font-bold text-[#191A23] dark:border-gray-600">
                     {user?.name?.charAt(0).toUpperCase() || "U"}
                   </div>
-                  <span
-                    className={`text-base font-bold ${isDarkMode ? "text-white" : "text-[#191A23]"}`}
-                  >
-                    {user?.name || "User"}
-                  </span>
+                  <div className="flex flex-col">
+                    <span
+                      className={`text-base font-bold leading-tight ${isDarkMode ? "text-white" : "text-[#191A23]"}`}
+                    >
+                      {user?.name || "User"}
+                    </span>
+                    {user?.isPremium && (
+                      <span className="text-xs font-black uppercase tracking-wider text-[#B9FF66]">
+                        Premium
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <Link
-                  to="/dashboard"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex w-full items-center justify-center rounded-xl border-2 py-3 text-base font-bold ${
-                    isDarkMode
-                      ? "border-[#B9FF66] bg-[#B9FF66] text-[#191A23]"
-                      : "border-[#191A23] bg-[#191A23] text-white"
-                  }`}
-                >
-                  Dashboard
-                </Link>
                 <button
                   onClick={() => {
                     logout();
                     setIsMobileMenuOpen(false);
                   }}
-                  className={`text-center text-base font-bold underline decoration-2 underline-offset-4 ${
+                  className={`mt-2 text-center text-base font-bold underline decoration-2 underline-offset-4 ${
                     isDarkMode ? "text-gray-400" : "text-gray-500"
                   }`}
                 >

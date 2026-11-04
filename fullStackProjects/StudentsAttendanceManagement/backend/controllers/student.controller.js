@@ -1,5 +1,6 @@
 const { studentModel } = require("../models/index");
 
+// Controller function to get all students
 const getAllStudents = async (req, res) => {
   try {
     const students = await studentModel.findAll({
@@ -18,6 +19,7 @@ const getAllStudents = async (req, res) => {
   }
 };
 
+// Controller function to add a new student
 const addStudent = async (req, res) => {
   try {
     const { name } = req.body;

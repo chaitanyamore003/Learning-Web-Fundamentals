@@ -1,22 +1,56 @@
 import { useState } from "react";
-import { useTheme } from "../context/ThemeContext"; // Adjust path if needed
+import { useTheme } from "../context/ThemeContext";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
   const { isDarkMode } = useTheme();
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    // Clear error when user starts typing again
+    if (error) setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // Add your login API call here
-    setTimeout(() => setLoading(false), 1500); // Simulated delay
+    setError("");
+
+    try {
+      // Call the login function from AuthContext
+      await login(formData);
+
+      // If successful, navigate to the dashboard
+      navigate("/dashboard");
+    } catch (err) {
+      // Handle API errors gracefully
+      setError(
+        err.response?.data?.message ||
+          "Invalid email or password. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
+
+  // Reusable input styling class
+  const inputClass = `w-full rounded-xl border-2 py-3.5 pl-11 pr-4 text-sm font-medium outline-none transition-all ${
+    isDarkMode
+      ? "border-gray-600 bg-[#191A23] text-white placeholder-gray-600 focus:border-[#B9FF66] focus:ring-1 focus:ring-[#B9FF66]"
+      : "border-[#191A23] bg-white text-[#191A23] placeholder-gray-400 focus:border-[#B9FF66] focus:ring-1 focus:ring-[#191A23]"
+  }`;
+
+  const iconClass = `pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 ${
+    isDarkMode ? "text-gray-500" : "text-gray-400"
+  }`;
 
   return (
     <>
@@ -33,6 +67,19 @@ const Login = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Error Message Display */}
+        {error && (
+          <div
+            className={`rounded-xl border-2 p-3 text-sm font-bold ${
+              isDarkMode
+                ? "border-red-500/50 bg-red-500/10 text-red-400"
+                : "border-red-500 bg-red-50 text-red-600"
+            }`}
+          >
+            {error}
+          </div>
+        )}
+
         {/* Email Input */}
         <div>
           <label
@@ -42,9 +89,9 @@ const Login = () => {
             Email Address
           </label>
           <div className="relative">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+            <div className={iconClass}>
               <svg
-                className={`h-5 w-5 ${isDarkMode ? "text-gray-500" : "text-gray-400"}`}
+                className="h-5 w-5"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -65,11 +112,8 @@ const Login = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="you@example.com"
-              className={`w-full rounded-xl border-2 py-3.5 pl-11 pr-4 text-sm font-medium outline-none transition-all ${
-                isDarkMode
-                  ? "border-gray-600 bg-[#191A23] text-white placeholder-gray-600 focus:border-[#B9FF66] focus:ring-1 focus:ring-[#B9FF66]"
-                  : "border-[#191A23] bg-white text-[#191A23] placeholder-gray-400 focus:border-[#B9FF66] focus:ring-1 focus:ring-[#191A23]"
-              }`}
+              className={inputClass}
+              disabled={loading}
             />
           </div>
         </div>
@@ -83,9 +127,9 @@ const Login = () => {
             Password
           </label>
           <div className="relative">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+            <div className={iconClass}>
               <svg
-                className={`h-5 w-5 ${isDarkMode ? "text-gray-500" : "text-gray-400"}`}
+                className="h-5 w-5"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -106,17 +150,15 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
               placeholder="••••••••"
-              className={`w-full rounded-xl border-2 py-3.5 pl-11 pr-12 text-sm font-medium outline-none transition-all ${
-                isDarkMode
-                  ? "border-gray-600 bg-[#191A23] text-white placeholder-gray-600 focus:border-[#B9FF66] focus:ring-1 focus:ring-[#B9FF66]"
-                  : "border-[#191A23] bg-white text-[#191A23] placeholder-gray-400 focus:border-[#B9FF66] focus:ring-1 focus:ring-[#191A23]"
-              }`}
+              className={`${inputClass} pr-12`}
+              disabled={loading}
             />
             {/* Toggle Password Visibility */}
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500 hover:text-[#191A23] dark:hover:text-white"
+              disabled={loading}
             >
               {showPassword ? (
                 <svg
@@ -166,6 +208,7 @@ const Login = () => {
                   ? "border-gray-600 bg-[#191A23]"
                   : "border-[#191A23] bg-white"
               }`}
+              disabled={loading}
             />
             Remember me
           </label>
@@ -235,12 +278,12 @@ const Login = () => {
         <span className={isDarkMode ? "text-gray-400" : "text-gray-500"}>
           Don't have an account?{" "}
         </span>
-        <a
-          href="#signup"
+        <Link
+          to="/signup"
           className="font-bold underline decoration-2 underline-offset-4 transition-colors hover:text-[#B9FF66]"
         >
           Sign up
-        </a>
+        </Link>
       </div>
     </>
   );

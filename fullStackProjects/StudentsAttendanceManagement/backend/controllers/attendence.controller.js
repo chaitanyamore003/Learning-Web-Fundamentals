@@ -4,8 +4,10 @@ const sequelize = require("../utils/database");
 // GET /attendance/:date
 const getAttendanceByDate = async (req, res) => {
   try {
+
     const { date } = req.params;
 
+    // if already marked, return the saved records; otherwise, return the full student list
     const records = await attendanceModel.findAll({
       where: { date },
       include: [
@@ -28,6 +30,7 @@ const getAttendanceByDate = async (req, res) => {
       });
     }
 
+    // if not marked, return the full student list with null status
     const students = await studentModel.findAll({
       attributes: ["id", "name"],
       order: [["name", "ASC"]],

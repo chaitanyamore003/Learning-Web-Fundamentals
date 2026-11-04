@@ -1,9 +1,11 @@
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
 import { useTheme } from "../context/ThemeContext"; // Adjust path if needed
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const { isDarkMode } = useTheme();
+  const navigate = useNavigate();
 
   return (
     <div
@@ -592,11 +594,12 @@ const Home = () => {
                 ))}
               </ul>
               <button
-                className={`mt-8 w-full rounded-xl border-2 py-4 font-bold transition-colors ${
+                className={`mt-8 w-full rounded-xl border-2 py-4 font-bold transition-colors cursor-pointer ${
                   isDarkMode
                     ? "border-gray-500 hover:border-white hover:bg-white hover:text-[#191A23]"
                     : "border-[#191A23] hover:bg-[#191A23] hover:text-white"
                 }`}
+                onClick={() => navigate("/signup")}
               >
                 Create free account
               </button>
@@ -640,7 +643,10 @@ const Home = () => {
                   </li>
                 ))}
               </ul>
-              <button className="mt-8 w-full rounded-xl bg-[#B9FF66] py-4 font-bold text-[#191A23] transition-transform hover:-translate-y-1">
+              <button
+                className="mt-8 w-full rounded-xl bg-[#B9FF66] py-4 font-bold text-[#191A23] transition-transform hover:-translate-y-1 cursor-pointer"
+                onClick={() => navigate("/login")}
+              >
                 Upgrade to Premium
               </button>
             </div>
@@ -665,10 +671,16 @@ const Home = () => {
               reports.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-              <button className="rounded-xl bg-[#191A23] px-8 py-4 font-bold text-white transition-transform hover:-translate-y-1">
+              <button
+                className="rounded-xl bg-[#191A23] px-8 py-4 font-bold text-white transition-transform hover:-translate-y-1 cursor-pointer"
+                onClick={() => navigate("/signup")}
+              >
                 Get started free
               </button>
-              <button className="rounded-xl border-2 border-[#191A23] bg-transparent px-8 py-4 font-bold text-[#191A23] transition-colors hover:bg-[#191A23] hover:text-white">
+              <button
+                className="rounded-xl border-2 border-[#191A23] bg-transparent px-8 py-4 font-bold text-[#191A23] transition-colors hover:bg-[#191A23] hover:text-white cursor-pointer"
+                onClick={() => navigate("/login")}
+              >
                 Log in
               </button>
             </div>
