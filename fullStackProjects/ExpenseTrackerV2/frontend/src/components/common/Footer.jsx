@@ -11,14 +11,6 @@ const Footer = () => {
     { name: "Dashboard", href: "/user/dashboard" },
   ];
 
-  // ✅ Cleaned up: Removed "Blog" to keep it focused on core business links
-  const companyLinks = [
-    { name: "About Us", href: "/about" },
-    { name: "Contact", href: "/contact" },
-    { name: "Privacy Policy", href: "/privacy" },
-    { name: "Terms of Service", href: "/terms" },
-  ];
-
   return (
     <footer
       className={`w-full overflow-hidden pt-16 transition-colors duration-300 ${
@@ -35,8 +27,8 @@ const Footer = () => {
           }`}
         >
           <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-12 lg:gap-8">
-            {/* Brand & Description */}
-            <div className="lg:col-span-4">
+            {/* Brand & Description (Spans 5 cols now for better balance) */}
+            <div className="lg:col-span-5">
               <Link
                 to="/"
                 className="flex items-center gap-2 text-2xl font-bold tracking-tight"
@@ -64,7 +56,7 @@ const Footer = () => {
                 ExpenseFlow
               </Link>
               <p
-                className={`mt-4 max-w-xs text-sm leading-relaxed ${
+                className={`mt-4 max-w-sm text-sm leading-relaxed ${
                   isDarkMode ? "text-gray-400" : "text-gray-500"
                 }`}
               >
@@ -73,8 +65,8 @@ const Footer = () => {
               </p>
             </div>
 
-            {/* Product Links */}
-            <div className="lg:col-span-3 lg:col-start-6">
+            {/* Product Links (Spans 3 cols) */}
+            <div className="lg:col-span-3">
               <h4
                 className={`mb-5 text-sm font-semibold ${
                   isDarkMode ? "text-gray-200" : "text-gray-900"
@@ -98,39 +90,17 @@ const Footer = () => {
               </ul>
             </div>
 
-            {/* Company Links */}
-            <div className="lg:col-span-3">
-              <h4
-                className={`mb-5 text-sm font-semibold ${
-                  isDarkMode ? "text-gray-200" : "text-gray-900"
-                }`}
-              >
-                Company
-              </h4>
-              <ul className="flex flex-col gap-3">
-                {companyLinks.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      to={link.href}
-                      className={`text-sm transition-colors hover:text-[#B9FF66] ${
-                        isDarkMode ? "text-gray-400" : "text-gray-500"
-                      }`}
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Socials & Copyright */}
-            <div className="flex flex-col lg:col-span-2 lg:items-end">
+            {/* Socials, Creator Tag & Copyright (Spans 4 cols) */}
+            <div className="flex flex-col lg:col-span-4 lg:items-end">
+              {/* Social Icons */}
               <div className="flex items-center gap-3">
                 {/* YouTube */}
                 <a
-                  href="#"
+                  href="https://youtube.com" // Replace with your demo video link
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label="YouTube"
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-all hover:-translate-y-0.5 hover:border-[#B9FF66] hover:text-[#B9FF66] ${
+                  className={`flex h-10 w-10 items-center justify-center rounded-lg border transition-all hover:-translate-y-1 hover:border-[#090909] ${
                     isDarkMode
                       ? "border-[#1E293B] bg-[#151B2B] text-gray-300"
                       : "border-gray-200 bg-gray-50 text-gray-600"
@@ -145,57 +115,44 @@ const Footer = () => {
                     <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
                   </svg>
                 </a>
-                {/* Twitter */}
+
+                {/* GitHub */}
                 <a
-                  href="#"
-                  aria-label="Twitter"
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-all hover:-translate-y-0.5 hover:border-[#B9FF66] hover:text-[#B9FF66] ${
+                  href="https://github.com" // Replace with your GitHub repo link
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="GitHub"
+                  className={`flex h-10 w-10 items-center justify-center rounded-lg border transition-all hover:-translate-y-1 hover:border-[#090909]  ${
                     isDarkMode
                       ? "border-[#1E293B] bg-[#151B2B] text-gray-300"
                       : "border-gray-200 bg-gray-50 text-gray-600"
                   }`}
                 >
                   <svg
-                    width="16"
-                    height="16"
+                    width="18"
+                    height="18"
                     viewBox="0 0 24 24"
                     fill="currentColor"
                   >
-                    <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
                   </svg>
                 </a>
-                {/* Instagram */}
-                <a
-                  href="#"
-                  aria-label="Instagram"
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-all hover:-translate-y-0.5 hover:border-[#B9FF66] hover:text-[#B9FF66] ${
-                    isDarkMode
-                      ? "border-[#1E293B] bg-[#151B2B] text-gray-300"
-                      : "border-gray-200 bg-gray-50 text-gray-600"
-                  }`}
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
-                  </svg>
-                </a>
+
                 {/* LinkedIn */}
                 <a
-                  href="#"
+                  href="https://linkedin.com" // Replace with your LinkedIn profile
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label="LinkedIn"
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-all hover:-translate-y-0.5 hover:border-[#B9FF66] hover:text-[#B9FF66] ${
+                  className={`flex h-10 w-10 items-center justify-center rounded-lg border transition-all hover:-translate-y-1 hover:border-[#090909] ${
                     isDarkMode
                       ? "border-[#1E293B] bg-[#151B2B] text-gray-300"
                       : "border-gray-200 bg-gray-50 text-gray-600"
                   }`}
                 >
                   <svg
-                    width="16"
-                    height="16"
+                    width="18"
+                    height="18"
                     viewBox="0 0 24 24"
                     fill="currentColor"
                   >
@@ -204,13 +161,31 @@ const Footer = () => {
                 </a>
               </div>
 
+              {/* Creator Tag */}
+              <a
+                href="https://linkedin.com" // Replace with your LinkedIn profile
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`group mt-6 flex items-center gap-1.5 rounded-full border px-4 py-2 text-xs font-bold transition-all hover:-translate-y-0.5 ${
+                  isDarkMode
+                    ? "border-[#1E293B] bg-[#151B2B] text-gray-300 hover:border-[#B9FF66] hover:text-[#B9FF66]"
+                    : "border-gray-200 bg-gray-50 text-gray-600 hover:border-[#191A23] hover:text-[#191A23] hover:shadow-sm"
+                }`}
+              >
+                Created with{" "}
+                <span className="text-red-500 transition-transform group-hover:scale-125 group-hover:animate-pulse">
+                  ❤️
+                </span>{" "}
+                by Chaitanya More
+              </a>
+
+              {/* Copyright */}
               <p
                 className={`mt-6 text-[13px] lg:text-right ${
                   isDarkMode ? "text-gray-500" : "text-gray-500"
                 }`}
               >
-                © 2026 ExpenseFlow.
-                <br className="hidden lg:block" /> All rights reserved.
+                © {new Date().getFullYear()} ExpenseFlow. All rights reserved.
               </p>
             </div>
           </div>

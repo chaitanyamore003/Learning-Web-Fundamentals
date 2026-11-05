@@ -1,26 +1,32 @@
 const { Sequelize } = require("sequelize");
-require("dotenv").config();
+const fs = require("fs");
+const path = require("path");
 
+// Create the Sequelize instance
 const db = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
+  process.env.DB_NAME, // defaultdb
+  process.env.DB_USER, // avnadmin
+  process.env.DB_PASSWORD, // your password
   {
-    host: "localhost",
+    host: process.env.DB_HOST, // mysql-258b6fef...aivencloud.com
+    port: process.env.DB_PORT, // 20748
     dialect: "mysql",
     logging: false,
+    dialectOptions: {
+      // ✅ Aiven requires SSL. We read the ca.pem file you downloaded.
+      ssl: {
+        require: true,
+        rejectUnauthorized: true,
+        ca: fs.readFileSync(path.join(__dirname, "..", "ca.pem")).toString(),
+      },
+    },
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000,
+    },
   },
 );
-
-//checking the connection using IFFE module
-(async () => {
-  try {
-    await db.authenticate();
-    console.log("database connection successful");
-  } catch (err) {
-    console.log("database connection failed");
-    console.log(err.message);
-  }
-})();
 
 module.exports = db;

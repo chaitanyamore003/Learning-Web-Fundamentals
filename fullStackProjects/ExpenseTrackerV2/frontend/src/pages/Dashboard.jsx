@@ -104,7 +104,7 @@ const Dashboard = () => {
               </p>
             </div>
             <Link
-              to="/premium"
+              to="/user/premium"
               className={`flex shrink-0 items-center gap-2 rounded-xl border-2 px-6 py-3 text-sm font-bold transition-all hover:-translate-y-1 ${
                 isDarkMode
                   ? "border-[#191A23] bg-[#B9FF66] text-[#191A23] hover:bg-white"
