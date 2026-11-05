@@ -29,6 +29,10 @@ const users = db.define("Users", {
     type: DataTypes.BIGINT,
     defaultValue: 0,
   },
+  totalIncome: {
+    type: DataTypes.BIGINT,
+    defaultValue: 0,
+  },
   isPremium: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,

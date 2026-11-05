@@ -2,36 +2,18 @@ const { expenseModel, userModel } = require("../models/associations");
 const db = require("../utils/database");
 const { main } = require("../utils/ai");
 
-const getAllExpenses = async (req, res) => {
-  try {
-    const userId = req.user.userId;
-    const expenses = await expenseModel.findAll({
-      where: {
-        UserId: userId,
-      },
-    });
-
-    return res.status(200).json({
-      success: true,
-      message: "expenses fetched successfully",
-      expenses,
-    });
-  } catch (err) {
-    console.log(err.message);
-
-    return res.status(500).json({
-      success: false,
-      message: "failed to fetch all expenses",
-    });
-  }
-};
-
+// ==========================================
+// ADD EXPENSE / INCOME
+// ==========================================
 const addExpense = async (req, res) => {
   let transaction;
+  let transactionType = "expense"; // Defined here so catch block can access it
 
   try {
     const userId = req.user.userId;
-    const { amount, description } = req.body;
+    const { amount, description, type = "expense" } = req.body;
+
+    transactionType = type;
 
     // Validate input
     if (!amount || Number(amount) <= 0 || !description?.trim()) {
@@ -41,8 +23,8 @@ const addExpense = async (req, res) => {
       });
     }
 
-    // Allowed categories
-    const allowedCategories = [
+    // Define categories based on type
+    const allowedExpenseCategories = [
       "Food",
       "Transportation",
       "Entertainment",
@@ -53,91 +35,270 @@ const addExpense = async (req, res) => {
       "Travel",
       "Other",
     ];
+    const allowedIncomeCategories = [
+      "Salary",
+      "Freelance",
+      "Investments",
+      "Business",
+      "Gifts",
+      "Other Income",
+    ];
+
+    const allowedCategories =
+      type === "income" ? allowedIncomeCategories : allowedExpenseCategories;
 
     // Generate category using AI
     const prompt = `
-      You are an expense categorization system.
+      You are a financial categorization system.
 
-      Categorize the following expense into exactly ONE category:
-      Food, Transportation, Entertainment, Utilities,
-      Healthcare, Education, Shopping, Travel, Other.
+      Categorize the following ${type} into exactly ONE category from this list:
+      ${allowedCategories.join(", ")}.
 
-      Expense description: ${description}
+      Description: ${description}
 
       Rules:
       - Return ONLY the category name.
-      - Do not use Markdown.
-      - Do not include explanations.
-      - Do not include quotation marks.
-      - If uncertain, return Other.
+      - Do not use Markdown, explanations, or punctuation.
+      - If uncertain, return ${type === "income" ? "Other Income" : "Other"}.
     `;
 
-    let category = "Other";
+    let category = type === "income" ? "Other Income" : "Other";
 
     try {
       const aiResponse = await main(prompt);
-
-      // Normalize AI response
       const normalizedCategory = String(aiResponse)
         .replace(/\*/g, "")
         .replace(/[`"'"]/g, "")
         .trim()
         .split(/\s+/)[0];
 
-      // Validate category
       const matchedCategory = allowedCategories.find(
         (item) => item.toLowerCase() === normalizedCategory.toLowerCase(),
       );
 
-      category = matchedCategory || "Other";
+      category =
+        matchedCategory || (type === "income" ? "Other Income" : "Other");
     } catch (aiError) {
       console.error("AI categorization failed:", aiError.message);
     }
 
-    // Start transaction after AI processing
+    // Start transaction
     transaction = await db.transaction();
 
-    // Create expense
+    // Create expense/income record
     await expenseModel.create(
       {
         expenseAmount: amount,
         category,
         description: description.trim(),
         UserId: userId,
+        type: type,
       },
       { transaction },
     );
 
-    // Update user's total expense
-    await userModel.increment(
-      { totalExpense: amount },
-      {
-        where: { id: userId },
-        transaction,
-      },
-    );
+    // ✅ Update the respective total based on type
+    if (type === "expense") {
+      await userModel.increment(
+        { totalExpense: amount },
+        { where: { id: userId }, transaction },
+      );
+    } else {
+      await userModel.increment(
+        { totalIncome: amount },
+        { where: { id: userId }, transaction },
+      );
+    }
 
     await transaction.commit();
 
     return res.status(201).json({
       success: true,
-      message: "New expense created successfully",
+      message: `${type === "income" ? "Income" : "Expense"} created successfully`,
       category,
     });
   } catch (err) {
     if (transaction && !transaction.finished) {
       await transaction.rollback();
     }
-
-    console.error(err.message);
-
+    console.error("Add Expense Error:", err.message);
     return res.status(500).json({
       success: false,
-      message: "Adding expense failed",
+      message: `Adding ${transactionType} failed`,
     });
   }
 };
 
+// ==========================================
+// UPDATE EXPENSE / INCOME
+// ==========================================
+const updateExpense = async (req, res) => {
+  let transaction;
+  let transactionType = "expense";
+
+  try {
+    const userId = req.user.userId;
+    const { id } = req.params;
+    const { amount, description, type } = req.body;
+
+    if (type) transactionType = type;
+
+    const expense = await expenseModel.findOne({
+      where: { id, UserId: userId },
+    });
+
+    if (!expense) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Transaction not found" });
+    }
+
+    if (
+      (amount !== undefined && Number(amount) <= 0) ||
+      (description !== undefined && !description.trim())
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid amount or description" });
+    }
+
+    const allowedExpenseCategories = [
+      "Food",
+      "Transportation",
+      "Entertainment",
+      "Utilities",
+      "Healthcare",
+      "Education",
+      "Shopping",
+      "Travel",
+      "Other",
+    ];
+    const allowedIncomeCategories = [
+      "Salary",
+      "Freelance",
+      "Investments",
+      "Business",
+      "Gifts",
+      "Other Income",
+    ];
+
+    const updatedAmount =
+      amount !== undefined ? Number(amount) : expense.expenseAmount;
+    const updatedDescription =
+      description !== undefined ? description.trim() : expense.description;
+    const updatedType = type !== undefined ? type : expense.type;
+
+    const allowedCategories =
+      updatedType === "income"
+        ? allowedIncomeCategories
+        : allowedExpenseCategories;
+
+    // Generate category only when description or type changes
+    let category = expense.category;
+
+    if (
+      (description !== undefined &&
+        updatedDescription !== expense.description) ||
+      (type !== undefined && type !== expense.type)
+    ) {
+      const prompt = `
+        You are a financial categorization system.
+
+        Categorize the following ${updatedType} into exactly ONE category from this list:
+        ${allowedCategories.join(", ")}.
+
+        Description: ${updatedDescription}
+
+        Rules:
+        - Return ONLY the category name.
+        - Do not use Markdown, explanations, or punctuation.
+        - If uncertain, return ${updatedType === "income" ? "Other Income" : "Other"}.
+      `;
+
+      try {
+        const aiResponse = await main(prompt);
+        const normalizedCategory = String(aiResponse)
+          .replace(/\*/g, "")
+          .replace(/[`"'"]/g, "")
+          .trim()
+          .split(/\s+/)[0];
+        const matchedCategory = allowedCategories.find(
+          (item) => item.toLowerCase() === normalizedCategory.toLowerCase(),
+        );
+        category =
+          matchedCategory ||
+          (updatedType === "income" ? "Other Income" : "Other");
+      } catch (aiError) {
+        console.error("AI categorization failed:", aiError.message);
+      }
+    }
+
+    // Keep old values to calculate differences
+    const oldAmount = Number(expense.expenseAmount);
+    const oldType = expense.type;
+
+    // Start transaction
+    transaction = await db.transaction();
+
+    // Update transaction record
+    await expense.update(
+      {
+        expenseAmount: updatedAmount,
+        description: updatedDescription,
+        category,
+        type: updatedType,
+      },
+      { transaction },
+    );
+
+    // ✅ Handle totals by removing the old amount first
+    if (oldType === "expense") {
+      await userModel.decrement(
+        { totalExpense: oldAmount },
+        { where: { id: userId }, transaction },
+      );
+    } else {
+      await userModel.decrement(
+        { totalIncome: oldAmount },
+        { where: { id: userId }, transaction },
+      );
+    }
+
+    // ✅ Then add the new amount to the correct bucket
+    if (updatedType === "expense") {
+      await userModel.increment(
+        { totalExpense: updatedAmount },
+        { where: { id: userId }, transaction },
+      );
+    } else {
+      await userModel.increment(
+        { totalIncome: updatedAmount },
+        { where: { id: userId }, transaction },
+      );
+    }
+
+    await transaction.commit();
+
+    return res.status(200).json({
+      success: true,
+      message: "Transaction updated successfully",
+      category,
+    });
+  } catch (err) {
+    if (transaction && !transaction.finished) {
+      await transaction.rollback();
+    }
+    console.error("Update Expense Error:", err.message);
+    return res.status(500).json({
+      success: false,
+      message: `Failed to update ${transactionType}`,
+    });
+  }
+};
+
+// ==========================================
+// DELETE EXPENSE / INCOME
+// ==========================================
 const deleteExpense = async (req, res) => {
   const transaction = await db.transaction();
 
@@ -145,231 +306,98 @@ const deleteExpense = async (req, res) => {
     const userId = req.user.userId;
     const { id } = req.params;
 
-    // Find expense belonging to this user
     const expense = await expenseModel.findOne({
-      where: {
-        id,
-        UserId: userId,
-      },
+      where: { id, UserId: userId },
       transaction,
     });
 
     if (!expense) {
       await transaction.rollback();
-
-      return res.status(404).json({
-        success: false,
-        message: "Expense not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Transaction not found" });
     }
 
-    // Delete expense
+    // ✅ Decrement the respective total based on type
+    if (expense.type === "expense") {
+      await userModel.decrement(
+        { totalExpense: expense.expenseAmount },
+        { where: { id: userId }, transaction },
+      );
+    } else {
+      await userModel.decrement(
+        { totalIncome: expense.expenseAmount },
+        { where: { id: userId }, transaction },
+      );
+    }
+
     await expense.destroy({ transaction });
-
-    // Decrease user's total expense
-    await userModel.decrement(
-      {
-        totalExpense: expense.expenseAmount,
-      },
-      {
-        where: {
-          id: userId,
-        },
-        transaction,
-      },
-    );
-
     await transaction.commit();
 
     return res.status(200).json({
       success: true,
-      message: "Expense deleted successfully",
+      message: "Transaction deleted successfully",
     });
   } catch (err) {
-    if (!transaction.finished) {
-      await transaction.rollback();
-    }
-
+    if (!transaction.finished) await transaction.rollback();
     console.log(err.message);
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to delete the transaction" });
+  }
+};
 
+// ==========================================
+// GET ALL EXPENSES
+// ==========================================
+const getAllExpenses = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const expenses = await expenseModel.findAll({
+      where: { UserId: userId },
+      order: [["createdAt", "DESC"]],
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Transactions fetched successfully",
+      expenses,
+    });
+  } catch (err) {
+    console.log(err.message);
     return res.status(500).json({
       success: false,
-      message: "Failed to delete the expense",
+      message: "Failed to fetch all transactions",
     });
   }
 };
 
+// ==========================================
+// GET SINGLE EXPENSE
+// ==========================================
 const getExpense = async (req, res) => {
   try {
     const { id } = req.params;
     const expense = await expenseModel.findOne({
-      where: {
-        id,
-      },
+      where: { id },
     });
 
     if (!expense) {
-      return res.status(404).json({
-        success: false,
-        message: "expense not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Transaction not found" });
     }
 
     return res.status(200).json({
       success: true,
-      message: "expense fetched successfully",
+      message: "Transaction fetched successfully",
       expense,
     });
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({
-      success: false,
-      message: "unable the fetch the expense",
-    });
-  }
-};
-
-const updateExpense = async (req, res) => {
-  let transaction;
-
-  try {
-    const userId = req.user.userId;
-    const { id } = req.params;
-    const { amount, description } = req.body;
-
-    // Find existing expense
-    const expense = await expenseModel.findOne({
-      where: {
-        id,
-        UserId: userId,
-      },
-    });
-
-    if (!expense) {
-      return res.status(404).json({
-        success: false,
-        message: "Expense not found",
-      });
-    }
-
-    // Validate input
-    if (
-      (amount !== undefined && Number(amount) <= 0) ||
-      (description !== undefined && !description.trim())
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid amount or description",
-      });
-    }
-
-    const allowedCategories = [
-      "Food",
-      "Transportation",
-      "Entertainment",
-      "Utilities",
-      "Healthcare",
-      "Education",
-      "Shopping",
-      "Travel",
-      "Other",
-    ];
-
-    // Keep existing values if not provided
-    const updatedAmount =
-      amount !== undefined ? Number(amount) : expense.expenseAmount;
-
-    const updatedDescription =
-      description !== undefined ? description.trim() : expense.description;
-
-    // Generate category only when description changes
-    let category = expense.category;
-
-    if (
-      description !== undefined &&
-      updatedDescription !== expense.description
-    ) {
-      const prompt = `
-        You are an expense categorization system.
-
-        Categorize the following expense into exactly ONE category:
-        Food, Transportation, Entertainment, Utilities,
-        Healthcare, Education, Shopping, Travel, Other.
-
-        Expense description: ${updatedDescription}
-
-        Return ONLY the category name.
-        No Markdown, explanations, or punctuation.
-        If uncertain, return Other.
-      `;
-
-      try {
-        const aiResponse = await main(prompt);
-
-        const normalizedCategory = String(aiResponse)
-          .replace(/\*/g, "")
-          .replace(/[`"'"]/g, "")
-          .trim()
-          .split(/\s+/)[0];
-
-        const matchedCategory = allowedCategories.find(
-          (item) => item.toLowerCase() === normalizedCategory.toLowerCase(),
-        );
-
-        category = matchedCategory || "Other";
-      } catch (aiError) {
-        console.error("AI categorization failed:", aiError.message);
-
-        category = "Other";
-      }
-    }
-
-    // Start transaction
-    transaction = await db.transaction();
-
-    // Update expense
-    await expense.update(
-      {
-        expenseAmount: updatedAmount,
-        description: updatedDescription,
-        category,
-      },
-      { transaction },
-    );
-
-    // Calculate amount difference
-    const difference =
-      updatedAmount - Number(expense.previous("expenseAmount"));
-
-    // Update user's total expense only if amount changed
-    if (difference !== 0) {
-      await userModel.increment(
-        { totalExpense: difference },
-        {
-          where: { id: userId },
-          transaction,
-        },
-      );
-    }
-
-    await transaction.commit();
-
-    return res.status(200).json({
-      success: true,
-      message: "Expense updated successfully",
-      category,
-    });
-  } catch (err) {
-    if (transaction && !transaction.finished) {
-      await transaction.rollback();
-    }
-
-    console.error(err.message);
-
-    return res.status(500).json({
-      success: false,
-      message: "Failed to update expense",
-    });
+    return res
+      .status(500)
+      .json({ success: false, message: "Unable to fetch the transaction" });
   }
 };
 

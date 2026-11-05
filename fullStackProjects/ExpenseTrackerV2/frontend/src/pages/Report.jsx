@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
 import api from "../services/api";
+import { saveAs } from "file-saver";
 
 const Reports = () => {
   const { isDarkMode } = useTheme();
@@ -15,11 +16,11 @@ const Reports = () => {
   const [error, setError] = useState("");
 
   // Filter State
-  const [timeFilter, setTimeFilter] = useState("all"); // "all", "daily", "weekly", "monthly"
+  const [timeFilter, setTimeFilter] = useState("all");
 
   // ✅ Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10); // ✅ New state for dropdown
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Summary State
   const [totals, setTotals] = useState({ income: 0, expense: 0, savings: 0 });
@@ -73,7 +74,7 @@ const Reports = () => {
     let expenseTotal = 0;
 
     filtered.forEach((item) => {
-      if (item.category?.toLowerCase() === "income") {
+      if (item.type === "income") {
         incomeTotal += Number(item.expenseAmount);
       } else {
         expenseTotal += Number(item.expenseAmount);
@@ -87,11 +88,10 @@ const Reports = () => {
       savings: incomeTotal - expenseTotal,
     });
 
-    // ✅ Reset to page 1 whenever the filter changes
     setCurrentPage(1);
   }, [expenses, timeFilter]);
 
-  // ✅ Pagination Logic
+  // Pagination Logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredExpenses.slice(
@@ -105,39 +105,49 @@ const Reports = () => {
     window.scrollTo({ top: 300, behavior: "smooth" });
   };
 
-  // ✅ Handle Rows Per Page Change
   const handleItemsPerPageChange = (e) => {
     setItemsPerPage(Number(e.target.value));
-    setCurrentPage(1); // Reset to page 1 when changing rows per page
+    setCurrentPage(1);
   };
 
-  // CSV Download Logic
+  // ✅ Updated CSV Download Logic
   const downloadCSV = () => {
-    const headers = ["Date", "Description", "Category", "Income", "Expense"];
-    const rows = filteredExpenses.map((item) => {
-      const isIncome = item.category?.toLowerCase() === "income";
-      return [
-        new Date(item.createdAt).toLocaleDateString("en-IN"),
-        `"${item.description || "N/A"}"`,
-        item.category || "Uncategorized",
-        isIncome ? item.expenseAmount : 0,
-        !isIncome ? item.expenseAmount : 0,
-      ];
+    const rows = [];
+    rows.push(
+      ["Date", "Description", "Category", "Income", "Expense"].join(","),
+    );
+
+    filteredExpenses.forEach((item) => {
+      const isIncome = item.type === "income";
+      const dateStr = new Date(item.createdAt)
+        .toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })
+        .replace(/ /g, "-");
+
+      const description = `"${(item.description || "N/A").replace(/"/g, '""')}"`;
+      const category = `"${(item.category || "Uncategorized").replace(/"/g, '""')}"`;
+
+      const incomeAmount = isIncome ? item.expenseAmount : 0;
+      const expenseAmount = !isIncome ? item.expenseAmount : 0;
+
+      rows.push(
+        [dateStr, description, category, incomeAmount, expenseAmount].join(","),
+      );
     });
 
-    const csvContent = [
-      headers.join(","),
-      ...rows.map((row) => row.join(",")),
-    ].join("\n");
+    rows.push("");
+    rows.push([",,Total Income:,", totals.income].join(","));
+    rows.push([",,Total Expenses:,", totals.expense].join(","));
+    rows.push([",,Net Balance:,", totals.savings].join(","));
 
+    const csvContent = rows.join("\n");
+
+    // ✅ Use FileSaver to handle the download securely
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `ExpenseFlow_Report_${timeFilter}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    saveAs(blob, `ExpenseFlow_Report_${timeFilter}.csv`);
   };
 
   const formatCurrency = (amount) =>
@@ -229,6 +239,7 @@ const Reports = () => {
             >
               Total Income
             </p>
+            {/* ✅ Changed to standard Green */}
             <h3 className="mt-2 text-3xl font-black text-green-500">
               {formatCurrency(totals.income)}
             </h3>
@@ -330,6 +341,7 @@ const Reports = () => {
                       <th className="px-6 py-4 font-bold">Date</th>
                       <th className="px-6 py-4 font-bold">Description</th>
                       <th className="px-6 py-4 font-bold">Category</th>
+                      {/* ✅ Changed to standard Green */}
                       <th className="px-6 py-4 font-bold text-right text-green-500">
                         Income
                       </th>
@@ -344,8 +356,7 @@ const Reports = () => {
                     }`}
                   >
                     {currentItems.map((item) => {
-                      const isIncome =
-                        item.category?.toLowerCase() === "income";
+                      const isIncome = item.type === "income";
                       return (
                         <tr
                           key={item.id}
@@ -371,14 +382,19 @@ const Reports = () => {
                           <td className="px-6 py-4">
                             <span
                               className={`inline-block rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${
-                                isDarkMode
-                                  ? "bg-gray-800 text-gray-300"
-                                  : "bg-gray-200 text-gray-700"
+                                isIncome
+                                  ? isDarkMode
+                                    ? "bg-green-500/10 text-green-400"
+                                    : "bg-green-100 text-green-700"
+                                  : isDarkMode
+                                    ? "bg-red-500/10 text-red-400"
+                                    : "bg-red-100 text-red-700"
                               }`}
                             >
                               {item.category}
                             </span>
                           </td>
+                          {/* ✅ Changed to standard Green */}
                           <td className="px-6 py-4 text-right font-bold text-green-500">
                             {isIncome
                               ? formatCurrency(item.expenseAmount)
@@ -404,7 +420,6 @@ const Reports = () => {
               >
                 {/* Left Side: Rows per page & Showing text */}
                 <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
-                  {/* ✅ Rows per page dropdown */}
                   <div className="flex items-center gap-2">
                     <span
                       className={`text-sm font-medium ${
@@ -437,7 +452,6 @@ const Reports = () => {
                     </select>
                   </div>
 
-                  {/* Showing text */}
                   <div
                     className={`text-sm font-medium ${
                       isDarkMode ? "text-gray-400" : "text-gray-500"
@@ -463,7 +477,6 @@ const Reports = () => {
                     Prev
                   </button>
 
-                  {/* Page Numbers (Limit display if too many pages) */}
                   <div className="flex items-center gap-1">
                     {Array.from({ length: totalPages }, (_, i) => i + 1)
                       .filter(
@@ -473,7 +486,6 @@ const Reports = () => {
                           (num >= currentPage - 1 && num <= currentPage + 1),
                       )
                       .map((number, index, array) => {
-                        // Add ellipsis logic
                         const prev = array[index - 1];
                         const showEllipsis = prev && number - prev > 1;
 

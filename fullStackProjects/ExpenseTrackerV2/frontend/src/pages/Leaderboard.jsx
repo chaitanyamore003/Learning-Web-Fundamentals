@@ -27,6 +27,7 @@ const Leaderboard = () => {
       } catch (err) {
         console.error("Leaderboard Error:", err);
 
+        // Catch the 403 Forbidden error from your backend
         if (err.response?.status === 403) {
           setIsPremiumRequired(true);
         } else {
@@ -58,7 +59,7 @@ const Leaderboard = () => {
     return `₹ ${(amount || 0).toLocaleString("en-IN")}`;
   };
 
-  // Helper to render rank badges
+  // Helper to render rank badges (Gold, Silver, Bronze)
   const getRankStyle = (rank) => {
     if (rank === 1)
       return "bg-yellow-400 text-[#191A23] border-[#191A23] shadow-[2px_2px_0_0_#191A23]";

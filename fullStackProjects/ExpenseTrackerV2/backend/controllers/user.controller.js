@@ -178,6 +178,7 @@ const getMe = async (req, res) => {
         email: user.email,
         premiumStatus: user.isPremium,
         totalExpense: user.totalExpense,
+        totalIncome: user.totalIncome,
       },
     });
   } catch (err) {

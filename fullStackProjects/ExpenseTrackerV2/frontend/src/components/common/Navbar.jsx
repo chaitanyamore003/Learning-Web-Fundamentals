@@ -136,9 +136,9 @@ const Navbar = () => {
                     >
                       {user?.name?.split(" ")[0] || "User"}
                     </span>
-                    {/* ✅ FIX: Use premiumStatus */}
+                    {/* ✅ Changed to Golden Yellow */}
                     {user?.premiumStatus && (
-                      <span className="text-[10px] font-black uppercase tracking-wider text-[#B9FF66]">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-yellow-400">
                         Premium
                       </span>
                     )}
@@ -264,9 +264,9 @@ const Navbar = () => {
                     >
                       {user?.name || "User"}
                     </span>
-                    {/* ✅ FIX: Use premiumStatus */}
+                    {/* ✅ Changed to Golden Yellow */}
                     {user?.premiumStatus && (
-                      <span className="text-xs font-black uppercase tracking-wider text-[#B9FF66]">
+                      <span className="text-xs font-black uppercase tracking-wider text-yellow-400">
                         Premium
                       </span>
                     )}

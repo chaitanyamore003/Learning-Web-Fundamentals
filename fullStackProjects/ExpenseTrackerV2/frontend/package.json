@@ -13,6 +13,7 @@
     "@cashfreepayments/cashfree-js": "^1.0.7",
     "@tailwindcss/vite": "^4.3.3",
     "axios": "^1.21.0",
+    "file-saver": "^2.0.5",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router": "^8.5.1",

@@ -18,6 +18,11 @@ const expenses = db.define("Expenses", {
   description: {
     type: DataTypes.STRING,
   },
+  type: {
+    type: DataTypes.ENUM("expense", "income"),
+    defaultValue: "expense",
+    allowNull: false,
+  },
 });
 
 module.exports = expenses;
