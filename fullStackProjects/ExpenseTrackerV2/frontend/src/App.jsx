@@ -3,9 +3,14 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import AuthLayout from "./layouts/authLayout"; // Ensure casing matches your file name
+import AuthLayout from "./layouts/authLayout";
 import Dashboard from "./pages/Dashboard";
 import Expenses from "./pages/Expenses";
+import Leaderboard from "./pages/Leaderboard";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import Premium from "./pages/Premium";
+import Report from "./pages/Report";
 
 import ProtectedRoute from "./components/auth/ProtectedRoutes";
 import PublicRoute from "./components/auth/PublicRoutes";
@@ -17,18 +22,22 @@ function App() {
       <Route path="/" element={<Home />} />
 
       <Route element={<PublicRoute />}>
-        {/* Notice how AuthLayout is the parent, and Login/Signup are children */}
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:id" element={<ResetPassword />} />
         </Route>
       </Route>
 
-      {/* Protected routes */}
+      {/* Protected routes (User must be logged in) */}
       <Route element={<ProtectedRoute />}>
-        <Route path="user/dashboard" element={<Dashboard />} />
-        <Route path="user/expenses" element={<Expenses />} />
-        {/* <Route path="user/leaderboard" element={<Leaderboard />} /> */}
+        {/* ✅ Added leading slashes for absolute paths */}
+        <Route path="/user/dashboard" element={<Dashboard />} />
+        <Route path="/user/expenses" element={<Expenses />} />
+        <Route path="/user/leaderboard" element={<Leaderboard />} />
+        <Route path="/user/premium" element={<Premium />} />
+        <Route path="/user/report" element={<Report />} />
       </Route>
     </Routes>
   );

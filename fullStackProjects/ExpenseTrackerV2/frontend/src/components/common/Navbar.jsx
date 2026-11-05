@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
-import api from "../../services/api";
 
 const Navbar = () => {
   const { isDarkMode, toggleTheme } = useTheme();
@@ -23,11 +22,10 @@ const Navbar = () => {
   ];
 
   // 3. Conditionally add Premium links
-  // Note: Ensure your AuthContext user object actually has an `premiumStatus` boolean property!
   if (user?.premiumStatus) {
     appLinks.push(
-      { name: "Leaderboard", href: "user/leaderboard" },
-      { name: "Reports", href: "user/reports" },
+      { name: "Leaderboard", href: "/user/leaderboard" },
+      { name: "Reports", href: "/user/report" },
     );
   }
 
@@ -75,12 +73,12 @@ const Navbar = () => {
         </ul>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-3 lg:gap-6">
+        <div className="flex items-center gap-3 lg:gap-4">
           {/* Dark Mode Toggle */}
           <button
             onClick={toggleTheme}
             aria-label="Toggle dark mode"
-            className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors ${
+            className={`cursor-pointer flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors ${
               isDarkMode
                 ? "border-gray-600 text-[#B9FF66] hover:border-[#B9FF66]"
                 : "border-[#191A23] text-[#191A23] hover:bg-gray-100"
@@ -138,8 +136,8 @@ const Navbar = () => {
                     >
                       {user?.name?.split(" ")[0] || "User"}
                     </span>
-                    {/* Optional: Add a tiny "PRO" badge next to the name if they are premium */}
-                    {user?.isPremium && (
+                    {/* ✅ FIX: Use premiumStatus */}
+                    {user?.premiumStatus && (
                       <span className="text-[10px] font-black uppercase tracking-wider text-[#B9FF66]">
                         Premium
                       </span>
@@ -150,10 +148,10 @@ const Navbar = () => {
                 {/* Logout Button */}
                 <button
                   onClick={() => logout()}
-                  className={`cursor-pointer ml-2 text-[15px] font-bold underline decoration-2 underline-offset-4 transition-colors ${
+                  className={`cursor-pointer inline-flex items-center justify-center rounded-xl border-2 px-5 py-2 text-sm font-bold transition-all duration-300 ${
                     isDarkMode
-                      ? "text-gray-400 hover:text-white"
-                      : "text-gray-500 hover:text-[#191A23]"
+                      ? "border-gray-600 text-gray-300 hover:border-red-500 hover:bg-red-500 hover:text-white"
+                      : "border-[#191A23] text-[#191A23] hover:border-red-500 hover:bg-red-500 hover:text-white"
                   }`}
                 >
                   Log out
@@ -266,7 +264,8 @@ const Navbar = () => {
                     >
                       {user?.name || "User"}
                     </span>
-                    {user?.isPremium && (
+                    {/* ✅ FIX: Use premiumStatus */}
+                    {user?.premiumStatus && (
                       <span className="text-xs font-black uppercase tracking-wider text-[#B9FF66]">
                         Premium
                       </span>
@@ -278,8 +277,10 @@ const Navbar = () => {
                     logout();
                     setIsMobileMenuOpen(false);
                   }}
-                  className={`mt-2 text-center text-base font-bold underline decoration-2 underline-offset-4 ${
-                    isDarkMode ? "text-gray-400" : "text-gray-500"
+                  className={`mt-2 flex w-full items-center justify-center rounded-xl border-2 py-3 text-base font-bold transition-all duration-300 ${
+                    isDarkMode
+                      ? "border-gray-600 text-gray-300 hover:border-red-500 hover:bg-red-500 hover:text-white"
+                      : "border-[#191A23] text-[#191A23] hover:border-red-500 hover:bg-red-500 hover:text-white"
                   }`}
                 >
                   Log out

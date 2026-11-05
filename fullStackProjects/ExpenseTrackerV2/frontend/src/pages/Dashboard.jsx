@@ -3,17 +3,19 @@ import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
 
 const Dashboard = () => {
   const { isDarkMode } = useTheme();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [recentExpenses, setRecentExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // ✅ FIX: Use premiumStatus
   const isPremium = user?.premiumStatus || false;
 
   // Fetch dynamic expenses from the backend
@@ -21,14 +23,10 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        // Replace with your actual endpoint for fetching expenses
-        // Assuming it returns an array of objects matching the Expenses model
         const response = await api.get("/expenses?limit=5");
         setRecentExpenses(response.data.expenses || response.data || []);
       } catch (err) {
         console.error("Dashboard Error:", err);
-        // If the backend route doesn't exist yet, we catch the error
-        // so the dashboard doesn't crash, and default to empty state
         setRecentExpenses([]);
       } finally {
         setLoading(false);
@@ -36,7 +34,7 @@ const Dashboard = () => {
     };
 
     fetchDashboardData();
-  }, []);
+  }, [user?.premiumStatus]); // Re-fetch if premium status changes
 
   // --- LOADING STATE ---
   if (loading) {
@@ -97,6 +95,7 @@ const Dashboard = () => {
                 spending leaderboard.
               </p>
             </div>
+            {/* ✅ FIX: Point to /premium to match App.jsx */}
             <Link
               to="/user/premium"
               className={`flex shrink-0 items-center gap-2 rounded-xl border-2 px-6 py-3 text-sm font-bold transition-all hover:-translate-y-1 ${
@@ -154,6 +153,7 @@ const Dashboard = () => {
                     ? "border-gray-600 bg-[#292A32] text-white hover:border-[#B9FF66]"
                     : "border-gray-300 bg-white text-[#191A23] hover:border-[#191A23]"
                 }`}
+                onClick={() => navigate("/user/reports")}
               >
                 <svg
                   width="20"

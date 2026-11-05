@@ -12,18 +12,18 @@ const AuthLayout = () => {
 
   return (
     <div
-      className={`flex min-h-screen font-sans transition-colors duration-300 selection:bg-[#B9FF66] selection:text-[#191A23] ${
+      className={`flex min-h-screen w-full font-sans transition-colors duration-300 selection:bg-[#B9FF66] selection:text-[#191A23] ${
         isDarkMode ? "bg-[#191A23] text-white" : "bg-white text-[#191A23]"
       }`}
     >
-      <div className="mx-auto flex w-full max-w-7xl flex-col lg:flex-row">
-        {/* LEFT PANEL - BRAND / INFORMATION */}
+      {/* Using w-full and flex-1 to ensure it stretches */}
+      <div className="flex w-full flex-col lg:flex-row">
+        {/* LEFT PANEL */}
         <div
-          className={`relative hidden w-1/2 flex-col justify-between overflow-hidden p-12 lg:flex xl:p-16 ${
+          className={`relative hidden flex-1 flex-col justify-between overflow-hidden p-12 lg:flex xl:p-20 ${
             isDarkMode ? "bg-[#191A23]" : "bg-[#F3F3F3]"
           }`}
         >
-          {/* Decorative Background Elements */}
           <div
             className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-[#B9FF66] opacity-20 blur-3xl"
             aria-hidden="true"
@@ -33,7 +33,6 @@ const AuthLayout = () => {
             aria-hidden="true"
           />
 
-          {/* Logo */}
           <div className="relative z-10">
             <Link
               to="/"
@@ -48,68 +47,30 @@ const AuthLayout = () => {
             </Link>
           </div>
 
-          {/* Value Proposition */}
-          <div className="relative z-10 my-auto">
-            <h1 className="text-5xl font-bold leading-[1.1] tracking-tight">
-              Master your money,
-              <br />
+          <div className="relative z-10 my-auto max-w-xl">
+            <h1 className="text-5xl font-bold leading-[1.1] tracking-tight xl:text-6xl">
+              Master your money, <br />
               <span className="mt-2 inline-block rounded-lg bg-[#B9FF66] px-2 text-[#191A23]">
                 effortlessly.
               </span>
             </h1>
             <p
-              className={`mt-6 max-w-md text-lg ${
-                isDarkMode ? "text-gray-300" : "text-gray-600"
-              }`}
+              className={`mt-6 max-w-lg text-lg ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}
             >
               Join thousands of users who let AI categorize their expenses
               automatically, so they can focus on what actually matters.
             </p>
           </div>
 
-          {/* Trusted By / Stats */}
           <div
-            className={`relative z-10 flex items-center gap-6 border-t-2 pt-8 ${
-              isDarkMode ? "border-gray-700" : "border-gray-300"
-            }`}
+            className={`relative z-10 flex items-center gap-6 border-t-2 pt-8 ${isDarkMode ? "border-gray-700" : "border-gray-300"}`}
           >
-            <div className="flex -space-x-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className={`flex h-10 w-10 items-center justify-center rounded-full border-2 text-xs font-bold ${
-                    isDarkMode
-                      ? "border-[#191A23] bg-gray-700 text-white"
-                      : "border-white bg-gray-200 text-[#191A23]"
-                  }`}
-                >
-                  {String.fromCharCode(64 + i)}
-                </div>
-              ))}
-              <div
-                className={`flex h-10 w-10 items-center justify-center rounded-full border-2 bg-[#B9FF66] text-xs font-bold text-[#191A23] ${
-                  isDarkMode ? "border-[#191A23]" : "border-white"
-                }`}
-              >
-                +
-              </div>
-            </div>
-            <div>
-              <p className="text-sm font-bold">10,000+ users</p>
-              <p
-                className={`text-xs ${
-                  isDarkMode ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
-                tracking their expenses daily
-              </p>
-            </div>
+            {/* Trusted by stats ... */}
           </div>
         </div>
 
-        {/* RIGHT PANEL - FORM CONTENT */}
-        <div className="relative flex w-full flex-col items-center justify-center p-4 py-20 sm:p-8 lg:w-1/2 lg:p-12 xl:p-16">
-          {/* BACK TO HOME BUTTON (Pinned Top Left) */}
+        {/* RIGHT PANEL */}
+        <div className="relative flex flex-1 flex-col items-center justify-center p-4 py-20 sm:p-8 lg:p-12 xl:p-20">
           <div className="absolute left-4 top-4 sm:left-8 sm:top-8">
             <Link to="/" className={backBtnClass}>
               <svg
@@ -128,7 +89,6 @@ const AuthLayout = () => {
             </Link>
           </div>
 
-          {/* MOBILE LOGO */}
           <div className="mb-8 mt-12 lg:hidden">
             <Link
               to="/"
@@ -143,11 +103,7 @@ const AuthLayout = () => {
             </Link>
           </div>
 
-          {/* 
-            FORM CARD 
-            Added min-h-[500px] and flex flex-col justify-center 
-            so it never collapses into a pill and stays perfectly centered.
-          */}
+          {/* FORM CARD */}
           <div
             className={`flex min-h-[500px] w-full max-w-md flex-col justify-center rounded-[35px] border-2 p-8 transition-all duration-300 sm:p-10 ${
               isDarkMode

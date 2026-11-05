@@ -1,22 +1,38 @@
+import { useEffect } from "react";
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
 import { useTheme } from "../context/ThemeContext";
-import { useAuth } from "../context/AuthContext"; // Import Auth
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Home = () => {
   const { isDarkMode } = useTheme();
-  const { isAuthenticated, user } = useAuth(); // Get auth state
-  const isPremium = user?.premiumStatus || false; // Check if user is premium
+  const { isAuthenticated, user } = useAuth();
+  const isPremium = user?.premiumStatus || false;
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Scroll to section when hash changes
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.replace("#", "");
+      const element = document.getElementById(id);
+      if (element) {
+        // Small delay ensures the DOM is fully rendered before scrolling
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
+    }
+  }, [location]);
 
   // Helper to handle pricing buttons based on auth state
   const handlePlanClick = (plan) => {
     if (isAuthenticated) {
       if (plan === "free") {
-        navigate("user/dashboard");
+        navigate("/user/dashboard");
       } else {
-        navigate("user/premium"); // Or wherever your upgrade checkout is
+        navigate("/user/premium"); // Or wherever your upgrade checkout is
       }
     } else {
       navigate("/login");
@@ -34,7 +50,7 @@ const Home = () => {
       <main>
         {/* ================= HERO SECTION ================= */}
         <section
-          className="mx-auto max-w-7xl px-4 py-12 sm:px-8 lg:px-16 lg:py-20"
+          className="mx-auto max-w-7xl px-4 py-12 sm:px-8 lg:px-16 lg:py-20 scroll-mt-28"
           id="about"
         >
           <div className="grid items-center gap-12 lg:grid-cols-2">
@@ -90,7 +106,7 @@ const Home = () => {
                 {isAuthenticated ? (
                   <>
                     <button
-                      onClick={() => navigate("user/dashboard")}
+                      onClick={() => navigate("/user/dashboard")}
                       className={`cursor-pointer inline-flex items-center justify-center rounded-xl px-8 py-4 text-base font-bold transition-all hover:-translate-y-1 ${
                         isDarkMode
                           ? "bg-[#B9FF66] text-[#191A23] hover:bg-white"
@@ -100,7 +116,7 @@ const Home = () => {
                       Go to Dashboard
                     </button>
                     <button
-                      onClick={() => navigate("user/expenses")}
+                      onClick={() => navigate("/user/expenses")}
                       className={`cursor-pointer inline-flex items-center justify-center rounded-xl border-2 bg-transparent px-8 py-4 text-base font-medium transition-colors ${
                         isDarkMode
                           ? "border-gray-500 text-white hover:border-white hover:bg-white hover:text-[#191A23]"
@@ -114,7 +130,7 @@ const Home = () => {
                   <>
                     <button
                       onClick={() => navigate("/signup")}
-                      className={`inline-flex items-center justify-center rounded-xl px-8 py-4 text-base font-bold transition-all hover:-translate-y-1 ${
+                      className={`cursor-pointer inline-flex items-center justify-center rounded-xl px-8 py-4 text-base font-bold transition-all hover:-translate-y-1 ${
                         isDarkMode
                           ? "bg-[#B9FF66] text-[#191A23] hover:bg-white"
                           : "bg-[#191A23] text-white hover:bg-gray-800"
@@ -124,7 +140,7 @@ const Home = () => {
                     </button>
                     <button
                       onClick={() => navigate("/login")}
-                      className={`inline-flex items-center justify-center rounded-xl border-2 bg-transparent px-8 py-4 text-base font-medium transition-colors ${
+                      className={`cursor-pointer inline-flex items-center justify-center rounded-xl border-2 bg-transparent px-8 py-4 text-base font-medium transition-colors ${
                         isDarkMode
                           ? "border-gray-500 text-white hover:border-white hover:bg-white hover:text-[#191A23]"
                           : "border-[#191A23] text-[#191A23] hover:bg-[#191A23] hover:text-white"
@@ -322,9 +338,8 @@ const Home = () => {
         </section>
 
         {/* ================= FEATURES SECTION ================= */}
-        {/* Kept as static marketing material for all users */}
         <section
-          className="mx-auto max-w-7xl px-4 py-16 sm:px-8 lg:px-16"
+          className="mx-auto max-w-7xl px-4 py-16 sm:px-8 lg:px-16 scroll-mt-28"
           id="features"
         >
           <div className="mb-12 text-center">
@@ -425,9 +440,8 @@ const Home = () => {
         </section>
 
         {/* ================= AI SECTION ================= */}
-        {/* Kept as static marketing material */}
         <section
-          className="mx-auto max-w-7xl px-4 py-16 sm:px-8 lg:px-16"
+          className="mx-auto max-w-7xl px-4 py-16 sm:px-8 lg:px-16 scroll-mt-28"
           id="ai"
         >
           <div
@@ -527,7 +541,7 @@ const Home = () => {
 
         {/* ================= PREMIUM / PRICING ================= */}
         <section
-          className="mx-auto max-w-7xl px-4 py-16 sm:px-8 lg:px-16"
+          className="mx-auto max-w-7xl px-4 py-16 sm:px-8 lg:px-16 scroll-mt-28"
           id="premium"
         >
           <div className="mb-12 text-center">
@@ -611,7 +625,7 @@ const Home = () => {
                 For people who want the full picture
               </p>
               <div className="mt-6 flex items-baseline gap-2">
-                <strong className="text-5xl font-bold">₹299</strong>
+                <strong className="text-5xl font-bold">₹49</strong>
                 <span className="text-gray-400">/ month</span>
               </div>
               <ul className="mt-8 flex-1 space-y-4">
@@ -665,7 +679,7 @@ const Home = () => {
               {isAuthenticated ? (
                 <button
                   className="rounded-xl bg-[#191A23] px-8 py-4 font-bold text-white transition-transform hover:-translate-y-1 cursor-pointer"
-                  onClick={() => navigate("user/dashboard")}
+                  onClick={() => navigate("/user/dashboard")}
                 >
                   Go to Dashboard
                 </button>

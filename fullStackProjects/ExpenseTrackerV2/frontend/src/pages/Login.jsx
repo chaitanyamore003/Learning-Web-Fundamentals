@@ -214,7 +214,7 @@ const Login = () => {
             Remember me
           </label>
           <a
-            href="#forgot"
+            href="/forgot-password"
             className="text-sm font-bold underline decoration-2 underline-offset-4 transition-colors hover:text-[#B9FF66]"
           >
             Forgot password?

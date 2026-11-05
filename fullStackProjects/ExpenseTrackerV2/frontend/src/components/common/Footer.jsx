@@ -8,12 +8,12 @@ const Footer = () => {
     { name: "Features", href: "/#features" },
     { name: "AI Categorization", href: "/#ai" },
     { name: "Premium", href: "/#premium" },
-    { name: "Dashboard", href: "/dashboard" },
+    { name: "Dashboard", href: "/user/dashboard" },
   ];
 
+  // ✅ Cleaned up: Removed "Blog" to keep it focused on core business links
   const companyLinks = [
     { name: "About Us", href: "/about" },
-    { name: "Blog", href: "/blog" },
     { name: "Contact", href: "/contact" },
     { name: "Privacy Policy", href: "/privacy" },
     { name: "Terms of Service", href: "/terms" },
@@ -42,7 +42,11 @@ const Footer = () => {
                 className="flex items-center gap-2 text-2xl font-bold tracking-tight"
               >
                 <span
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg ${isDarkMode ? "bg-[#B9FF66] text-[#191A23]" : "bg-[#191A23] text-[#B9FF66]"}`}
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                    isDarkMode
+                      ? "bg-[#B9FF66] text-[#191A23]"
+                      : "bg-[#191A23] text-[#B9FF66]"
+                  }`}
                 >
                   <svg
                     width="18"
@@ -60,7 +64,9 @@ const Footer = () => {
                 ExpenseFlow
               </Link>
               <p
-                className={`mt-4 max-w-xs text-sm leading-relaxed ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
+                className={`mt-4 max-w-xs text-sm leading-relaxed ${
+                  isDarkMode ? "text-gray-400" : "text-gray-500"
+                }`}
               >
                 Track and manage your expenses effortlessly with AI. Built to
                 make personal finance simpler and smarter.
@@ -70,7 +76,9 @@ const Footer = () => {
             {/* Product Links */}
             <div className="lg:col-span-3 lg:col-start-6">
               <h4
-                className={`mb-5 text-sm font-semibold ${isDarkMode ? "text-gray-200" : "text-gray-900"}`}
+                className={`mb-5 text-sm font-semibold ${
+                  isDarkMode ? "text-gray-200" : "text-gray-900"
+                }`}
               >
                 Product
               </h4>
@@ -79,7 +87,9 @@ const Footer = () => {
                   <li key={link.name}>
                     <Link
                       to={link.href}
-                      className={`text-sm transition-colors hover:text-[#B9FF66] ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
+                      className={`text-sm transition-colors hover:text-[#B9FF66] ${
+                        isDarkMode ? "text-gray-400" : "text-gray-500"
+                      }`}
                     >
                       {link.name}
                     </Link>
@@ -91,7 +101,9 @@ const Footer = () => {
             {/* Company Links */}
             <div className="lg:col-span-3">
               <h4
-                className={`mb-5 text-sm font-semibold ${isDarkMode ? "text-gray-200" : "text-gray-900"}`}
+                className={`mb-5 text-sm font-semibold ${
+                  isDarkMode ? "text-gray-200" : "text-gray-900"
+                }`}
               >
                 Company
               </h4>
@@ -100,7 +112,9 @@ const Footer = () => {
                   <li key={link.name}>
                     <Link
                       to={link.href}
-                      className={`text-sm transition-colors hover:text-[#B9FF66] ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
+                      className={`text-sm transition-colors hover:text-[#B9FF66] ${
+                        isDarkMode ? "text-gray-400" : "text-gray-500"
+                      }`}
                     >
                       {link.name}
                     </Link>
@@ -116,7 +130,11 @@ const Footer = () => {
                 <a
                   href="#"
                   aria-label="YouTube"
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-all hover:-translate-y-0.5 hover:border-[#B9FF66] hover:text-[#B9FF66] ${isDarkMode ? "border-[#1E293B] bg-[#151B2B] text-gray-300" : "border-gray-200 bg-gray-50 text-gray-600"}`}
+                  className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-all hover:-translate-y-0.5 hover:border-[#B9FF66] hover:text-[#B9FF66] ${
+                    isDarkMode
+                      ? "border-[#1E293B] bg-[#151B2B] text-gray-300"
+                      : "border-gray-200 bg-gray-50 text-gray-600"
+                  }`}
                 >
                   <svg
                     width="18"
@@ -131,7 +149,11 @@ const Footer = () => {
                 <a
                   href="#"
                   aria-label="Twitter"
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-all hover:-translate-y-0.5 hover:border-[#B9FF66] hover:text-[#B9FF66] ${isDarkMode ? "border-[#1E293B] bg-[#151B2B] text-gray-300" : "border-gray-200 bg-gray-50 text-gray-600"}`}
+                  className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-all hover:-translate-y-0.5 hover:border-[#B9FF66] hover:text-[#B9FF66] ${
+                    isDarkMode
+                      ? "border-[#1E293B] bg-[#151B2B] text-gray-300"
+                      : "border-gray-200 bg-gray-50 text-gray-600"
+                  }`}
                 >
                   <svg
                     width="16"
@@ -146,7 +168,11 @@ const Footer = () => {
                 <a
                   href="#"
                   aria-label="Instagram"
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-all hover:-translate-y-0.5 hover:border-[#B9FF66] hover:text-[#B9FF66] ${isDarkMode ? "border-[#1E293B] bg-[#151B2B] text-gray-300" : "border-gray-200 bg-gray-50 text-gray-600"}`}
+                  className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-all hover:-translate-y-0.5 hover:border-[#B9FF66] hover:text-[#B9FF66] ${
+                    isDarkMode
+                      ? "border-[#1E293B] bg-[#151B2B] text-gray-300"
+                      : "border-gray-200 bg-gray-50 text-gray-600"
+                  }`}
                 >
                   <svg
                     width="16"
@@ -161,7 +187,11 @@ const Footer = () => {
                 <a
                   href="#"
                   aria-label="LinkedIn"
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-all hover:-translate-y-0.5 hover:border-[#B9FF66] hover:text-[#B9FF66] ${isDarkMode ? "border-[#1E293B] bg-[#151B2B] text-gray-300" : "border-gray-200 bg-gray-50 text-gray-600"}`}
+                  className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-all hover:-translate-y-0.5 hover:border-[#B9FF66] hover:text-[#B9FF66] ${
+                    isDarkMode
+                      ? "border-[#1E293B] bg-[#151B2B] text-gray-300"
+                      : "border-gray-200 bg-gray-50 text-gray-600"
+                  }`}
                 >
                   <svg
                     width="16"
@@ -175,7 +205,9 @@ const Footer = () => {
               </div>
 
               <p
-                className={`mt-6 text-[13px] lg:text-right ${isDarkMode ? "text-gray-500" : "text-gray-500"}`}
+                className={`mt-6 text-[13px] lg:text-right ${
+                  isDarkMode ? "text-gray-500" : "text-gray-500"
+                }`}
               >
                 © 2026 ExpenseFlow.
                 <br className="hidden lg:block" /> All rights reserved.
@@ -186,13 +218,11 @@ const Footer = () => {
       </div>
 
       {/* 2. Massive Edge-to-Edge Branding Text */}
-      {/* Changed mt-16 to mt-10 to bring the whole block up slightly */}
       <div className="mt-10 flex w-full justify-center overflow-hidden sm:mt-14">
         <h1
           className={`select-none whitespace-nowrap text-[16vw] font-extrabold leading-[0.75] tracking-tighter transition-colors duration-300 ${
             isDarkMode ? "text-[#1A2332]" : "text-[#191A23]/10"
           }`}
-          // Changed from -3vw to -1vw to show 75% of the text instead of 50%
           style={{ marginBottom: "-1vw" }}
         >
           Expense{" "}
