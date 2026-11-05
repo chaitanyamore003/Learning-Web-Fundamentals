@@ -7,6 +7,7 @@ const expenseRouter = require("./routes/expense.routes");
 const paymentRouter = require("./routes/payment.routes");
 const premiumRouter = require("./routes/premium.routes");
 const passwordRouter = require("./routes/password.routes");
+const errorHandler = require("./middlewares/errorHandler");
 
 const cors = require("cors");
 const morgan = require("morgan");
@@ -59,3 +60,5 @@ db.sync({ force: false })
   .catch((err) => {
     console.error("Database synchronization failed:", err);
   });
+
+app.use(errorHandler);
