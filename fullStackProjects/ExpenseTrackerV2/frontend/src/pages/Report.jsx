@@ -19,7 +19,7 @@ const Reports = () => {
 
   // ✅ Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10); // ✅ New state for dropdown
 
   // Summary State
   const [totals, setTotals] = useState({ income: 0, expense: 0, savings: 0 });
@@ -102,8 +102,13 @@ const Reports = () => {
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
-    // Optional: Scroll to top of table smoothly
     window.scrollTo({ top: 300, behavior: "smooth" });
+  };
+
+  // ✅ Handle Rows Per Page Change
+  const handleItemsPerPageChange = (e) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1); // Reset to page 1 when changing rows per page
   };
 
   // CSV Download Logic
@@ -165,7 +170,7 @@ const Reports = () => {
           <button
             onClick={downloadCSV}
             disabled={filteredExpenses.length === 0}
-            className={`flex items-center gap-2 rounded-xl border-2 px-6 py-3.5 text-base font-bold transition-all hover:-translate-y-1 disabled:opacity-50 disabled:hover:translate-y-0 ${
+            className={`cursor-pointer flex items-center gap-2 rounded-xl border-2 px-6 py-3.5 text-base font-bold transition-all hover:-translate-y-1 disabled:opacity-50 disabled:hover:translate-y-0 ${
               isDarkMode
                 ? "border-[#B9FF66] bg-[#B9FF66] text-[#191A23] shadow-[4px_4px_0_0_#ffffff]"
                 : "border-[#191A23] bg-[#191A23] text-white shadow-[4px_4px_0_0_#B9FF66]"
@@ -195,7 +200,7 @@ const Reports = () => {
             <button
               key={filter}
               onClick={() => setTimeFilter(filter)}
-              className={`rounded-xl border-2 px-6 py-2 text-sm font-bold capitalize transition-all ${
+              className={`cursor-pointer rounded-xl border-2 px-6 py-2 text-sm font-bold capitalize transition-all ${
                 timeFilter === filter
                   ? "border-[#191A23] bg-[#B9FF66] text-[#191A23]"
                   : isDarkMode
@@ -338,7 +343,6 @@ const Reports = () => {
                       isDarkMode ? "divide-gray-700" : "divide-gray-200"
                     }`}
                   >
-                    {/* ✅ Render currentItems instead of filteredExpenses */}
                     {currentItems.map((item) => {
                       const isIncome =
                         item.category?.toLowerCase() === "income";
@@ -394,31 +398,63 @@ const Reports = () => {
 
               {/* ================= PAGINATION CONTROLS ================= */}
               <div
-                className={`flex flex-col items-center justify-between gap-4 border-t-2 px-6 py-4 sm:flex-row ${
+                className={`flex flex-col items-center justify-between gap-4 border-t-2 px-6 py-4 lg:flex-row ${
                   isDarkMode ? "border-gray-700" : "border-gray-200"
                 }`}
               >
-                <div
-                  className={`text-sm font-medium ${
-                    isDarkMode ? "text-gray-400" : "text-gray-500"
-                  }`}
-                >
-                  Showing{" "}
-                  <span className="font-bold">{indexOfFirstItem + 1}</span> to{" "}
-                  <span className="font-bold">
-                    {Math.min(indexOfLastItem, filteredExpenses.length)}
-                  </span>{" "}
-                  of{" "}
-                  <span className="font-bold">{filteredExpenses.length}</span>{" "}
-                  expenses
+                {/* Left Side: Rows per page & Showing text */}
+                <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
+                  {/* ✅ Rows per page dropdown */}
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`text-sm font-medium ${
+                        isDarkMode ? "text-gray-400" : "text-gray-500"
+                      }`}
+                    >
+                      Rows per page:
+                    </span>
+                    <select
+                      value={itemsPerPage}
+                      onChange={handleItemsPerPageChange}
+                      className={`cursor-pointer rounded-lg border-2 bg-transparent px-2 py-1 text-sm font-bold outline-none transition-colors ${
+                        isDarkMode
+                          ? "border-gray-600 text-white hover:border-[#B9FF66]"
+                          : "border-gray-300 text-[#191A23] hover:border-[#191A23]"
+                      }`}
+                    >
+                      <option value={10} className="text-black">
+                        10
+                      </option>
+                      <option value={25} className="text-black">
+                        25
+                      </option>
+                      <option value={50} className="text-black">
+                        50
+                      </option>
+                      <option value={100} className="text-black">
+                        100
+                      </option>
+                    </select>
+                  </div>
+
+                  {/* Showing text */}
+                  <div
+                    className={`text-sm font-medium ${
+                      isDarkMode ? "text-gray-400" : "text-gray-500"
+                    }`}
+                  >
+                    {indexOfFirstItem + 1}-
+                    {Math.min(indexOfLastItem, filteredExpenses.length)} of{" "}
+                    {filteredExpenses.length}
+                  </div>
                 </div>
 
+                {/* Right Side: Page controls */}
                 <div className="flex items-center gap-2">
-                  {/* Previous Button */}
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className={`rounded-lg border-2 px-4 py-2 text-sm font-bold transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
+                    className={`flex h-9 items-center justify-center rounded-lg border-2 px-4 text-sm font-bold transition-all disabled:cursor-not-allowed disabled:opacity-30 ${
                       isDarkMode
                         ? "border-gray-600 hover:border-[#B9FF66] hover:text-[#B9FF66]"
                         : "border-gray-300 hover:border-[#191A23] hover:bg-gray-50"
@@ -427,32 +463,50 @@ const Reports = () => {
                     Prev
                   </button>
 
-                  {/* Page Numbers */}
+                  {/* Page Numbers (Limit display if too many pages) */}
                   <div className="flex items-center gap-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                      (number) => (
-                        <button
-                          key={number}
-                          onClick={() => handlePageChange(number)}
-                          className={`flex h-9 w-9 items-center justify-center rounded-lg border-2 text-sm font-bold transition-all ${
-                            currentPage === number
-                              ? "border-[#191A23] bg-[#B9FF66] text-[#191A23]"
-                              : isDarkMode
-                                ? "border-gray-600 hover:border-gray-400"
-                                : "border-gray-300 hover:border-[#191A23]"
-                          }`}
-                        >
-                          {number}
-                        </button>
-                      ),
-                    )}
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter(
+                        (num) =>
+                          num === 1 ||
+                          num === totalPages ||
+                          (num >= currentPage - 1 && num <= currentPage + 1),
+                      )
+                      .map((number, index, array) => {
+                        // Add ellipsis logic
+                        const prev = array[index - 1];
+                        const showEllipsis = prev && number - prev > 1;
+
+                        return (
+                          <div key={number} className="flex items-center gap-1">
+                            {showEllipsis && (
+                              <span
+                                className={`px-2 ${isDarkMode ? "text-gray-500" : "text-gray-400"}`}
+                              >
+                                ...
+                              </span>
+                            )}
+                            <button
+                              onClick={() => handlePageChange(number)}
+                              className={`flex h-9 w-9 items-center justify-center rounded-lg border-2 text-sm font-bold transition-all ${
+                                currentPage === number
+                                  ? "border-[#191A23] bg-[#B9FF66] text-[#191A23]"
+                                  : isDarkMode
+                                    ? "border-gray-600 hover:border-gray-400"
+                                    : "border-gray-300 hover:border-[#191A23]"
+                              }`}
+                            >
+                              {number}
+                            </button>
+                          </div>
+                        );
+                      })}
                   </div>
 
-                  {/* Next Button */}
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages || totalPages === 0}
-                    className={`rounded-lg border-2 px-4 py-2 text-sm font-bold transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
+                    className={`flex h-9 items-center justify-center rounded-lg border-2 px-4 text-sm font-bold transition-all disabled:cursor-not-allowed disabled:opacity-30 ${
                       isDarkMode
                         ? "border-gray-600 hover:border-[#B9FF66] hover:text-[#B9FF66]"
                         : "border-gray-300 hover:border-[#191A23] hover:bg-gray-50"
