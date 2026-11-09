@@ -2,24 +2,29 @@ const { Sequelize } = require("sequelize");
 const fs = require("fs");
 const path = require("path");
 
-// Create the Sequelize instance
+// AWS RDS MySQL connection
 const db = new Sequelize(
-  process.env.DB_NAME, // defaultdb
-  process.env.DB_USER, // avnadmin
-  process.env.DB_PASSWORD, // your password
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
   {
-    host: process.env.DB_HOST, // mysql-258b6fef...aivencloud.com
-    port: process.env.DB_PORT, // 20748
+    host: process.env.DB_HOST,
+    port: Number(process.env.DB_PORT || 3306),
+
     dialect: "mysql",
+
     logging: false,
+
     dialectOptions: {
-      // ✅ Aiven requires SSL. We read the ca.pem file you downloaded.
       ssl: {
         require: true,
         rejectUnauthorized: true,
-        ca: fs.readFileSync(path.join(__dirname, "..", "ca.pem")).toString(),
+        ca: fs
+          .readFileSync(path.join(__dirname, "..", "global-bundle.pem"))
+          .toString(),
       },
     },
+
     pool: {
       max: 5,
       min: 0,
