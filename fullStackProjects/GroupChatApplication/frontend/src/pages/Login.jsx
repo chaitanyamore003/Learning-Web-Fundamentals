@@ -1,16 +1,19 @@
 // src/pages/Login.jsx
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowLeft, Eye, EyeOff, Lock, User } from "lucide-react";
 import { isEmail, isPhone } from "../utils/validators";
+import AuthLayout from "../components/layout/AuthLayout";
 
 const initialValues = { identifier: "", password: "" };
 
 const inputClass = (hasError, extra = "") =>
   [
-    "w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-slate-900",
-    "placeholder:text-slate-400 outline-none transition",
+    "w-full rounded-xl border bg-white/60 px-4 py-3 text-[15px] text-slate-900 placeholder:text-slate-400 outline-none transition backdrop-blur-sm",
+    "dark:bg-black/20 dark:text-white dark:placeholder:text-slate-500",
     hasError
       ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-      : "border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20",
+      : "border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:focus:border-blue-500",
     extra,
   ]
     .filter(Boolean)
@@ -54,18 +57,16 @@ const Login = ({ onSubmit }) => {
 
     setSubmitting(true);
     try {
-      // Normalise: detect whether the user typed an email or a phone
       const id = values.identifier.trim();
       const payload = {
         [id.includes("@") ? "email" : "phone"]: id,
         password: values.password,
       };
 
-      // TODO: replace with your real API call
       if (onSubmit) {
         await onSubmit(payload);
       } else {
-        await new Promise((resolve) => setTimeout(resolve, 600));
+        await new Promise((resolve) => setTimeout(resolve, 800));
       }
 
       setValues(initialValues);
@@ -79,64 +80,84 @@ const Login = ({ onSubmit }) => {
   };
 
   return (
-    <div className="grid min-h-screen place-items-center bg-slate-50 p-6 font-sans">
-      <form
-        onSubmit={handleSubmit}
-        noValidate
-        className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl shadow-slate-900/5 ring-1 ring-slate-900/5"
-      >
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+    <AuthLayout>
+      {/* Back to Home Button */}
+      <div className="mb-8 flex items-center">
+        <Link
+          to="/"
+          className="group inline-flex items-center gap-2 rounded-full px-2 py-1.5 text-[13px] font-semibold text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-white"
+        >
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+          Back to Home
+        </Link>
+      </div>
+
+      <div className="text-center">
+        <h1 className="text-2xl font-extrabold tracking-tighter text-slate-900 dark:text-white">
           Welcome back
         </h1>
-        <p className="mt-1.5 mb-6 text-sm text-slate-500">
+        <p className="mt-2 text-[14px] font-medium text-slate-500 dark:text-slate-400">
           Log in with your email or phone number.
         </p>
+      </div>
 
-        {errors.form && (
-          <div
-            role="alert"
-            className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-700"
-          >
-            {errors.form}
-          </div>
-        )}
+      {errors.form && (
+        <div
+          role="alert"
+          className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400"
+        >
+          {errors.form}
+        </div>
+      )}
 
-        <div className="mb-4">
+      <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-4">
+        {/* Email or Phone Input */}
+        <div>
           <label
             htmlFor="identifier"
-            className="mb-1.5 block text-[13px] font-semibold text-slate-700"
+            className="mb-1.5 block text-[13px] font-semibold text-slate-700 dark:text-slate-300"
           >
-            Email or phone number
+            Email or Phone Number
           </label>
-          <input
-            id="identifier"
-            name="identifier"
-            type="text"
-            placeholder="jane@example.com or 9876543210"
-            autoComplete="username"
-            value={values.identifier}
-            onChange={handleChange}
-            className={inputClass(Boolean(errors.identifier))}
-            aria-invalid={Boolean(errors.identifier)}
-            aria-describedby={
-              errors.identifier ? "identifier-error" : undefined
-            }
-          />
+          <div className="relative">
+            <User className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+            <input
+              id="identifier"
+              name="identifier"
+              type="text"
+              placeholder="jane@example.com or 9876543210"
+              autoComplete="username"
+              value={values.identifier}
+              onChange={handleChange}
+              className={inputClass(Boolean(errors.identifier), "pl-11")}
+              aria-invalid={Boolean(errors.identifier)}
+            />
+          </div>
           {errors.identifier && (
-            <p id="identifier-error" className="mt-1.5 text-xs text-red-600">
+            <p className="mt-1.5 text-xs font-medium text-red-600 dark:text-red-400">
               {errors.identifier}
             </p>
           )}
         </div>
 
-        <div className="mb-5">
-          <label
-            htmlFor="password"
-            className="mb-1.5 block text-[13px] font-semibold text-slate-700"
-          >
-            Password
-          </label>
+        {/* Password Input */}
+        <div>
+          <div className="mb-1.5 flex items-center justify-between">
+            <label
+              htmlFor="password"
+              className="block text-[13px] font-semibold text-slate-700 dark:text-slate-300"
+            >
+              Password
+            </label>
+            <Link
+              to="/forgot-password"
+              className="text-[12px] font-semibold text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-500 dark:hover:text-blue-400"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <div className="relative">
+            <Lock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
             <input
               id="password"
               name="password"
@@ -145,45 +166,51 @@ const Login = ({ onSubmit }) => {
               autoComplete="current-password"
               value={values.password}
               onChange={handleChange}
-              className={inputClass(Boolean(errors.password), "pr-16")}
+              className={inputClass(Boolean(errors.password), "pl-11 pr-12")}
               aria-invalid={Boolean(errors.password)}
-              aria-describedby={errors.password ? "password-error" : undefined}
             />
             <button
               type="button"
               onClick={() => setShowPassword((s) => !s)}
               aria-label={showPassword ? "Hide password" : "Show password"}
-              className="absolute top-1/2 right-2 -translate-y-1/2 rounded-md px-2 py-1 text-xs font-semibold text-indigo-600 transition hover:bg-indigo-50 focus-visible:ring-2 focus-visible:ring-indigo-500/30 focus-visible:outline-none"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-200/50 hover:text-slate-600 dark:hover:bg-slate-700/50 dark:hover:text-slate-300"
             >
-              {showPassword ? "Hide" : "Show"}
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
             </button>
           </div>
           {errors.password && (
-            <p id="password-error" className="mt-1.5 text-xs text-red-600">
+            <p className="mt-1.5 text-xs font-medium text-red-600 dark:text-red-400">
               {errors.password}
             </p>
           )}
         </div>
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-indigo-300"
-        >
-          {submitting ? "Logging in…" : "Log in"}
-        </button>
-
-        <p className="mt-5 text-center text-sm text-slate-500">
-          Don't have an account?{" "}
-          <a
-            href="/signup"
-            className="font-semibold text-indigo-600 hover:underline"
+        {/* Submit Button */}
+        <div className="pt-2">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="cursor-pointer w-full rounded-full bg-blue-600 px-6 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-600/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-blue-400 disabled:hover:translate-y-0 dark:focus-visible:ring-offset-[#09090b]"
           >
-            Sign up
-          </a>
-        </p>
+            {submitting ? "Logging in..." : "Log in"}
+          </button>
+        </div>
       </form>
-    </div>
+
+      <p className="mt-8 text-center text-[14px] font-medium text-slate-500 dark:text-slate-400">
+        Don't have an account?{" "}
+        <Link
+          to="/signup"
+          className="font-bold text-blue-600 transition hover:text-blue-700 hover:underline dark:text-blue-500 dark:hover:text-blue-400"
+        >
+          Sign up
+        </Link>
+      </p>
+    </AuthLayout>
   );
 };
 

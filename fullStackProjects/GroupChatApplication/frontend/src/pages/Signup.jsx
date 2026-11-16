@@ -1,16 +1,19 @@
 // src/pages/Signup.jsx
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowLeft, Eye, EyeOff, Lock, Mail, Phone, User } from "lucide-react";
 import { isEmail, isPhone } from "../utils/validators";
+import AuthLayout from "../components/layout/AuthLayout";
 
 const initialValues = { name: "", email: "", phone: "", password: "" };
 
 const inputClass = (hasError, extra = "") =>
   [
-    "w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-slate-900",
-    "placeholder:text-slate-400 outline-none transition",
+    "w-full rounded-xl border bg-white/60 px-4 py-3 text-[15px] text-slate-900 placeholder:text-slate-400 outline-none transition backdrop-blur-sm",
+    "dark:bg-black/20 dark:text-white dark:placeholder:text-slate-500",
     hasError
       ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-      : "border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20",
+      : "border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:focus:border-blue-500",
     extra,
   ]
     .filter(Boolean)
@@ -67,7 +70,7 @@ const Signup = ({ onSubmit }) => {
       if (onSubmit) {
         await onSubmit(values);
       } else {
-        await new Promise((resolve) => setTimeout(resolve, 600));
+        await new Promise((resolve) => setTimeout(resolve, 800));
       }
 
       setSuccess("Account created successfully!");
@@ -82,123 +85,144 @@ const Signup = ({ onSubmit }) => {
   };
 
   return (
-    <div className="grid min-h-screen place-items-center bg-slate-50 p-6 font-sans">
-      <form
-        onSubmit={handleSubmit}
-        noValidate
-        className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl shadow-slate-900/5 ring-1 ring-slate-900/5"
-      >
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-          Create your account
+    <AuthLayout>
+      {/* Back to Home Button */}
+      <div className="mb-8 flex items-center">
+        <Link
+          to="/"
+          className="group inline-flex items-center gap-2 rounded-full px-2 py-1.5 text-[13px] font-semibold text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-white"
+        >
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+          Back to Home
+        </Link>
+      </div>
+
+      <div className="text-center">
+        <h1 className="text-2xl font-extrabold tracking-tighter text-slate-900 dark:text-white">
+          Create an account
         </h1>
-        <p className="mt-1.5 mb-6 text-sm text-slate-500">
-          Sign up to get started. It only takes a minute.
+        <p className="mt-2 text-[14px] font-medium text-slate-500 dark:text-slate-400">
+          Join Said Hi and start connecting.
         </p>
+      </div>
 
-        {errors.form && (
-          <div
-            role="alert"
-            className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-700"
-          >
-            {errors.form}
-          </div>
-        )}
-        {success && (
-          <div
-            role="status"
-            className="mb-4 rounded-lg border border-green-200 bg-green-50 px-3.5 py-2.5 text-sm text-green-700"
-          >
-            {success}
-          </div>
-        )}
+      {errors.form && (
+        <div
+          role="alert"
+          className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400"
+        >
+          {errors.form}
+        </div>
+      )}
 
-        <div className="mb-4">
+      {success && (
+        <div
+          role="status"
+          className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-900/20 dark:text-emerald-400"
+        >
+          {success}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-4">
+        {/* Name */}
+        <div>
           <label
             htmlFor="name"
-            className="mb-1.5 block text-[13px] font-semibold text-slate-700"
+            className="mb-1.5 block text-[13px] font-semibold text-slate-700 dark:text-slate-300"
           >
-            Full name
+            Full Name
           </label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            placeholder="Jane Doe"
-            autoComplete="name"
-            value={values.name}
-            onChange={handleChange}
-            className={inputClass(Boolean(errors.name))}
-            aria-invalid={Boolean(errors.name)}
-            aria-describedby={errors.name ? "name-error" : undefined}
-          />
+          <div className="relative">
+            <User className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+            <input
+              id="name"
+              name="name"
+              type="text"
+              placeholder="Jane Doe"
+              autoComplete="name"
+              value={values.name}
+              onChange={handleChange}
+              className={inputClass(Boolean(errors.name), "pl-11")}
+              aria-invalid={Boolean(errors.name)}
+            />
+          </div>
           {errors.name && (
-            <p id="name-error" className="mt-1.5 text-xs text-red-600">
+            <p className="mt-1.5 text-xs font-medium text-red-600 dark:text-red-400">
               {errors.name}
             </p>
           )}
         </div>
 
-        <div className="mb-4">
+        {/* Email */}
+        <div>
           <label
             htmlFor="email"
-            className="mb-1.5 block text-[13px] font-semibold text-slate-700"
+            className="mb-1.5 block text-[13px] font-semibold text-slate-700 dark:text-slate-300"
           >
-            Email address
+            Email Address
           </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            placeholder="jane@example.com"
-            autoComplete="email"
-            value={values.email}
-            onChange={handleChange}
-            className={inputClass(Boolean(errors.email))}
-            aria-invalid={Boolean(errors.email)}
-            aria-describedby={errors.email ? "email-error" : undefined}
-          />
+          <div className="relative">
+            <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+            <input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="jane@example.com"
+              autoComplete="email"
+              value={values.email}
+              onChange={handleChange}
+              className={inputClass(Boolean(errors.email), "pl-11")}
+              aria-invalid={Boolean(errors.email)}
+            />
+          </div>
           {errors.email && (
-            <p id="email-error" className="mt-1.5 text-xs text-red-600">
+            <p className="mt-1.5 text-xs font-medium text-red-600 dark:text-red-400">
               {errors.email}
             </p>
           )}
         </div>
 
-        <div className="mb-4">
+        {/* Phone */}
+        <div>
           <label
             htmlFor="phone"
-            className="mb-1.5 block text-[13px] font-semibold text-slate-700"
+            className="mb-1.5 block text-[13px] font-semibold text-slate-700 dark:text-slate-300"
           >
-            Phone number
+            Phone Number
           </label>
-          <input
-            id="phone"
-            name="phone"
-            type="tel"
-            inputMode="tel"
-            placeholder="9876543210"
-            autoComplete="tel"
-            value={values.phone}
-            onChange={handleChange}
-            className={inputClass(Boolean(errors.phone))}
-            aria-invalid={Boolean(errors.phone)}
-            aria-describedby={errors.phone ? "phone-error" : undefined}
-          />
+          <div className="relative">
+            <Phone className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              inputMode="tel"
+              placeholder="9876543210"
+              autoComplete="tel"
+              value={values.phone}
+              onChange={handleChange}
+              className={inputClass(Boolean(errors.phone), "pl-11")}
+              aria-invalid={Boolean(errors.phone)}
+            />
+          </div>
           {errors.phone && (
-            <p id="phone-error" className="mt-1.5 text-xs text-red-600">
+            <p className="mt-1.5 text-xs font-medium text-red-600 dark:text-red-400">
               {errors.phone}
             </p>
           )}
         </div>
 
-        <div className="mb-5">
+        {/* Password */}
+        <div>
           <label
             htmlFor="password"
-            className="mb-1.5 block text-[13px] font-semibold text-slate-700"
+            className="mb-1.5 block text-[13px] font-semibold text-slate-700 dark:text-slate-300"
           >
             Password
           </label>
           <div className="relative">
+            <Lock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
             <input
               id="password"
               name="password"
@@ -207,45 +231,51 @@ const Signup = ({ onSubmit }) => {
               autoComplete="new-password"
               value={values.password}
               onChange={handleChange}
-              className={inputClass(Boolean(errors.password), "pr-16")}
+              className={inputClass(Boolean(errors.password), "pl-11 pr-12")}
               aria-invalid={Boolean(errors.password)}
-              aria-describedby={errors.password ? "password-error" : undefined}
             />
             <button
               type="button"
               onClick={() => setShowPassword((s) => !s)}
               aria-label={showPassword ? "Hide password" : "Show password"}
-              className="absolute top-1/2 right-2 -translate-y-1/2 rounded-md px-2 py-1 text-xs font-semibold text-indigo-600 transition hover:bg-indigo-50 focus-visible:ring-2 focus-visible:ring-indigo-500/30 focus-visible:outline-none"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-200/50 hover:text-slate-600 dark:hover:bg-slate-700/50 dark:hover:text-slate-300"
             >
-              {showPassword ? "Hide" : "Show"}
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
             </button>
           </div>
           {errors.password && (
-            <p id="password-error" className="mt-1.5 text-xs text-red-600">
+            <p className="mt-1.5 text-xs font-medium text-red-600 dark:text-red-400">
               {errors.password}
             </p>
           )}
         </div>
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-indigo-300"
-        >
-          {submitting ? "Creating account…" : "Sign up"}
-        </button>
-
-        <p className="mt-5 text-center text-sm text-slate-500">
-          Already have an account?{" "}
-          <a
-            href="/login"
-            className="font-semibold text-indigo-600 hover:underline"
+        {/* Submit Button */}
+        <div className="pt-2">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="cursor-pointer w-full rounded-full bg-blue-600 px-6 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-600/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-blue-400 disabled:hover:translate-y-0 dark:focus-visible:ring-offset-[#09090b]"
           >
-            Log in
-          </a>
-        </p>
+            {submitting ? "Creating account..." : "Sign up"}
+          </button>
+        </div>
       </form>
-    </div>
+
+      <p className="mt-8 text-center text-[14px] font-medium text-slate-500 dark:text-slate-400">
+        Already have an account?{" "}
+        <Link
+          to="/login"
+          className="font-bold text-blue-600 transition hover:text-blue-700 hover:underline dark:text-blue-500 dark:hover:text-blue-400"
+        >
+          Log in
+        </Link>
+      </p>
+    </AuthLayout>
   );
 };
 
