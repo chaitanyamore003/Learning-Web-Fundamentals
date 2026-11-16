@@ -1,1 +1,52 @@
 @import "tailwindcss";
+
+/* 👇 Tailwind v4 Dark Mode Setup 👇 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+
+  /* Light surfaces */
+  --color-surface: #fafafa;
+  --color-surface-muted: #f4f4f5;
+  --color-border: #e4e4e7;
+
+  /* Dark surfaces */
+  --color-surface-dark: #09090b;
+  --color-surface-dark-muted: #18181b;
+  --color-border-dark: #27272a;
+
+  /* Brand Palette (Vibrant Indigo/Violet) */
+  --color-brand-50: #eef2ff;
+  --color-brand-100: #e0e7ff;
+  --color-brand-200: #c7d2fe;
+  --color-brand-300: #a5b4fc;
+  --color-brand-400: #818cf8;
+  --color-brand-500: #6366f1;
+  --color-brand-600: #4f46e5; /* Main Primary */
+  --color-brand-700: #4338ca;
+  --color-brand-800: #3730a3;
+  --color-brand-900: #312e81;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-surface text-slate-900 dark:bg-surface-dark dark:text-slate-100;
+    font-family:
+      system-ui,
+      -apple-system,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+}
