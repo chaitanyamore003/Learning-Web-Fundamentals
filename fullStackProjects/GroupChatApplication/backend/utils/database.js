@@ -1,10 +1,37 @@
-const express = require("express");
-const userController = require("");
+import { Sequelize } from "sequelize";
+import dotenv from "dotenv";
 
-const router = express.Router();
+dotenv.config();
 
-router.get("/signup");
+const sequelize = new Sequelize(
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT || 3306,
+    dialect: "mysql",
 
-router.post("/login");
+    logging: false,
 
-module.exports = router;
+    pool: {
+      max: 10,
+      min: 0,
+      acquire: 30000,
+      idle: 10000,
+    },
+  },
+);
+
+// Test database connection
+const connectDB = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log("MySQL Database Connected Successfully!");
+  } catch (error) {
+    console.error("Database Connection Failed:", error.message);
+    process.exit(1);
+  }
+};
+
+export { sequelize, connectDB };
