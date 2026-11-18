@@ -11,7 +11,9 @@ const ChatListPanel = ({ chats, activeChat, onChatSelect, showMobileChat }) => {
     >
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-200/60 px-4 py-3 dark:border-white/10">
-        <h1 className="text-xl font-extrabold tracking-tighter">Said Hi.</h1>
+        <h1 className="text-xl font-extrabold tracking-tighter">
+          Said Hi<span className="text-blue-600">.</span>
+        </h1>
         <div className="flex items-center gap-2">
           <button className="rounded-full p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
             <Plus className="h-5 w-5" />
@@ -33,10 +35,10 @@ const ChatListPanel = ({ chats, activeChat, onChatSelect, showMobileChat }) => {
           />
         </div>
         <div className="mt-3 flex gap-2">
-          {["All", "Unread", "Groups"].map((filter, i) => (
+          {["All", "Groups"].map((filter, i) => (
             <button
               key={filter}
-              className={`rounded-full px-3 py-1 text-[12px] font-medium transition ${
+              className={`cursor-pointer rounded-full px-3 py-1 text-[12px] font-medium transition ${
                 i === 0
                   ? "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
