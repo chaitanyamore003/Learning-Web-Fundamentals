@@ -1,11 +1,33 @@
 // src/pages/Signup.jsx
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, Eye, EyeOff, Lock, Mail, Phone, User } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  Lock,
+  Mail,
+  Phone,
+  Upload,
+  User,
+  X,
+} from "lucide-react";
 import { isEmail, isPhone } from "../utils/validators";
 import AuthLayout from "../components/layout/AuthLayout";
+import { uploadToCloudinary } from "../utils/cloudinary";
 
 const initialValues = { name: "", email: "", phone: "", password: "" };
+
+const PRESET_AVATARS = [
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka&backgroundColor=ffdfbf",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Jack&backgroundColor=c0aede",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Luna&backgroundColor=ffd5dc",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Max&backgroundColor=d1f4d9",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Maya&backgroundColor=ffeaa7",
+];
+
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 
 const inputClass = (hasError, extra = "") =>
   [
@@ -20,17 +42,66 @@ const inputClass = (hasError, extra = "") =>
     .join(" ");
 
 const Signup = ({ onSubmit }) => {
+  const navigate = useNavigate();
+
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
-  const [success, setSuccess] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  const [selectedPreset, setSelectedPreset] = useState(null);
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [uploadPreview, setUploadPreview] = useState("");
+
+  const previewUrl = uploadPreview || selectedPreset || "";
+
+  useEffect(() => {
+    return () => {
+      if (uploadPreview) URL.revokeObjectURL(uploadPreview);
+    };
+  }, [uploadPreview]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setValues((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: "", form: "" }));
-    setSuccess("");
+  };
+
+  const clearAvatar = () => {
+    setSelectedPreset(null);
+    setUploadedFile(null);
+    if (uploadPreview) URL.revokeObjectURL(uploadPreview);
+    setUploadPreview("");
+  };
+
+  const handlePresetSelect = (url) => {
+    setSelectedPreset(url);
+    setUploadedFile(null);
+    if (uploadPreview) URL.revokeObjectURL(uploadPreview);
+    setUploadPreview("");
+    setErrors((prev) => ({ ...prev, avatar: "" }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setErrors((prev) => ({ ...prev, avatar: "Please choose an image file" }));
+      return;
+    }
+    if (file.size > MAX_AVATAR_BYTES) {
+      setErrors((prev) => ({
+        ...prev,
+        avatar: "Image must be 5 MB or smaller",
+      }));
+      return;
+    }
+    setSelectedPreset(null);
+    setUploadedFile(file);
+    if (uploadPreview) URL.revokeObjectURL(uploadPreview);
+    setUploadPreview(URL.createObjectURL(file));
+    setErrors((prev) => ({ ...prev, avatar: "" }));
   };
 
   const validate = (v) => {
@@ -64,20 +135,35 @@ const Signup = ({ onSubmit }) => {
     if (Object.keys(nextErrors).length > 0) return;
 
     setSubmitting(true);
-    setSuccess("");
     try {
-      // TODO: replace with your real API call
+      const payload = { ...values };
+
+      if (uploadedFile) {
+        const { secure_url, public_id } = await uploadToCloudinary(
+          uploadedFile,
+          "said-hi/avatars",
+        );
+        payload.profile_picture = secure_url;
+        payload.profile_picture_public_id = public_id;
+      } else if (selectedPreset) {
+        payload.profile_picture = selectedPreset;
+      }
+
       if (onSubmit) {
-        await onSubmit(values);
+        await onSubmit(payload);
       } else {
         await new Promise((resolve) => setTimeout(resolve, 800));
       }
 
-      setSuccess("Account created successfully!");
-      setValues(initialValues);
+      // Success → straight into the chat. The AuthContext has already
+      // stored the token and user by the time onSubmit resolves.
+      navigate("/chat", { replace: true });
     } catch (err) {
       setErrors({
-        form: err?.message || "Something went wrong. Please try again.",
+        form:
+          err?.response?.data?.message ||
+          err?.message ||
+          "Something went wrong. Please try again.",
       });
     } finally {
       setSubmitting(false);
@@ -86,7 +172,6 @@ const Signup = ({ onSubmit }) => {
 
   return (
     <AuthLayout>
-      {/* Back to Home Button */}
       <div className="mb-8 flex items-center">
         <Link
           to="/"
@@ -115,16 +200,96 @@ const Signup = ({ onSubmit }) => {
         </div>
       )}
 
-      {success && (
-        <div
-          role="status"
-          className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-900/20 dark:text-emerald-400"
-        >
-          {success}
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-4">
+        {/* Avatar */}
+        <div>
+          <label className="mb-2 block text-[13px] font-semibold text-slate-700 dark:text-slate-300">
+            Profile Picture{" "}
+            <span className="font-normal text-slate-400">(optional)</span>
+          </label>
+
+          <div className="mb-3 flex items-center gap-3">
+            <div className="relative h-16 w-16 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700 flex items-center justify-center">
+              {previewUrl ? (
+                <img
+                  src={previewUrl}
+                  alt="Avatar preview"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <User className="h-7 w-7 text-slate-400" />
+              )}
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              {!selectedPreset && (
+                <>
+                  <label
+                    htmlFor="avatar-upload"
+                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                  >
+                    <Upload className="h-3.5 w-3.5" />
+                    Upload
+                  </label>
+                  <input
+                    id="avatar-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                </>
+              )}
+              {previewUrl && (
+                <button
+                  type="button"
+                  onClick={clearAvatar}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-red-600 hover:underline dark:text-red-400"
+                >
+                  <X className="h-3 w-3" />
+                  Remove
+                </button>
+              )}
+            </div>
+          </div>
+
+          {!uploadedFile && (
+            <>
+              <p className="mb-1.5 text-xs text-slate-500 dark:text-slate-400">
+                Or pick one:
+              </p>
+              <div className="grid grid-cols-6 gap-2">
+                {PRESET_AVATARS.map((url) => (
+                  <button
+                    key={url}
+                    type="button"
+                    onClick={() => handlePresetSelect(url)}
+                    aria-label="Select preset avatar"
+                    aria-pressed={selectedPreset === url}
+                    className={`cursor-pointer aspect-square overflow-hidden rounded-full transition ${
+                      selectedPreset === url
+                        ? "ring-2 ring-blue-600 ring-offset-2 dark:ring-offset-[#09090b]"
+                        : "ring-1 ring-transparent hover:ring-slate-300 dark:hover:ring-slate-600"
+                    }`}
+                  >
+                    <img
+                      src={url}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+
+          {errors.avatar && (
+            <p className="mt-1.5 text-xs font-medium text-red-600 dark:text-red-400">
+              {errors.avatar}
+            </p>
+          )}
+        </div>
+
         {/* Name */}
         <div>
           <label
@@ -254,7 +419,6 @@ const Signup = ({ onSubmit }) => {
           )}
         </div>
 
-        {/* Submit Button */}
         <div className="pt-2">
           <button
             type="submit"

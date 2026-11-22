@@ -19,18 +19,29 @@ const User = db.define(
       type: DataTypes.STRING(150),
       allowNull: false,
       unique: true,
-      validate: {
-        isEmail: true,
-      },
+      validate: { isEmail: true },
     },
 
-    password_hash: {
+    // Login identifier #2. Nullable so existing rows are fine.
+    phone: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+      unique: true,
+    },
+
+    password: {
       type: DataTypes.STRING(255),
       allowNull: false,
     },
 
     profile_picture: {
       type: DataTypes.STRING(500),
+      allowNull: true,
+    },
+
+    // Cloudinary public_id — needed later to delete the old avatar.
+    profile_picture_public_id: {
+      type: DataTypes.STRING(255),
       allowNull: true,
     },
 

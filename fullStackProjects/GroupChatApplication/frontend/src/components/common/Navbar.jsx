@@ -1,6 +1,6 @@
 // src/components/layout/Navbar.jsx
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ChevronDown,
   LogOut,
@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { useTheme } from "../../hooks/useTheme";
+import { useAuth } from "../../context/AuthContext";
 import { cn } from "../../utils/cn";
 
 /* ------------------------------------------------------------------ */
@@ -27,7 +28,6 @@ function Brand({ onClick }) {
       aria-label="Said Hi — home"
       className="flex items-center gap-2"
     >
-      {/* Changed to rounded-full for the pill theme */}
       <span className="grid h-8 w-8 place-items-center rounded-full bg-blue-600 text-white shadow-sm shadow-blue-600/20">
         <MessageCircle className="h-4 w-4" strokeWidth={2.5} />
       </span>
@@ -77,7 +77,6 @@ function UserMenu({ user, onLogout }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
-  // Close on outside click + Escape
   useEffect(() => {
     if (!open) return;
     const handleClick = (e) => {
@@ -103,11 +102,19 @@ function UserMenu({ user, onLogout }) {
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="flex items-center gap-2 rounded-full p-1 pr-2 transition hover:bg-slate-100 dark:hover:bg-slate-800"
+        className="cursor-pointer flex items-center gap-2 rounded-full p-1 pr-2 transition hover:bg-slate-100 dark:hover:bg-slate-800"
       >
-        <span className="grid h-8 w-8 place-items-center rounded-full bg-blue-600 text-xs font-semibold text-white">
-          {getInitials(displayName)}
-        </span>
+        {user?.profile_picture ? (
+          <img
+            src={user.profile_picture}
+            alt={displayName}
+            className="h-8 w-8 rounded-full object-cover ring-1 ring-slate-200 dark:ring-slate-700"
+          />
+        ) : (
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-blue-600 text-xs font-semibold text-white">
+            {getInitials(displayName)}
+          </span>
+        )}
         <span className="hidden max-w-[120px] truncate text-sm font-medium text-slate-700 dark:text-slate-200 sm:inline">
           {displayName}
         </span>
@@ -174,14 +181,16 @@ function UserMenu({ user, onLogout }) {
 /* Navbar                                                              */
 /* ------------------------------------------------------------------ */
 
-const Navbar = ({
-  user = null,
-  onLogout,
-  links = [],
-  sticky = true, // Kept for compatibility, but now handled via fixed floating
-  maxWidth = "max-w-5xl", // Slightly smaller max-width for the pill shape
-}) => {
+const Navbar = ({ links = [], sticky = true, maxWidth = "max-w-5xl" }) => {
+  const { user, loading, logout } = useAuth();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
+
   const isAuthed = Boolean(user);
 
   return (
@@ -194,7 +203,6 @@ const Navbar = ({
       <div
         className={cn(
           "pointer-events-auto mx-auto flex h-16 items-center justify-between rounded-full px-5 sm:px-6",
-          // Glassmorphism styles
           "border border-white/50 bg-white/70 shadow-lg shadow-slate-200/20 backdrop-blur-xl",
           "dark:border-white/10 dark:bg-[#09090b]/70 dark:shadow-black/40",
           maxWidth,
@@ -202,7 +210,6 @@ const Navbar = ({
       >
         <Brand onClick={() => setMobileOpen(false)} />
 
-        {/* Desktop Links */}
         {links.length > 0 && (
           <nav className="hidden items-center gap-8 md:flex">
             {links.map((link) => (
@@ -220,8 +227,12 @@ const Navbar = ({
         <div className="flex items-center gap-2 sm:gap-3">
           <ThemeToggle />
 
-          {isAuthed ? (
-            <UserMenu user={user} onLogout={onLogout} />
+          {/* While AuthContext is verifying the token on refresh, show a
+              skeleton so the button doesn't flash Sign in → avatar. */}
+          {loading ? (
+            <div className="h-9 w-24 animate-pulse rounded-full bg-slate-200/70 dark:bg-slate-800/70" />
+          ) : isAuthed ? (
+            <UserMenu user={user} onLogout={handleLogout} />
           ) : (
             <>
               <Link
@@ -239,7 +250,6 @@ const Navbar = ({
             </>
           )}
 
-          {/* Mobile Menu Toggle */}
           {(links.length > 0 || !isAuthed) && (
             <button
               type="button"
@@ -258,7 +268,6 @@ const Navbar = ({
         </div>
       </div>
 
-      {/* Floating Mobile Dropdown */}
       {mobileOpen && (
         <div className="pointer-events-auto absolute left-4 right-4 top-[72px] z-50 sm:left-6 sm:right-6 md:hidden">
           <div className="overflow-hidden rounded-3xl border border-white/50 bg-white/90 p-2 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#09090b]/90">

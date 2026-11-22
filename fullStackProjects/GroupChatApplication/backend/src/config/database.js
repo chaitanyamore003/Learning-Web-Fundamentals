@@ -31,8 +31,6 @@ const db = new Sequelize(process.env.DATABASE_URL, {
     const [result] = await db.query(
       "SELECT CURRENT_USER() AS username, DATABASE() AS db",
     );
-
-    console.log("Database identity:", result[0]);
   } catch (error) {
     console.error("Database Connection Failed:", error.message);
     throw error;

@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import db from "../utils/database.js";
+import db from "../config/database.js";
 
 const MessageReceipt = db.define(
   "MessageReceipt",

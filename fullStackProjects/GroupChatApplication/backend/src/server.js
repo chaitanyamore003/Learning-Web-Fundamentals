@@ -5,7 +5,7 @@ const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   try {
-    await db.sync({ force: true });
+    await db.sync();
 
     app.listen(PORT, () => {
       console.log(`Said Hi server running on port ${PORT}`);

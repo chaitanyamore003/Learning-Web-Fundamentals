@@ -1,9 +1,9 @@
 // src/pages/Login.jsx
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff, Lock, User } from "lucide-react";
-import { isEmail, isPhone } from "../utils/validators";
 import AuthLayout from "../components/layout/AuthLayout";
+import { useAuth } from "../context/AuthContext";
 
 const initialValues = { identifier: "", password: "" };
 
@@ -19,7 +19,10 @@ const inputClass = (hasError, extra = "") =>
     .filter(Boolean)
     .join(" ");
 
-const Login = ({ onSubmit }) => {
+const Login = () => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
@@ -31,48 +34,25 @@ const Login = ({ onSubmit }) => {
     setErrors((prev) => ({ ...prev, [name]: "", form: "" }));
   };
 
-  const validate = (v) => {
-    const err = {};
-    const id = v.identifier.trim();
-
-    if (!id) {
-      err.identifier = "Email or phone number is required";
-    } else if (id.includes("@")) {
-      if (!isEmail(id)) err.identifier = "Enter a valid email address";
-    } else if (!isPhone(id)) {
-      err.identifier = "Enter a valid email or a 10–15 digit phone number";
-    }
-
-    if (!v.password) err.password = "Password is required";
-
-    return err;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const nextErrors = validate(values);
+    const nextErrors = {};
+    if (!values.identifier.trim())
+      nextErrors.identifier = "Email or phone is required";
+    if (!values.password) nextErrors.password = "Password is required";
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
     setSubmitting(true);
     try {
-      const id = values.identifier.trim();
-      const payload = {
-        [id.includes("@") ? "email" : "phone"]: id,
+      await login({
+        identifier: values.identifier.trim(),
         password: values.password,
-      };
-
-      if (onSubmit) {
-        await onSubmit(payload);
-      } else {
-        await new Promise((resolve) => setTimeout(resolve, 800));
-      }
-
-      setValues(initialValues);
+      });
+      navigate("/chat", { replace: true });
     } catch (err) {
       setErrors({
-        form: err?.message || "Invalid credentials. Please try again.",
+        form: err?.response?.data?.message || "Login failed. Please try again.",
       });
     } finally {
       setSubmitting(false);
@@ -81,7 +61,6 @@ const Login = ({ onSubmit }) => {
 
   return (
     <AuthLayout>
-      {/* Back to Home Button */}
       <div className="mb-8 flex items-center">
         <Link
           to="/"
@@ -97,7 +76,7 @@ const Login = ({ onSubmit }) => {
           Welcome back
         </h1>
         <p className="mt-2 text-[14px] font-medium text-slate-500 dark:text-slate-400">
-          Log in with your email or phone number.
+          Log in to continue to Said Hi.
         </p>
       </div>
 
@@ -111,13 +90,12 @@ const Login = ({ onSubmit }) => {
       )}
 
       <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-4">
-        {/* Email or Phone Input */}
         <div>
           <label
             htmlFor="identifier"
             className="mb-1.5 block text-[13px] font-semibold text-slate-700 dark:text-slate-300"
           >
-            Email or Phone Number
+            Email or Phone
           </label>
           <div className="relative">
             <User className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
@@ -125,8 +103,8 @@ const Login = ({ onSubmit }) => {
               id="identifier"
               name="identifier"
               type="text"
-              placeholder="jane@example.com or 9876543210"
               autoComplete="username"
+              placeholder="jane@example.com or 9876543210"
               value={values.identifier}
               onChange={handleChange}
               className={inputClass(Boolean(errors.identifier), "pl-11")}
@@ -140,30 +118,21 @@ const Login = ({ onSubmit }) => {
           )}
         </div>
 
-        {/* Password Input */}
         <div>
-          <div className="mb-1.5 flex items-center justify-between">
-            <label
-              htmlFor="password"
-              className="block text-[13px] font-semibold text-slate-700 dark:text-slate-300"
-            >
-              Password
-            </label>
-            <Link
-              to="/forgot-password"
-              className="text-[12px] font-semibold text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-500 dark:hover:text-blue-400"
-            >
-              Forgot password?
-            </Link>
-          </div>
+          <label
+            htmlFor="password"
+            className="mb-1.5 block text-[13px] font-semibold text-slate-700 dark:text-slate-300"
+          >
+            Password
+          </label>
           <div className="relative">
             <Lock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
             <input
               id="password"
               name="password"
               type={showPassword ? "text" : "password"}
-              placeholder="Enter your password"
               autoComplete="current-password"
+              placeholder="Your password"
               value={values.password}
               onChange={handleChange}
               className={inputClass(Boolean(errors.password), "pl-11 pr-12")}
@@ -189,7 +158,6 @@ const Login = ({ onSubmit }) => {
           )}
         </div>
 
-        {/* Submit Button */}
         <div className="pt-2">
           <button
             type="submit"
@@ -202,12 +170,12 @@ const Login = ({ onSubmit }) => {
       </form>
 
       <p className="mt-8 text-center text-[14px] font-medium text-slate-500 dark:text-slate-400">
-        Don't have an account?{" "}
+        New here?{" "}
         <Link
           to="/signup"
           className="font-bold text-blue-600 transition hover:text-blue-700 hover:underline dark:text-blue-500 dark:hover:text-blue-400"
         >
-          Sign up
+          Create an account
         </Link>
       </p>
     </AuthLayout>

@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
-import { sequelize } from "../config/database.js";
+import db from "../config/database.js";
 
-const Attachment = sequelize.define(
+const Attachment = db.define(
   "Attachment",
   {
     id: {
