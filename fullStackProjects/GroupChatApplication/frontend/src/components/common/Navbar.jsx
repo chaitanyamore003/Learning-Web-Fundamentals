@@ -9,7 +9,6 @@ import {
   Moon,
   Settings,
   Sun,
-  User,
   X,
 } from "lucide-react";
 import { useTheme } from "../../hooks/useTheme";
@@ -144,12 +143,12 @@ function UserMenu({ user, onLogout }) {
 
           <div className="p-1">
             <Link
-              to="/profile"
+              to="/chat"
               role="menuitem"
               onClick={() => setOpen(false)}
               className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
             >
-              <User className="h-4 w-4" /> Profile
+              <MessageCircle className="h-4 w-4" /> Go to Chats
             </Link>
             <Link
               to="/settings"
@@ -227,8 +226,6 @@ const Navbar = ({ links = [], sticky = true, maxWidth = "max-w-5xl" }) => {
         <div className="flex items-center gap-2 sm:gap-3">
           <ThemeToggle />
 
-          {/* While AuthContext is verifying the token on refresh, show a
-              skeleton so the button doesn't flash Sign in → avatar. */}
           {loading ? (
             <div className="h-9 w-24 animate-pulse rounded-full bg-slate-200/70 dark:bg-slate-800/70" />
           ) : isAuthed ? (

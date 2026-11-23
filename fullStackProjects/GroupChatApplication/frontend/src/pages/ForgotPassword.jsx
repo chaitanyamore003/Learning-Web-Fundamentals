@@ -1,9 +1,10 @@
-// src/pages/ForgetPassword.jsx
+// src/pages/ForgotPassword.jsx
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, CheckCircle2, Mail } from "lucide-react";
 import { isEmail } from "../utils/validators";
 import AuthLayout from "../components/layout/AuthLayout";
+import api from "../lib/axios";
 
 const inputClass = (hasError, extra = "") =>
   [
@@ -17,7 +18,7 @@ const inputClass = (hasError, extra = "") =>
     .filter(Boolean)
     .join(" ");
 
-const ForgotPassword = ({ onSubmit }) => {
+const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -25,14 +26,13 @@ const ForgotPassword = ({ onSubmit }) => {
 
   const handleChange = (e) => {
     setEmail(e.target.value);
-    setError(""); // Clear error when user types
+    setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const trimmedEmail = email.trim();
 
-    // Validation
     if (!trimmedEmail) {
       setError("Email address is required");
       return;
@@ -44,17 +44,17 @@ const ForgotPassword = ({ onSubmit }) => {
 
     setSubmitting(true);
     try {
-      // TODO: Replace with your real API call
-      // await authService.forgotPassword(trimmedEmail);
-      if (onSubmit) {
-        await onSubmit(trimmedEmail);
-      } else {
-        await new Promise((resolve) => setTimeout(resolve, 800));
-      }
-
+      // Backend always returns 200 with a generic message (no user
+      // enumeration), so a success response never reveals whether
+      // the email exists. Showing the success screen unconditionally
+      // is correct behaviour.
+      await api.post("/auth/forgot-password", { email: trimmedEmail });
       setSuccess(true);
     } catch (err) {
-      setError(err?.message || "Something went wrong. Please try again later.");
+      setError(
+        err?.response?.data?.message ||
+          "Something went wrong. Please try again later.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -62,7 +62,6 @@ const ForgotPassword = ({ onSubmit }) => {
 
   return (
     <AuthLayout>
-      {/* Back to Login Button */}
       <div className="mb-8 flex items-center">
         <Link
           to="/login"
@@ -74,7 +73,6 @@ const ForgotPassword = ({ onSubmit }) => {
       </div>
 
       {success ? (
-        /* Success State */
         <div className="text-center animate-in fade-in zoom-in duration-300">
           <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
             <CheckCircle2 className="h-8 w-8" />
@@ -100,7 +98,6 @@ const ForgotPassword = ({ onSubmit }) => {
           </p>
         </div>
       ) : (
-        /* Form State */
         <>
           <div className="text-center">
             <h1 className="text-2xl font-extrabold tracking-tighter text-slate-900 dark:text-white">

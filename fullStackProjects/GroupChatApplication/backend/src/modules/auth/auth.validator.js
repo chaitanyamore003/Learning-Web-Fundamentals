@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 // ─── Reusable field schemas ──────────────────────────────────────────────
-// .trim() and .toLowerCase() are *transforms* — Zod rewrites the value
-// before handing it to the controller, so the service receives clean input.
+// .trim() / .toLowerCase() are transforms — they run BEFORE the controller,
+// so the service always receives clean input.
 
 const nameField = z
   .string({ required_error: "Name is required" })
@@ -22,8 +22,8 @@ const phoneField = z
   .trim()
   .regex(/^\d{10,15}$/, "Phone must be 10–15 digits");
 
-// Only enforced at signup. Login must NOT apply strength rules, or a
-// user who registered before the rule changed could never log in again.
+// Only enforced on signup/reset — login must not apply strength rules,
+// or a user who registered before a rule change could never log in.
 const passwordField = z
   .string({ required_error: "Password is required" })
   .min(8, "Password must be at least 8 characters")
@@ -50,7 +50,7 @@ export const signupSchema = z.object({
 });
 
 export const loginSchema = z.object({
-  // Email OR phone — so we only require a non-empty string, not a format.
+  // Email OR phone — only require a non-empty string, not a format.
   identifier: z
     .string({ required_error: "Email or phone is required" })
     .trim()
@@ -58,4 +58,22 @@ export const loginSchema = z.object({
   password: z
     .string({ required_error: "Password is required" })
     .min(1, "Password is required"),
+});
+
+// Forgot-password: just an email to look up.
+export const forgotPasswordSchema = z.object({
+  email: z
+    .string({ required_error: "Email is required" })
+    .trim()
+    .toLowerCase()
+    .email("Enter a valid email address"),
+});
+
+// Reset-password: token from the email link + the new password.
+// Reuses passwordField — same strength rules as signup.
+export const resetPasswordSchema = z.object({
+  token: z
+    .string({ required_error: "Token is required" })
+    .min(1, "Token is required"),
+  newPassword: passwordField,
 });

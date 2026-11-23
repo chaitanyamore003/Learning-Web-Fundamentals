@@ -10,6 +10,8 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import ChatPage from "./pages/ChatPage";
 import ProtectedRoute from "./components/auth/ProtectedRoutes";
+import SettingsPage from "./pages/SettingsPage";
+import ProfilePage from "./pages/ProfilePage";
 
 // Signup keeps its existing onSubmit prop — we just supply it from context.
 const SignupWithAuth = () => {
@@ -38,6 +40,22 @@ const App = () => {
               element={
                 <ProtectedRoute>
                   <ChatPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <SettingsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile/:userId"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
                 </ProtectedRoute>
               }
             />

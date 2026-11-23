@@ -1,101 +1,131 @@
-import bcrypt from "bcrypt";
 import { Op } from "sequelize";
-import { User } from "../../models/index.js";
+import { User, Conversation, ConversationMember } from "../../models/index.js";
+import bcrypt from "bcrypt";
+import cloudinary from "../../config/cloudinary.js";
 import { AppError } from "../../utils/errors.js";
-import jwt from "jsonwebtoken";
-
-const INVALID_CREDENTIALS = "Invalid credentials.";
 
 /**
- * Verify a user by email OR phone + password.
- * Returns the user without password_hash. Throws on failure.
+ * Fetch users the current user is NOT connected to.
+ * Excludes:
+ * 1. The current user themselves.
+ * 2. Anyone the current user already has a DIRECT conversation with.
  */
-const login = async ({ identifier, password }) => {
-  if (!identifier || !password) {
-    throw new AppError(INVALID_CREDENTIALS, 401);
-  }
-
-  const normalised = String(identifier).trim().toLowerCase();
-
-  // SELECT * FROM users WHERE email = ? OR phone = ? LIMIT 1;
-  const user = await User.findOne({
-    where: {
-      [Op.or]: [{ email: normalised }, { phone: normalised }],
-    },
+export const getDiscoverableUsers = async (currentUserId) => {
+  // 1. Find all DIRECT conversation IDs that belong to the current user
+  const myDirectConvos = await ConversationMember.findAll({
+    where: { user_id: currentUserId },
+    include: [
+      {
+        model: Conversation,
+        where: { type: "DIRECT" },
+        attributes: [], // We don't need the conversation data, just the join
+      },
+    ],
+    attributes: ["conversation_id"],
   });
 
-  // Same error for "no user" and "wrong password" — prevents
-  // attackers from discovering which emails/phones are registered.
-  if (!user) throw new AppError(INVALID_CREDENTIALS, 401);
+  const myConvoIds = myDirectConvos.map((c) => c.conversation_id);
 
-  const ok = await bcrypt.compare(password, user.password);
-  if (!ok) throw new AppError(INVALID_CREDENTIALS, 401);
-
-  await user.update({ last_seen: new Date() });
-
-  const { password_hash, ...safeUser } = user.get({ plain: true });
-  return safeUser;
-};
-
-/**
- * Signup the user by name, email, phone, password, and optional avatar.
- * Returns the user (without password_hash) after signup completes.
- */
-const signup = async ({
-  name,
-  email,
-  phone,
-  password,
-  profile_picture, // Cloudinary secure_url, optional
-  profile_picture_public_id, // Cloudinary public_id, optional
-}) => {
-  if (!name || !email || !phone || !password) {
-    throw new AppError("All fields are required", 400);
-  }
-
-  const normalisedEmail = String(email).trim().toLowerCase();
-  const normalisedPhone = String(phone).trim();
-  const passwordHash = await bcrypt.hash(password, 12);
-
-  let user;
-  try {
-    user = await User.create({
-      name: String(name).trim(),
-      email: normalisedEmail,
-      phone: normalisedPhone,
-      password: passwordHash,
-      profile_picture: profile_picture || null,
-      profile_picture_public_id: profile_picture_public_id || null,
+  // 2. Find all user IDs that are in those conversations (these are my connections)
+  let connectedUserIds = [];
+  if (myConvoIds.length > 0) {
+    const connectedMembers = await ConversationMember.findAll({
+      where: { conversation_id: { [Op.in]: myConvoIds } },
+      attributes: ["user_id"],
     });
-  } catch (err) {
-    if (err instanceof UniqueConstraintError) {
-      throw new AppError("Email or phone already registered", 409);
-    }
-    throw err;
+    connectedUserIds = connectedMembers.map((m) => m.user_id);
   }
 
-  const { password_hash, ...safeUser } = user.get({ plain: true });
-  return safeUser;
+  // 3. Fetch all users EXCEPT me and EXCEPT those connected IDs
+  const users = await User.findAll({
+    where: {
+      id: {
+        [Op.and]: [
+          { [Op.ne]: currentUserId }, // Not me
+          { [Op.notIn]: connectedUserIds }, // Not connected
+        ],
+      },
+    },
+    attributes: [
+      "id",
+      "name",
+      "email",
+      "phone",
+      "profile_picture",
+      "last_seen",
+    ],
+    limit: 50, // Good practice to limit pagination for discovery
+  });
+
+  return users;
 };
 
-/**
- * Return the current user's profile by id.
- * The controller gets the id from the verified JWT, never from the client.
- */
-const getMe = async (userId) => {
-  // SELECT * FROM users WHERE id = ? LIMIT 1;
+export const updateProfile = async (userId, { name, phone }) => {
   const user = await User.findByPk(userId);
+  if (!user) throw new AppError("User not found", 404);
 
-  if (!user) {
-    throw new AppError("User not found", 404);
+  // If phone is changing, check if it's already taken
+  if (phone && phone !== user.phone) {
+    const existing = await User.findOne({ where: { phone } });
+    if (existing) throw new AppError("Phone number already in use", 409);
   }
+
+  await user.update({ name, phone });
+  const { password_hash, ...safeUser } = user.get({ plain: true });
+  return safeUser;
+};
+
+export const updatePassword = async (
+  userId,
+  { currentPassword, newPassword },
+) => {
+  const user = await User.findByPk(userId);
+  if (!user) throw new AppError("User not found", 404);
+
+  const isValid = await bcrypt.compare(currentPassword, user.password_hash);
+  if (!isValid) throw new AppError("Incorrect current password", 401);
+
+  const newHash = await bcrypt.hash(newPassword, 12);
+  await user.update({ password_hash: newHash });
+
+  return { success: true };
+};
+
+export const updateAvatar = async (userId, { secure_url, public_id }) => {
+  const user = await User.findByPk(userId);
+  if (!user) throw new AppError("User not found", 404);
+
+  // If they have an old uploaded avatar, delete it from Cloudinary
+  if (user.profile_picture_public_id) {
+    try {
+      await cloudinary.uploader.destroy(user.profile_picture_public_id);
+    } catch (err) {
+      console.error("Failed to delete old avatar from Cloudinary", err);
+      // We log it but don't block the update if deletion fails
+    }
+  }
+
+  await user.update({
+    profile_picture: secure_url,
+    profile_picture_public_id: public_id || null,
+  });
 
   const { password_hash, ...safeUser } = user.get({ plain: true });
   return safeUser;
 };
 
-export default {
-  login,
-  signup,
-  getMe,
+export const getUserById = async (userId) => {
+  const user = await User.findByPk(userId, {
+    // Only return public fields (never password_hash or reset tokens)
+    attributes: [
+      "id",
+      "name",
+      "email",
+      "phone",
+      "profile_picture",
+      "last_seen",
+    ],
+  });
+  if (!user) throw new AppError("User not found", 404);
+  return user;
 };

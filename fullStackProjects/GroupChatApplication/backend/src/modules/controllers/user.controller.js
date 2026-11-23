@@ -1,50 +1,32 @@
-import authService from "../services/user.service.js";
-import { signToken } from "../../utils/jwt.js";
+import * as userService from "../services/user.service.js";
 
-/**
- * POST /api/auth/signup
- * Body: { name, email, phone, password, profile_picture?, profile_picture_public_id? }
- */
-const signup = async (req, res) => {
-  const user = await authService.signup({
-    name: req.body.name,
-    email: req.body.email,
-    phone: req.body.phone,
-    password: req.body.password,
-    profile_picture: req.body.profile_picture,
-    profile_picture_public_id: req.body.profile_picture_public_id,
+// GET /api/users/discover
+export const discoverUsers = async (req, res) => {
+  // req.user.id comes from our requireAuth middleware
+  const users = await userService.getDiscoverableUsers(req.user.id);
+
+  res.status(200).json({
+    success: true,
+    users,
   });
-
-  const token = signToken({ id: user.id });
-  res.status(201).json({ success: true, user, token });
 };
 
-/**
- * POST /api/auth/login
- * Body: { identifier, password }
- * (identifier = email OR phone)
- */
-const login = async (req, res) => {
-  const user = await authService.login({
-    identifier: req.body.identifier,
-    password: req.body.password,
-  });
-
-  const token = signToken({ id: user.id });
-  res.status(200).json({ success: true, user, token });
-};
-
-/**
- * GET /api/auth/me
- * Requires auth middleware → sets req.user.id
- */
-const getMe = async (req, res) => {
-  const user = await authService.getMe(req.user.id);
+export const updateProfile = async (req, res) => {
+  const user = await userService.updateProfile(req.user.id, req.body);
   res.status(200).json({ success: true, user });
 };
 
-export default {
-  signup,
-  login,
-  getMe,
+export const updatePassword = async (req, res) => {
+  await userService.updatePassword(req.user.id, req.body);
+  res.status(200).json({ success: true, message: "Password updated" });
+};
+
+export const updateAvatar = async (req, res) => {
+  const user = await userService.updateAvatar(req.user.id, req.body);
+  res.status(200).json({ success: true, user });
+};
+
+export const getUserProfile = async (req, res) => {
+  const user = await userService.getUserById(req.params.id);
+  res.status(200).json({ success: true, user });
 };

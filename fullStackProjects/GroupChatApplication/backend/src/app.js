@@ -8,6 +8,7 @@ import User from "./models/user.model.js";
 
 //routes
 import authRouter from "./modules/routes/auth.routes.js";
+import userRouter from "./modules/routes/user.routes.js";
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRouter);
+app.use("/api/users", userRouter);
 
 app.use(errorHandler);
 

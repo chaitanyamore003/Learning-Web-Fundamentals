@@ -1,8 +1,16 @@
 // src/pages/ResetPassword.jsx
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, CheckCircle2, Lock, Eye, EyeOff } from "lucide-react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Lock,
+  Eye,
+  EyeOff,
+  AlertCircle,
+} from "lucide-react";
 import AuthLayout from "../components/layout/AuthLayout";
+import api from "../lib/axios";
 
 const initialValues = { password: "", confirmPassword: "" };
 
@@ -18,8 +26,15 @@ const inputClass = (hasError, extra = "") =>
     .filter(Boolean)
     .join(" ");
 
-const ResetPassword = ({ onSubmit }) => {
+const ResetPassword = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // The reset link in the email looks like:
+  //   http://localhost:5173/reset-password?token=<hex>
+  // If there's no token, there's no point showing the form.
+  const token = searchParams.get("token");
+
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
@@ -30,7 +45,6 @@ const ResetPassword = ({ onSubmit }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setValues((prev) => ({ ...prev, [name]: value }));
-    // Clear error for the specific field when typing
     setErrors((prev) => ({ ...prev, [name]: "", form: "" }));
   };
 
@@ -63,22 +77,15 @@ const ResetPassword = ({ onSubmit }) => {
 
     setSubmitting(true);
     try {
-      // TODO: Replace with your real API call
-      // await authService.resetPassword(token, values.password);
-      if (onSubmit) {
-        await onSubmit(values.password);
-      } else {
-        await new Promise((resolve) => setTimeout(resolve, 800));
-      }
-
+      await api.post("/auth/reset-password", {
+        token,
+        newPassword: values.password,
+      });
       setSuccess(true);
-
-      // Optional: Automatically redirect to login after 3 seconds
-      // setTimeout(() => navigate("/login"), 3000);
     } catch (err) {
       setErrors({
         form:
-          err?.message ||
+          err?.response?.data?.message ||
           "Failed to reset password. The link may have expired.",
       });
     } finally {
@@ -88,7 +95,6 @@ const ResetPassword = ({ onSubmit }) => {
 
   return (
     <AuthLayout>
-      {/* Back to Login Button */}
       <div className="mb-8 flex items-center">
         <Link
           to="/login"
@@ -99,8 +105,29 @@ const ResetPassword = ({ onSubmit }) => {
         </Link>
       </div>
 
-      {success ? (
-        /* Success State */
+      {/* No token in URL → the link is broken or was pasted wrong. */}
+      {!token ? (
+        <div className="text-center">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
+            <AlertCircle className="h-8 w-8" />
+          </div>
+          <h1 className="text-2xl font-extrabold tracking-tighter text-slate-900 dark:text-white">
+            Invalid reset link
+          </h1>
+          <p className="mt-3 text-[14px] font-medium leading-relaxed text-slate-500 dark:text-slate-400">
+            This page needs a reset token. Open the link from your email, or
+            request a new one.
+          </p>
+          <div className="mt-8">
+            <Link
+              to="/forgot-password"
+              className="w-full inline-flex items-center justify-center rounded-full bg-blue-600 px-6 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:bg-blue-700"
+            >
+              Request a new link
+            </Link>
+          </div>
+        </div>
+      ) : success ? (
         <div className="text-center animate-in fade-in zoom-in duration-300">
           <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
             <CheckCircle2 className="h-8 w-8" />
@@ -114,16 +141,15 @@ const ResetPassword = ({ onSubmit }) => {
           </p>
 
           <div className="mt-8">
-            <Link
-              to="/login"
-              className="w-full inline-flex items-center justify-center rounded-full bg-blue-600 px-6 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-600/30"
+            <button
+              onClick={() => navigate("/login", { replace: true })}
+              className="cursor-pointer w-full inline-flex items-center justify-center rounded-full bg-blue-600 px-6 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-600/30"
             >
               Continue to Log in
-            </Link>
+            </button>
           </div>
         </div>
       ) : (
-        /* Form State */
         <>
           <div className="text-center">
             <h1 className="text-2xl font-extrabold tracking-tighter text-slate-900 dark:text-white">
@@ -145,7 +171,6 @@ const ResetPassword = ({ onSubmit }) => {
           )}
 
           <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-4">
-            {/* New Password */}
             <div>
               <label
                 htmlFor="password"
@@ -188,7 +213,6 @@ const ResetPassword = ({ onSubmit }) => {
               )}
             </div>
 
-            {/* Confirm Password */}
             <div>
               <label
                 htmlFor="confirmPassword"
@@ -231,7 +255,6 @@ const ResetPassword = ({ onSubmit }) => {
               )}
             </div>
 
-            {/* Submit Button */}
             <div className="pt-2">
               <button
                 type="submit"

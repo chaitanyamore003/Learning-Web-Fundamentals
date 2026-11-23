@@ -33,6 +33,10 @@ const User = db.define(
       type: DataTypes.STRING(255),
       allowNull: false,
     },
+    password_reset_token: {
+      type: DataTypes.STRING(64),
+      allowNull: true,
+    },
 
     profile_picture: {
       type: DataTypes.STRING(500),

@@ -3,10 +3,14 @@ import { useState } from "react";
 import SidebarNav from "../components/layout/SidebarNav";
 import ChatListPanel from "../components/chat/ChatListPanel";
 import ChatWindow from "../components/chat/ChatWindow";
-import { CHATS } from "../data/mockChats";
+import DiscoverPanel from "../components/chat/DiscoverPanel";
 
 const ChatPage = () => {
-  const [activeChat, setActiveChat] = useState(CHATS[0]);
+  // 1. New state to control which middle panel is visible
+  const [activeTab, setActiveTab] = useState("chats"); // "chats" | "groups" | "people"
+
+  const [chats, setChats] = useState([]);
+  const [activeChat, setActiveChat] = useState(null);
   const [showMobileChat, setShowMobileChat] = useState(false);
 
   const handleChatSelect = (chat) => {
@@ -16,23 +20,42 @@ const ChatPage = () => {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-[#f8faff] font-sans text-slate-900 dark:bg-[#080b14] dark:text-white">
-      {/* 1. Left Navigation Rail */}
-      <SidebarNav />
+      {/* Left Rail: Pass the activeTab and setter down */}
+      <SidebarNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      {/* 2. Chat List Pane */}
-      <ChatListPanel
-        chats={CHATS}
-        activeChat={activeChat}
-        onChatSelect={handleChatSelect}
-        showMobileChat={showMobileChat}
-      />
+      {/* Middle Panel: Render based on activeTab */}
+      {(activeTab === "chats" || activeTab === "groups") && (
+        <ChatListPanel
+          chats={chats}
+          activeChat={activeChat}
+          onChatSelect={handleChatSelect}
+          showMobileChat={showMobileChat}
+        />
+      )}
 
-      {/* 3. Main Chat Window */}
-      <ChatWindow
-        activeChat={activeChat}
-        showMobileChat={showMobileChat}
-        onBack={() => setShowMobileChat(false)}
-      />
+      {activeTab === "people" && (
+        <DiscoverPanel onChatSelect={handleChatSelect} />
+      )}
+
+      {/* Right Panel: Chat Window */}
+      {activeChat ? (
+        <ChatWindow
+          activeChat={activeChat}
+          showMobileChat={showMobileChat}
+          onBack={() => setShowMobileChat(false)}
+        />
+      ) : (
+        <div className="hidden flex-1 flex-col items-center justify-center bg-slate-50/50 dark:bg-[#080b14] md:flex">
+          <div className="text-center">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+              Your messages
+            </h2>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              Select a conversation or find new people to chat with.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
