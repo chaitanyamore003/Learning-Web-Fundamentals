@@ -4,26 +4,31 @@ import { useLocation } from "react-router-dom";
 import SidebarNav from "../components/layout/SidebarNav";
 import ChatListPanel from "../components/chat/ChatListPanel";
 import ChatWindow from "../components/chat/ChatWindow";
+import ChatSettingsModal from "../components/chat/ChatSettingsModal"; // Import new modal
 import DiscoverPanel from "../components/chat/DiscoverPanel";
+import CreateGroupModal from "../components/chat/CreateGroupModal";
 import { startDirectConversation } from "../api/conversations";
-import api from "../lib/axios"; // Added import
+import api from "../lib/axios";
 
 const ChatPage = () => {
   const [activeTab, setActiveTab] = useState("chats");
   const [chats, setChats] = useState([]);
   const [activeChat, setActiveChat] = useState(null);
   const [showMobileChat, setShowMobileChat] = useState(false);
-
-  // Added loading state
   const [loadingChats, setLoadingChats] = useState(true);
+
+  // Modals state
+  const [showGroupModal, setShowGroupModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false); // New state
 
   const location = useLocation();
 
-  // 1. Fetch the user's conversations when the page loads
   useEffect(() => {
     const fetchChats = async () => {
+      setLoadingChats(true);
       try {
-        const res = await api.get("/conversations");
+        const type = activeTab === "chats" ? "DIRECT" : "GROUP";
+        const res = await api.get(`/conversations?type=${type}`);
         setChats(res.data.conversations);
       } catch (err) {
         console.error("Failed to fetch conversations", err);
@@ -31,19 +36,19 @@ const ChatPage = () => {
         setLoadingChats(false);
       }
     };
-    fetchChats();
-  }, []);
 
-  // 2. If redirected from ProfilePage, open the specific chat and add to list if missing
+    if (activeTab === "chats" || activeTab === "groups") {
+      fetchChats();
+    }
+  }, [activeTab]);
+
   useEffect(() => {
     if (location.state?.openConversation) {
       const newChat = location.state.openConversation;
-
       setActiveChat(newChat);
       setShowMobileChat(true);
       setActiveTab("chats");
 
-      // Add to chats list if it's a brand new conversation
       setChats((prev) => {
         if (!prev.find((c) => c.id === newChat.id)) {
           return [newChat, ...prev];
@@ -58,11 +63,23 @@ const ChatPage = () => {
     setShowMobileChat(true);
   };
 
-  // Called when clicking "Message" in DiscoverPanel
+  const handleChatDeleted = (deletedChatId) => {
+    setChats((prev) => prev.filter((c) => c.id !== deletedChatId));
+    setActiveChat(null);
+    setShowMobileChat(false);
+  };
+
+  // New: Handle updated chat info
+  const handleChatUpdated = (updatedChat) => {
+    setChats((prev) =>
+      prev.map((c) => (c.id === updatedChat.id ? updatedChat : c)),
+    );
+    setActiveChat(updatedChat);
+  };
+
   const handleStartChat = async (targetUser) => {
     try {
       const data = await startDirectConversation(targetUser.id);
-
       const newChat = {
         id: data.conversation.id,
         name: data.targetUser.name,
@@ -70,6 +87,7 @@ const ChatPage = () => {
         targetUserId: data.targetUser.id,
         lastMessage: "No messages yet",
         time: "",
+        type: "DIRECT",
         online: false,
       };
 
@@ -80,11 +98,25 @@ const ChatPage = () => {
         return prev;
       });
 
+      setActiveTab("chats");
       handleChatSelect(newChat);
     } catch (err) {
       console.error("Failed to start chat", err);
       alert("Failed to start conversation.");
     }
+  };
+
+  const handleGroupCreated = (conversation) => {
+    const newGroupChat = {
+      id: conversation.id,
+      name: conversation.name,
+      type: "GROUP",
+      avatar: conversation.group_image || null,
+      lastMessage: "Group created",
+      time: "Just now",
+    };
+    setChats((prev) => [newGroupChat, ...prev]);
+    handleChatSelect(newGroupChat);
   };
 
   return (
@@ -94,10 +126,12 @@ const ChatPage = () => {
       {(activeTab === "chats" || activeTab === "groups") && (
         <ChatListPanel
           chats={chats}
-          loading={loadingChats} // Pass the loading state down
+          loading={loadingChats}
           activeChat={activeChat}
           onChatSelect={handleChatSelect}
           showMobileChat={showMobileChat}
+          onCreateGroup={() => setShowGroupModal(true)}
+          isGroupTab={activeTab === "groups"}
         />
       )}
 
@@ -110,6 +144,7 @@ const ChatPage = () => {
           activeChat={activeChat}
           showMobileChat={showMobileChat}
           onBack={() => setShowMobileChat(false)}
+          onEditClick={() => setShowSettingsModal(true)} // Open the new settings modal
         />
       ) : (
         <div className="hidden flex-1 flex-col items-center justify-center bg-slate-50/50 dark:bg-[#080b14] md:flex">
@@ -122,6 +157,24 @@ const ChatPage = () => {
             </p>
           </div>
         </div>
+      )}
+
+      {/* Create Group Modal */}
+      {showGroupModal && (
+        <CreateGroupModal
+          onClose={() => setShowGroupModal(false)}
+          onGroupCreated={handleGroupCreated}
+        />
+      )}
+
+      {/* Chat Settings Modal */}
+      {showSettingsModal && activeChat && (
+        <ChatSettingsModal
+          activeChat={activeChat}
+          onClose={() => setShowSettingsModal(false)}
+          onChatDeleted={handleChatDeleted}
+          onChatUpdated={handleChatUpdated}
+        />
       )}
     </div>
   );

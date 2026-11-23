@@ -129,3 +129,13 @@ export const getUserById = async (userId) => {
   if (!user) throw new AppError("User not found", 404);
   return user;
 };
+
+export const getAllUsers = async (currentUserId) => {
+  // Fetch everyone EXCEPT the logged-in user
+  const users = await User.findAll({
+    where: { id: { [Op.ne]: currentUserId } },
+    attributes: ["id", "name", "email", "profile_picture"],
+    limit: 100, // Reasonable limit for the modal
+  });
+  return users;
+};

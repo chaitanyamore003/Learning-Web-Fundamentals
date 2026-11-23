@@ -1,36 +1,130 @@
-// src/components/chat/ChatWindow.jsx
-import { useEffect, useState } from "react";
-import { ArrowLeft, Phone, Video, MoreVertical, Loader2 } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { ArrowLeft, Loader2, Settings2 } from "lucide-react";
 import MessageBubble from "./MessageBubble";
 import MessageInput from "./MessageInput";
 import api from "../../lib/axios";
+import { useSocket } from "../../context/SocketContext";
 
-const ChatWindow = ({ activeChat, showMobileChat, onBack }) => {
+const ChatWindow = ({ activeChat, showMobileChat, onBack, onEditClick }) => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // 1. Fetch messages whenever the active chat changes
-  useEffect(() => {
-    if (!activeChat?.id) return;
+  const { socket } = useSocket();
+  const messagesEndRef = useRef(null);
 
-    const fetchMessages = async () => {
-      setLoading(true);
-      try {
-        const res = await api.get(`/messages/${activeChat.id}`);
-        setMessages(res.data.messages);
-      } catch (err) {
-        console.error("Failed to load messages", err);
-      } finally {
-        setLoading(false);
+  // Join and leave conversation rooms
+  useEffect(() => {
+    if (!socket || !activeChat?.id) return;
+
+    const conversationId = activeChat.id;
+
+    const joinRoom = () => {
+      console.log("Joining conversation:", conversationId);
+      socket.emit("join_conversation", conversationId);
+    };
+
+    const leaveRoom = () => {
+      console.log("Leaving conversation:", conversationId);
+      socket.emit("leave_conversation", conversationId);
+    };
+
+    // Join immediately if already connected
+    if (socket.connected) {
+      joinRoom();
+    }
+
+    // Rejoin automatically after reconnection
+    socket.on("connect", joinRoom);
+
+    return () => {
+      socket.off("connect", joinRoom);
+
+      if (socket.connected) {
+        leaveRoom();
       }
     };
+  }, [socket, activeChat?.id]);
+
+  // Fetch messages whenever active chat changes
+  useEffect(() => {
+    if (!activeChat?.id) {
+      setMessages([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    const fetchMessages = async () => {
+      setMessages([]);
+      setLoading(true);
+
+      try {
+        const res = await api.get(`/messages/${activeChat.id}`);
+
+        if (!cancelled) {
+          setMessages(res.data.messages);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error("Failed to load messages", err);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
     fetchMessages();
+
+    return () => {
+      cancelled = true;
+    };
   }, [activeChat?.id]);
 
-  // 2. Append a newly sent message to the UI instantly
+  // Listen for incoming real-time messages
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleReceiveMessage = (message) => {
+      if (String(message.conversation_id) !== String(activeChat?.id)) {
+        return;
+      }
+
+      setMessages((prev) => {
+        if (prev.some((msg) => msg.id === message.id)) {
+          return prev;
+        }
+
+        return [...prev, message];
+      });
+    };
+
+    socket.on("receive_message", handleReceiveMessage);
+
+    return () => {
+      socket.off("receive_message", handleReceiveMessage);
+    };
+  }, [socket, activeChat?.id]);
+
+  // Handle messages sent by current user
   const handleMessageSent = (newMessage) => {
-    setMessages((prev) => [...prev, newMessage]);
+    setMessages((prev) => {
+      if (prev.some((msg) => msg.id === newMessage.id)) {
+        return prev;
+      }
+
+      return [...prev, newMessage];
+    });
   };
+
+  // Automatically scroll to the latest message
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  }, [messages, loading]);
 
   return (
     <div
@@ -69,17 +163,14 @@ const ChatWindow = ({ activeChat, showMobileChat, onBack }) => {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400 sm:gap-2">
-          <button className="rounded-full p-2 hover:bg-slate-100 dark:hover:bg-slate-800">
-            <Phone className="h-5 w-5" />
-          </button>
-          <button className="rounded-full p-2 hover:bg-slate-100 dark:hover:bg-slate-800">
-            <Video className="h-5 w-5" />
-          </button>
-          <button className="rounded-full p-2 hover:bg-slate-100 dark:hover:bg-slate-800">
-            <MoreVertical className="h-5 w-5" />
-          </button>
-        </div>
+
+        <button
+          onClick={onEditClick}
+          className="flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 px-4 py-1.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+        >
+          <Settings2 className="h-4 w-4" />
+          <span className="hidden sm:inline">Edit</span>
+        </button>
       </div>
 
       {/* Message Area */}
@@ -103,22 +194,20 @@ const ChatWindow = ({ activeChat, showMobileChat, onBack }) => {
               <div className="mb-4 rounded-full bg-slate-200/80 px-4 py-2 text-[13px] font-medium text-slate-600 backdrop-blur-sm dark:bg-slate-800/80 dark:text-slate-300">
                 No messages yet
               </div>
+
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 Say hi to {activeChat?.name?.split(" ")[0] || "them"} to start
                 the conversation!
               </p>
             </div>
           ) : (
-            <>
-              {messages.map((msg) => (
-                <MessageBubble key={msg.id} message={msg} />
-              ))}
-            </>
+            messages.map((msg) => <MessageBubble key={msg.id} message={msg} />)
           )}
+
+          <div ref={messagesEndRef} />
         </div>
       </div>
 
-      {/* Pass the conversation ID and the callback to append messages */}
       <MessageInput
         conversationId={activeChat?.id}
         onMessageSent={handleMessageSent}

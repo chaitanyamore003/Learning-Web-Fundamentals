@@ -1,4 +1,3 @@
-// src/components/chat/MessageInput.jsx
 import { useState } from "react";
 import { Send } from "lucide-react";
 import api from "../../lib/axios";
@@ -9,15 +8,17 @@ const MessageInput = ({ conversationId, onMessageSent }) => {
 
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!text.trim() || !conversationId) return;
+
+    if (!text.trim() || !conversationId || sending) return;
 
     setSending(true);
+
     try {
       const res = await api.post("/messages", {
         conversationId,
         content: text.trim(),
       });
-      // Tell the parent component a new message was created
+
       onMessageSent(res.data.message);
       setText("");
     } catch (err) {
@@ -41,10 +42,11 @@ const MessageInput = ({ conversationId, onMessageSent }) => {
           disabled={sending}
           className="w-full rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-black/20"
         />
+
         <button
           type="submit"
           disabled={!text.trim() || sending}
-          className="cursor-pointer grid h-10 w-10 shrink-0 place-items-center rounded-full bg-blue-600 text-white transition hover:bg-blue-700 disabled:opacity-50"
+          className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full bg-blue-600 text-white transition hover:bg-blue-700 disabled:opacity-50"
         >
           <Send className="h-4 w-4" />
         </button>

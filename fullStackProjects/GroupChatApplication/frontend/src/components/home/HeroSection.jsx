@@ -61,10 +61,7 @@ export default function HeroSection() {
             <>
               Good things start
               <br />
-              with a{" "}
-              <span className="bg-gradient-to-r from-blue-600 via-indigo-500 to-cyan-500 bg-clip-text text-transparent">
-                hello.
-              </span>
+              with a <span className="text-blue-600">Hi.</span>
             </>
           )}
         </h1>

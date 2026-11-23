@@ -1,19 +1,17 @@
-// src/components/chat/MessageBubble.jsx
 import { CheckCheck } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 const MessageBubble = ({ message }) => {
   const { user } = useAuth();
 
-  // 1. Dynamically determine if the message was sent by the logged-in user
-  // We check both sender_id (snake_case from DB) and senderId (camelCase)
+  // Determine message ownership
   const isMine =
-    message.sender_id === user?.id || message.senderId === user?.id;
+    String(message.sender_id ?? message.senderId) === String(user?.id);
 
-  // 2. Use `content` instead of `text` (matches our Sequelize model)
+  // Message content
   const content = message.content || "";
 
-  // 3. Format the real timestamp from the database
+  // Format timestamp
   const formattedTime =
     message.createdAt || message.created_at
       ? new Date(message.createdAt || message.created_at).toLocaleTimeString(
@@ -25,6 +23,9 @@ const MessageBubble = ({ message }) => {
         )
       : "";
 
+  // Detect URLs
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+
   return (
     <div className={`flex w-full ${isMine ? "justify-end" : "justify-start"}`}>
       <div
@@ -35,14 +36,13 @@ const MessageBubble = ({ message }) => {
         }`}
       >
         <div className="whitespace-pre-wrap break-words">
-          {/* Parse links dynamically based on content */}
-          {content.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
-            part.match(/https?:\/\/[^\s]+/) ? (
+          {content.split(urlRegex).map((part, i) =>
+            part.match(urlRegex) ? (
               <a
                 key={i}
                 href={part}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className={`underline ${
                   isMine
                     ? "text-blue-200 hover:text-white"
@@ -57,14 +57,14 @@ const MessageBubble = ({ message }) => {
           )}
         </div>
 
-        {/* Time & Read Receipts */}
+        {/* Time and Read Receipts */}
         <div
           className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${
             isMine ? "text-blue-200" : "text-slate-400"
           }`}
         >
           <span>{formattedTime}</span>
-          {/* Only show checks if it's our message */}
+
           {isMine && <CheckCheck className="h-3 w-3" />}
         </div>
       </div>

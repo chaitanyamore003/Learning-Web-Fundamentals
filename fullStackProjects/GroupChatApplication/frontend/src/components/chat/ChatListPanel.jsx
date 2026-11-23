@@ -9,6 +9,8 @@ const ChatListPanel = ({
   onChatSelect,
   showMobileChat,
   loading,
+  onCreateGroup, // New prop
+  isGroupTab, // New prop
 }) => {
   return (
     <div
@@ -21,6 +23,17 @@ const ChatListPanel = ({
         <Link to={"/"} className="text-xl font-extrabold tracking-tighter">
           Said Hi<span className="text-blue-600">.</span>
         </Link>
+
+        {/* Show + button only on the Groups tab */}
+        {isGroupTab && (
+          <button
+            onClick={onCreateGroup}
+            className="grid h-8 w-8 cursor-pointer place-items-center rounded-full bg-blue-100 text-blue-600 transition hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+            title="Create New Group"
+          >
+            <Plus className="h-5 w-5" />
+          </button>
+        )}
       </div>
 
       {/* Search & Filters */}
@@ -63,10 +76,12 @@ const ChatListPanel = ({
               <MessageSquare className="h-6 w-6 text-slate-400" />
             </div>
             <p className="text-sm font-medium text-slate-900 dark:text-white">
-              No chats yet
+              {isGroupTab ? "No groups yet" : "No chats yet"}
             </p>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              Start a new conversation by clicking the +
+              {isGroupTab
+                ? "Create a new group by clicking the +"
+                : "Start a new conversation from the Discover tab"}
             </p>
           </div>
         ) : (

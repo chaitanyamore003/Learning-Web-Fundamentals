@@ -30,3 +30,8 @@ export const getUserProfile = async (req, res) => {
   const user = await userService.getUserById(req.params.id);
   res.status(200).json({ success: true, user });
 };
+
+export const getAllUsers = async (req, res) => {
+  const users = await userService.getAllUsers(req.user.id);
+  res.status(200).json({ success: true, users });
+};
