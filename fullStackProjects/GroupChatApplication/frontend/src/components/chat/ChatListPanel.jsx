@@ -1,9 +1,15 @@
 // src/components/chat/ChatListPanel.jsx
-import { Search, Plus, MoreVertical, MessageSquare } from "lucide-react";
+import { Search, Plus, MessageSquare, Loader2 } from "lucide-react";
 import ChatListItem from "./ChatListItem";
 import { Link } from "react-router-dom";
 
-const ChatListPanel = ({ chats, activeChat, onChatSelect, showMobileChat }) => {
+const ChatListPanel = ({
+  chats,
+  activeChat,
+  onChatSelect,
+  showMobileChat,
+  loading,
+}) => {
   return (
     <div
       className={`w-full flex-col border-r border-slate-200/60 bg-white/40 backdrop-blur-xl dark:border-white/10 dark:bg-[#09090b]/40 sm:flex sm:w-[350px] lg:w-[400px] ${
@@ -15,14 +21,6 @@ const ChatListPanel = ({ chats, activeChat, onChatSelect, showMobileChat }) => {
         <Link to={"/"} className="text-xl font-extrabold tracking-tighter">
           Said Hi<span className="text-blue-600">.</span>
         </Link>
-        <div className="flex items-center gap-2">
-          <button className="rounded-full p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
-            <Plus className="h-5 w-5" />
-          </button>
-          <button className="rounded-full p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
-            <MoreVertical className="h-5 w-5" />
-          </button>
-        </div>
       </div>
 
       {/* Search & Filters */}
@@ -53,7 +51,12 @@ const ChatListPanel = ({ chats, activeChat, onChatSelect, showMobileChat }) => {
 
       {/* List */}
       <div className="flex-1 overflow-y-auto">
-        {chats.length === 0 ? (
+        {loading ? (
+          // Loading State
+          <div className="flex h-full items-center justify-center">
+            <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+          </div>
+        ) : chats.length === 0 ? (
           // Empty State
           <div className="flex h-full flex-col items-center justify-center p-6 text-center">
             <div className="mb-3 grid h-12 w-12 place-items-center rounded-full bg-slate-100 dark:bg-slate-800">
@@ -72,7 +75,6 @@ const ChatListPanel = ({ chats, activeChat, onChatSelect, showMobileChat }) => {
             <ChatListItem
               key={chat.id}
               chat={chat}
-              // Safe check: if activeChat is null, it evaluates to false
               isActive={activeChat?.id === chat.id}
               onClick={() => onChatSelect(chat)}
             />

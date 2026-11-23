@@ -1,5 +1,10 @@
 import { Op } from "sequelize";
-import { Conversation, ConversationMember, User } from "../../models/index.js";
+import {
+  Conversation,
+  ConversationMember,
+  User,
+  Message,
+} from "../../models/index.js";
 import { AppError } from "../../utils/errors.js";
 
 export const startDirectConversation = async (currentUserId, targetUserId) => {
@@ -77,27 +82,38 @@ export const getUserConversations = async (userId) => {
   if (!user) throw new AppError("User not found", 404);
 
   // 2. Format the data for the frontend ChatListPanel
-  return user.conversations.map((conv) => {
-    // If it's a DIRECT chat, the name/avatar should be the OTHER person
-    let displayName = conv.name;
-    let displayAvatar = conv.group_image;
+  return user.conversations
+    .map((conv) => {
+      // If it's a DIRECT chat, the name/avatar should be the OTHER person
+      let displayName = conv.name;
+      let displayAvatar = conv.group_image;
 
-    if (conv.type === "DIRECT") {
-      const otherUser = conv.members.find((m) => m.id !== Number(userId));
-      displayName = otherUser?.name || "Unknown User";
-      displayAvatar = otherUser?.profile_picture || null;
-    }
+      if (conv.type === "DIRECT") {
+        const otherUser = conv.members.find((m) => m.id !== Number(userId));
+        displayName = otherUser?.name || "Unknown User";
+        displayAvatar = otherUser?.profile_picture || null;
+      }
 
-    const lastMsg = conv.messages && conv.messages.length > 0 ? conv.messages[0] : null;
+      const lastMsg =
+        conv.messages && conv.messages.length > 0 ? conv.messages[0] : null;
 
-    return {
-      id: conv.id,
-      type: conv.type,
-      name: displayName,
-      avatar: displayAvatar,
-      lastMessage: lastMsg ? lastMsg.content : "No messages yet",
-      time: lastMsg ? new Date(lastMsg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "",
-      targetUserId: conv.type === "DIRECT" ? conv.members.find((m) => m.id !== Number(userId))?.id : null,
-    };
-  }).sort((a, b) => b.id - a.id); // Sort by newest conversations
+      return {
+        id: conv.id,
+        type: conv.type,
+        name: displayName,
+        avatar: displayAvatar,
+        lastMessage: lastMsg ? lastMsg.content : "No messages yet",
+        time: lastMsg
+          ? new Date(lastMsg.createdAt).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "",
+        targetUserId:
+          conv.type === "DIRECT"
+            ? conv.members.find((m) => m.id !== Number(userId))?.id
+            : null,
+      };
+    })
+    .sort((a, b) => b.id - a.id); // Sort by newest conversations
 };

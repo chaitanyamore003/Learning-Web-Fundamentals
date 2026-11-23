@@ -91,7 +91,7 @@ const SidebarNav = ({ activeTab, setActiveTab }) => {
         {/* User Profile Avatar -> Routes to Settings */}
         <button
           onClick={() => navigate("/settings")}
-          className="group relative mt-1 flex h-10 w-10 items-center justify-center rounded-full border-2 border-transparent transition-all hover:border-blue-500"
+          className="cursor-pointer group relative mt-1 flex h-10 w-10 items-center justify-center rounded-full border-2 border-transparent transition-all hover:border-blue-500"
         >
           {user?.profile_picture ? (
             <img
@@ -108,7 +108,7 @@ const SidebarNav = ({ activeTab, setActiveTab }) => {
           <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500 dark:border-[#09090b]" />
 
           <div className="pointer-events-none absolute left-full z-50 ml-3 flex items-center opacity-0 transition-opacity group-hover:opacity-100">
-            <div className="h-2 w-2 rotate-45 bg-slate-800 dark:bg-slate-200" />
+            <div className=" h-2 w-2 rotate-45 bg-slate-800 dark:bg-slate-200" />
             <span className="whitespace-nowrap rounded-md bg-slate-800 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm dark:bg-slate-200 dark:text-slate-900">
               My Account
             </span>

@@ -44,7 +44,7 @@ const MessageInput = ({ conversationId, onMessageSent }) => {
         <button
           type="submit"
           disabled={!text.trim() || sending}
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-blue-600 text-white transition hover:bg-blue-700 disabled:opacity-50"
+          className="cursor-pointer grid h-10 w-10 shrink-0 place-items-center rounded-full bg-blue-600 text-white transition hover:bg-blue-700 disabled:opacity-50"
         >
           <Send className="h-4 w-4" />
         </button>
