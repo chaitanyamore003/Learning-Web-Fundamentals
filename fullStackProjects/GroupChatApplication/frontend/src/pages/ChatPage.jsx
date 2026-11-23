@@ -1,32 +1,100 @@
 // src/pages/ChatPage.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import SidebarNav from "../components/layout/SidebarNav";
 import ChatListPanel from "../components/chat/ChatListPanel";
 import ChatWindow from "../components/chat/ChatWindow";
 import DiscoverPanel from "../components/chat/DiscoverPanel";
+import { startDirectConversation } from "../api/conversations";
+import api from "../lib/axios"; // Added import
 
 const ChatPage = () => {
-  // 1. New state to control which middle panel is visible
-  const [activeTab, setActiveTab] = useState("chats"); // "chats" | "groups" | "people"
-
+  const [activeTab, setActiveTab] = useState("chats");
   const [chats, setChats] = useState([]);
   const [activeChat, setActiveChat] = useState(null);
   const [showMobileChat, setShowMobileChat] = useState(false);
+
+  // Added loading state
+  const [loadingChats, setLoadingChats] = useState(true);
+
+  const location = useLocation();
+
+  // 1. Fetch the user's conversations when the page loads
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        const res = await api.get("/conversations");
+        setChats(res.data.conversations);
+      } catch (err) {
+        console.error("Failed to fetch conversations", err);
+      } finally {
+        setLoadingChats(false);
+      }
+    };
+    fetchChats();
+  }, []);
+
+  // 2. If redirected from ProfilePage, open the specific chat and add to list if missing
+  useEffect(() => {
+    if (location.state?.openConversation) {
+      const newChat = location.state.openConversation;
+
+      setActiveChat(newChat);
+      setShowMobileChat(true);
+      setActiveTab("chats");
+
+      // Add to chats list if it's a brand new conversation
+      setChats((prev) => {
+        if (!prev.find((c) => c.id === newChat.id)) {
+          return [newChat, ...prev];
+        }
+        return prev;
+      });
+    }
+  }, [location.state]);
 
   const handleChatSelect = (chat) => {
     setActiveChat(chat);
     setShowMobileChat(true);
   };
 
+  // Called when clicking "Message" in DiscoverPanel
+  const handleStartChat = async (targetUser) => {
+    try {
+      const data = await startDirectConversation(targetUser.id);
+
+      const newChat = {
+        id: data.conversation.id,
+        name: data.targetUser.name,
+        avatar: data.targetUser.profile_picture,
+        targetUserId: data.targetUser.id,
+        lastMessage: "No messages yet",
+        time: "",
+        online: false,
+      };
+
+      setChats((prev) => {
+        if (!prev.find((c) => c.id === newChat.id)) {
+          return [newChat, ...prev];
+        }
+        return prev;
+      });
+
+      handleChatSelect(newChat);
+    } catch (err) {
+      console.error("Failed to start chat", err);
+      alert("Failed to start conversation.");
+    }
+  };
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-[#f8faff] font-sans text-slate-900 dark:bg-[#080b14] dark:text-white">
-      {/* Left Rail: Pass the activeTab and setter down */}
       <SidebarNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      {/* Middle Panel: Render based on activeTab */}
       {(activeTab === "chats" || activeTab === "groups") && (
         <ChatListPanel
           chats={chats}
+          loading={loadingChats} // Pass the loading state down
           activeChat={activeChat}
           onChatSelect={handleChatSelect}
           showMobileChat={showMobileChat}
@@ -34,10 +102,9 @@ const ChatPage = () => {
       )}
 
       {activeTab === "people" && (
-        <DiscoverPanel onChatSelect={handleChatSelect} />
+        <DiscoverPanel onStartChat={handleStartChat} />
       )}
 
-      {/* Right Panel: Chat Window */}
       {activeChat ? (
         <ChatWindow
           activeChat={activeChat}

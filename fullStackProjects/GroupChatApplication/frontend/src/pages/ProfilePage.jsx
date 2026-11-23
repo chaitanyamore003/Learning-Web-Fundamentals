@@ -11,19 +11,22 @@ import {
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/axios";
-import Navbar from "../components/common/Navbar"; // Fixed import path
+import { startDirectConversation } from "../api/conversations";
+import Navbar from "../components/common/Navbar";
 
 const ProfilePage = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
-  const { user: currentUser } = useAuth(); // The logged-in user
+  const { user: currentUser } = useAuth();
 
   const [profileUser, setProfileUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // New state for the message button
+  const [startingChat, setStartingChat] = useState(false);
+
   useEffect(() => {
-    // If the user is trying to view their own profile, send them to Settings
     if (currentUser && currentUser.id.toString() === userId.toString()) {
       navigate("/settings", { replace: true });
       return;
@@ -42,9 +45,26 @@ const ProfilePage = () => {
     fetchProfile();
   }, [userId, currentUser, navigate]);
 
-  const handleMessage = () => {
-    // We will wire this up to the "Create Conversation" API next!
-    alert(`Creating conversation with ${profileUser.name}...`);
+  const handleMessage = async () => {
+    setStartingChat(true);
+    try {
+      const data = await startDirectConversation(profileUser.id);
+
+      // Format the chat data for ChatPage
+      const chatData = {
+        id: data.conversation.id,
+        name: data.targetUser.name,
+        avatar: data.targetUser.profile_picture,
+        targetUserId: data.targetUser.id,
+      };
+
+      // Navigate to chat and pass the conversation data
+      navigate("/chat", { state: { openConversation: chatData } });
+    } catch (err) {
+      console.error(err);
+      alert("Failed to start conversation. Please try again.");
+      setStartingChat(false);
+    }
   };
 
   if (loading) {
@@ -73,7 +93,6 @@ const ProfilePage = () => {
     );
   }
 
-  // Format "Last seen"
   const lastSeenText = profileUser.last_seen
     ? new Date(profileUser.last_seen).toLocaleString([], {
         dateStyle: "medium",
@@ -85,23 +104,24 @@ const ProfilePage = () => {
     <div className="min-h-screen bg-[#f7f9ff] pb-20 font-sans text-slate-900 dark:bg-[#080b14] dark:text-white">
       <Navbar />
 
-      <div className="mx-auto max-w-2xl px-4 pt-28">
+      <div className="mx-auto max-w-5xl px-4 pt-28 sm:px-6">
+        {/* Back */}
         <button
           onClick={() => navigate(-1)}
-          className="mb-6 inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+          className="mb-6 inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" /> Back
         </button>
 
-        {/* Main Profile Card */}
-        <div className="overflow-hidden rounded-[2rem] border border-slate-200/60 bg-white/70 shadow-2xl shadow-slate-200/20 backdrop-blur-xl dark:border-white/10 dark:bg-[#09090b]/70 dark:shadow-black/40">
-          {/* Cover Banner */}
-          <div className="h-40 w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-90 dark:opacity-70" />
+        <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
+          {/* ── Left: Identity card ───────────────────────────── */}
+          <aside className="h-fit overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-sm dark:border-white/10 dark:bg-[#0d1019]">
+            {/* Slim gradient accent */}
+            <div className="h-1 w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
 
-          <div className="px-6 pb-10 text-center sm:px-12">
-            {/* Avatar */}
-            <div className="-mt-20 mb-5 flex justify-center">
-              <div className="relative h-36 w-36 overflow-hidden rounded-full border-4 border-white bg-slate-100 shadow-xl dark:border-[#09090b] dark:bg-slate-800">
+            <div className="p-6">
+              {/* Avatar */}
+              <div className="h-24 w-24 overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-200/70 dark:bg-slate-800 dark:ring-white/10">
                 <img
                   src={
                     profileUser.profile_picture ||
@@ -112,60 +132,77 @@ const ProfilePage = () => {
                   className="h-full w-full object-cover"
                 />
               </div>
-            </div>
 
-            {/* Name & Status */}
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              {profileUser.name}
-            </h1>
-            <p className="mt-2 flex items-center justify-center gap-1.5 text-sm font-medium text-slate-500 dark:text-slate-400">
-              <Clock className="h-4 w-4" />
-              Last seen {lastSeenText}
-            </p>
+              {/* Name */}
+              <h1 className="mt-5 text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                {profileUser.name}
+              </h1>
 
-            {/* Action Buttons */}
-            <div className="mt-8 flex justify-center gap-3">
+              {/* Last seen */}
+              <p className="mt-1.5 flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+                <Clock className="h-3.5 w-3.5" />
+                Last seen {lastSeenText}
+              </p>
+
+              {/* Divider */}
+              <div className="my-6 h-px w-full bg-slate-100 dark:bg-white/5" />
+
+              {/* Action */}
               <button
                 onClick={handleMessage}
-                className="inline-flex w-full max-w-[250px] cursor-pointer items-center justify-center gap-2 rounded-full bg-blue-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-600/30 sm:w-auto"
+                disabled={startingChat}
+                className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:opacity-50 dark:focus-visible:ring-offset-[#0d1019]"
               >
-                <MessageCircle className="h-5 w-5" /> Send Message
+                {startingChat ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <MessageCircle className="h-4 w-4" />
+                )}
+                {startingChat ? "Opening..." : "Send Message"}
               </button>
             </div>
+          </aside>
 
-            {/* Info Section */}
-            <div className="mt-10 grid gap-4 rounded-2xl bg-slate-50/80 p-6 text-left dark:bg-slate-900/60 sm:grid-cols-2">
+          {/* ── Right: Contact information ────────────────────── */}
+          <section className="overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-sm dark:border-white/10 dark:bg-[#0d1019]">
+            <div className="border-b border-slate-100 px-6 py-4 dark:border-white/5">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                Contact information
+              </h2>
+            </div>
+
+            <div className="divide-y divide-slate-100 dark:divide-white/5">
               {/* Phone */}
-              <div className="flex items-center gap-4 rounded-xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+              <div className="flex items-center gap-4 px-6 py-5">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
                   <Phone className="h-4 w-4" />
                 </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
                     Phone
                   </p>
-                  <p className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
+                  <p className="mt-0.5 truncate text-sm font-medium text-slate-900 dark:text-slate-100">
                     {profileUser.phone || "Not provided"}
                   </p>
                 </div>
               </div>
 
               {/* Email */}
-              <div className="flex items-center gap-4 rounded-xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+              <div className="flex items-center gap-4 px-6 py-5">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
                   <Mail className="h-4 w-4" />
                 </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
                     Email
                   </p>
-                  <p className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
+                  <p className="mt-0.5 break-all text-sm font-medium text-slate-900 dark:text-slate-100">
                     {profileUser.email || "Not provided"}
                   </p>
                 </div>
               </div>
             </div>
-          </div>
+          </section>
         </div>
       </div>
     </div>
