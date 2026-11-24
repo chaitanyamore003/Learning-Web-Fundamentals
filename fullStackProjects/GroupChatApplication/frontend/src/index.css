@@ -175,3 +175,53 @@
     stroke-dashoffset: 0;
   }
 }
+
+/* ===== CTA Section animations ===== */
+
+/* Shine sweep on CTA button hover */
+.cta-btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.cta-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(37, 99, 235, 0.1) 45%,
+    rgba(37, 99, 235, 0.28) 50%,
+    rgba(37, 99, 235, 0.1) 55%,
+    transparent 70%
+  );
+  background-size: 250% 100%;
+  background-position: 150% 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.cta-btn:hover::after {
+  opacity: 1;
+  animation: cta-shine 1.4s ease-in-out infinite;
+}
+
+@keyframes cta-shine {
+  0% {
+    background-position: 150% 0;
+  }
+  100% {
+    background-position: -50% 0;
+  }
+}
+
+/* Respect user's reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .cta-btn:hover::after {
+    animation: none;
+    opacity: 0;
+  }
+}

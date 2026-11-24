@@ -143,10 +143,9 @@ export default function HeroSection() {
       </div>
 
       {/* ── Marquee ticker ─────────────────────────────────── */}
-      <div className="relative mt-20 border-y border-slate-200/70 bg-white/50 py-4 backdrop-blur-sm dark:border-white/[0.07] dark:bg-white/[0.02] sm:mt-24">
-        {/* Edge fades */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-slate-50 to-transparent dark:from-[#05070f]" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-slate-50 to-transparent dark:from-[#05070f]" />
+      <div className="relative mt-20 -mx-5 border-y border-slate-200/70 bg-white/50 py-4 backdrop-blur-sm dark:border-white/[0.07] dark:bg-white/[0.02] sm:mt-24 sm:-mx-8">
+        {/* Edge fades — full width, zero fade in the middle */}
+        <div className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(to_right,#f8fafc_0%,transparent_14%,transparent_86%,#f8fafc_100%)] dark:bg-[linear-gradient(to_right,#05070f_0%,transparent_14%,transparent_86%,#05070f_100%)]" />
 
         <div className="flex w-max animate-[marquee_28s_linear_infinite] items-center gap-14 pr-14 hover:[animation-play-state:paused]">
           {[...tickerItems, ...tickerItems, ...tickerItems, ...tickerItems].map(
