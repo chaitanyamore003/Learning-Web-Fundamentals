@@ -19,12 +19,12 @@ const ChatWindow = ({ activeChat, showMobileChat, onBack, onEditClick }) => {
     const conversationId = activeChat.id;
 
     const joinRoom = () => {
-      console.log("Joining conversation:", conversationId);
+      
       socket.emit("join_conversation", conversationId);
     };
 
     const leaveRoom = () => {
-      console.log("Leaving conversation:", conversationId);
+    
       socket.emit("leave_conversation", conversationId);
     };
 

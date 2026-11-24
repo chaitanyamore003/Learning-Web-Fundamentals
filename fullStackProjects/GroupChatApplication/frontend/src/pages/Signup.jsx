@@ -15,6 +15,7 @@ import {
 import { isEmail, isPhone } from "../utils/validators";
 import AuthLayout from "../components/layout/AuthLayout";
 import { uploadToCloudinary } from "../utils/cloudinary";
+import { useAuth } from "../context/AuthContext";
 
 const initialValues = { name: "", email: "", phone: "", password: "" };
 
@@ -43,6 +44,7 @@ const inputClass = (hasError, extra = "") =>
 
 const Signup = ({ onSubmit }) => {
   const navigate = useNavigate();
+  const { signup } = useAuth();
 
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
@@ -149,14 +151,8 @@ const Signup = ({ onSubmit }) => {
         payload.profile_picture = selectedPreset;
       }
 
-      if (onSubmit) {
-        await onSubmit(payload);
-      } else {
-        await new Promise((resolve) => setTimeout(resolve, 800));
-      }
+      await signup(payload); // 3. use it here
 
-      // Success → straight into the chat. The AuthContext has already
-      // stored the token and user by the time onSubmit resolves.
       navigate("/chat", { replace: true });
     } catch (err) {
       setErrors({

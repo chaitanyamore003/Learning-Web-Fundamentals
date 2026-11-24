@@ -34,17 +34,14 @@ export const SocketProvider = ({ children }) => {
     });
 
     socketInstance.on("connect", () => {
-      console.log("Socket connected:", socketInstance.id);
       setIsConnected(true);
     });
 
     socketInstance.on("disconnect", (reason) => {
-      console.log("Socket disconnected:", reason);
       setIsConnected(false);
     });
 
     socketInstance.on("connect_error", (error) => {
-      console.error("Socket connection error:", error.message);
       setIsConnected(false);
     });
 
