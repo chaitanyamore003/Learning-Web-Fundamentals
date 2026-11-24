@@ -1,8 +1,20 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Check, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  Sparkles,
+  MessageCircle,
+  Zap,
+  Globe,
+  Users,
+} from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
-const assurances = ["Simple to use", "Stay in sync", "Made for conversations"];
+const tickerItems = [
+  { icon: MessageCircle, text: "Real-time conversations" },
+  { icon: Zap, text: "Instant delivery" },
+  { icon: Globe, text: "Made for everyone, everywhere" },
+  { icon: Users, text: "Rooms & group chats" },
+];
 
 export default function HeroSection() {
   const { user, loading } = useAuth();
@@ -11,49 +23,60 @@ export default function HeroSection() {
   return (
     <section
       id="home"
-      className="relative isolate overflow-hidden px-5 pb-28 pt-36 sm:px-8 sm:pb-36 sm:pt-44 lg:pt-48"
+      className="relative isolate overflow-hidden px-5 pb-0 pt-32 sm:px-8 sm:pt-40 lg:pt-44"
     >
-      {/* Background atmosphere */}
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        {/* Focused spotlight */}
-        <div className="absolute left-1/2 top-[-100px] h-[520px] w-[min(100%,1000px)] -translate-x-1/2 rounded-full bg-blue-500/[0.12] blur-[130px] dark:bg-blue-500/[0.18]" />
+      {/* ── Aurora mesh background ─────────────────────────── */}
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden bg-slate-50 dark:bg-[#05070f]">
+        {/* Living aurora blobs */}
+        <div className="absolute left-1/2 top-[-180px] h-[560px] w-[min(110%,1100px)] animate-[aurora_14s_ease-in-out_infinite] rounded-[45%_55%_60%_40%/50%_45%_55%_50%] bg-gradient-to-br from-blue-500/25 via-indigo-500/20 to-cyan-400/20 blur-[100px] dark:from-blue-600/30 dark:via-indigo-600/25 dark:to-cyan-500/20" />
+        <div className="absolute left-1/2 top-[60px] h-[420px] w-[min(70%,700px)] animate-[aurora-2_18s_ease-in-out_infinite] rounded-[60%_40%_45%_55%/55%_60%_40%_45%] bg-gradient-to-tr from-violet-500/15 via-blue-400/15 to-fuchsia-400/10 blur-[90px]" />
 
-        {/* Inner indigo glow */}
-        <div className="absolute left-1/2 top-[40px] h-[380px] w-[min(80%,700px)] -translate-x-1/2 rounded-full bg-indigo-400/[0.10] blur-[110px] dark:bg-indigo-500/[0.13]" />
+        {/* Gradient hairline top edge */}
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/40 to-transparent" />
 
-        {/* Subtle cyan highlight */}
-        <div className="absolute left-1/2 top-[100px] h-[220px] w-[min(55%,500px)] -translate-x-1/2 rounded-full bg-cyan-400/[0.08] blur-[90px] dark:bg-cyan-400/[0.08]" />
-
-        {/* Subtle grid */}
+        {/* Grid with radial fade */}
         <div
-          className="absolute inset-0 opacity-[0.025] dark:opacity-[0.035]"
+          className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
           style={{
             backgroundImage:
               "linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
+            backgroundSize: "56px 56px",
             maskImage:
-              "radial-gradient(ellipse 55% 45% at 50% 30%, black, transparent)",
+              "radial-gradient(ellipse 60% 50% at 50% 28%, black, transparent)",
             WebkitMaskImage:
-              "radial-gradient(ellipse 55% 45% at 50% 30%, black, transparent)",
+              "radial-gradient(ellipse 60% 50% at 50% 28%, black, transparent)",
           }}
         />
+
+        {/* Film grain */}
+        <div
+          className="absolute inset-0 opacity-[0.35] dark:opacity-[0.25]"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E\")",
+          }}
+        />
+
+        {/* Bottom fade into next section */}
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-slate-50 to-transparent dark:from-[#05070f]" />
       </div>
 
-      {/* Hero content */}
+      {/* ── Content ────────────────────────────────────────── */}
       <div className="relative mx-auto max-w-5xl text-center">
-        {/* Eyebrow */}
-        <div className="mb-9 inline-flex items-center gap-2 rounded-full border border-blue-200/70 bg-white/75 px-4 py-2 text-xs font-semibold text-blue-700 shadow-[0_4px_20px_rgba(37,99,235,0.07)] backdrop-blur-xl dark:border-blue-400/20 dark:bg-blue-500/[0.08] dark:text-blue-300">
-          <Sparkles className="h-3.5 w-3.5" />
+        {/* Live-status badge */}
+        <div className="text-blue-600 mb-10 inline-flex items-center gap-2.5 rounded-full border border-slate-200/80 bg-white/70 py-1.5 pl-3 pr-4 text-xs font-medium shadow-[0_2px_16px_rgba(15,23,42,0.05)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-300">
+          <span className="h-2 w-2 animate-[pulse-dot_2.2s_ease-in-out_infinite] rounded-full bg-emerald-500" />
+          <Sparkles className="h-3.5 w-3.5 text-blue-500" />
           Conversations, made better.
         </div>
 
-        {/* Heading */}
-        <h1 className="text-balance text-[3.5rem] font-extrabold leading-[1.02] tracking-[-0.065em] text-slate-950 sm:text-6xl md:text-7xl lg:text-[6rem] dark:text-white">
+        {/* Heading with animated gradient word */}
+        <h1 className="text-balance text-[3.2rem] font-extrabold leading-[1.0] tracking-[-0.06em] text-slate-950 dark:text-white sm:text-6xl md:text-7xl lg:text-[6.2rem]">
           {isAuthed ? (
             <>
               Welcome back
               <br />
-              <span className="text-blue-600 ">
+              <span className="text-blue-600">
                 {(user.name || "friend").split(" ")[0]}.
               </span>
             </>
@@ -61,53 +84,82 @@ export default function HeroSection() {
             <>
               Good things start
               <br />
-              with a <span className="text-blue-600">Hi.</span>
+              with a{" "}
+              <span className="relative inline-block">
+                {/* Animated gradient text */}
+                <span className="text-blue-600">Hi.</span>
+                {/* Hand-drawn underline stroke */}
+                <svg
+                  className="absolute -bottom-2 left-0 w-full text-blue-600"
+                  viewBox="0 0 120 12"
+                  fill="none"
+                  preserveAspectRatio="none"
+                >
+                  <path
+                    d="M3 9 C 30 3, 60 3, 117 7"
+                    stroke="currentColor"
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </span>
             </>
           )}
         </h1>
 
         {/* Description */}
-        <p className="mx-auto mt-8 max-w-2xl text-pretty text-base leading-8 text-slate-600 dark:text-slate-400 sm:text-lg">
+        <p className="mx-auto mt-9 max-w-xl text-pretty text-base leading-8 text-slate-600 dark:text-slate-400 sm:text-lg">
           {isAuthed
             ? "Your conversations are waiting. Pick up where you left off — or start something new."
             : "More than just messages. Share moments, exchange ideas, and stay close to the people who make every day better."}
         </p>
 
-        {/* CTA buttons */}
-        <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        {/* CTAs */}
+        <div className="mt-11 flex flex-col items-center justify-center gap-3 sm:flex-row">
           {loading ? (
-            <div className="h-12 w-48 animate-pulse rounded-full bg-blue-600/30" />
+            <div className="h-13 w-52 animate-pulse rounded-full bg-slate-200 dark:bg-white/10" />
           ) : (
             <Link
               to={isAuthed ? "/chat" : "/signup"}
-              className="group inline-flex min-h-12 items-center justify-center gap-3 rounded-full bg-blue-600 px-8 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(37,99,235,0.28)] transition duration-300 hover:-translate-y-1 hover:bg-blue-700 hover:shadow-[0_12px_40px_rgba(37,99,235,0.38)] focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/25"
+              className="group relative inline-flex min-h-[52px] items-center justify-center gap-2.5 overflow-hidden rounded-full bg-blue-600 px-9 py-3.5 text-sm font-semibold text-white shadow-[0_10px_36px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_48px_rgba(37,99,235,0.4)] focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/30 dark:bg-white dark:text-slate-950"
             >
+              {/* Shine sweep on hover */}
+              <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
+                <span className="absolute inset-y-0 w-1/3 animate-[shine_2.8s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+              </span>
               {isAuthed ? "Continue to chat" : "Get started for free"}
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           )}
 
           <a
             href="#preview"
-            className="inline-flex min-h-12 items-center justify-center rounded-full border border-slate-200/90 bg-white/70 px-8 py-3 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-blue-300 hover:text-blue-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200 dark:hover:border-blue-400/40 dark:hover:text-blue-300"
+            className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full border border-slate-200/90 bg-white/60 px-9 py-3.5 text-sm font-semibold text-slate-700 backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-slate-300 hover:bg-white dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200 dark:hover:bg-white/[0.08]"
           >
             Explore the experience
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-500 transition-transform duration-300 group-hover:scale-150" />
           </a>
         </div>
+      </div>
 
-        {/* Assurances */}
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
-          {assurances.map((item) => (
-            <span
-              key={item}
-              className="inline-flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400"
-            >
-              <span className="grid h-4 w-4 place-items-center rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">
-                <Check className="h-2.5 w-2.5" />
+      {/* ── Marquee ticker ─────────────────────────────────── */}
+      <div className="relative mt-20 border-y border-slate-200/70 bg-white/50 py-4 backdrop-blur-sm dark:border-white/[0.07] dark:bg-white/[0.02] sm:mt-24">
+        {/* Edge fades */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-slate-50 to-transparent dark:from-[#05070f]" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-slate-50 to-transparent dark:from-[#05070f]" />
+
+        <div className="flex w-max animate-[marquee_28s_linear_infinite] items-center gap-14 pr-14 hover:[animation-play-state:paused]">
+          {[...tickerItems, ...tickerItems, ...tickerItems, ...tickerItems].map(
+            ({ icon: Icon, text }, i) => (
+              <span
+                key={i}
+                className="flex items-center gap-2.5 whitespace-nowrap text-xs font-medium tracking-wide text-slate-500 dark:text-slate-400"
+              >
+                <Icon className="h-3.5 w-3.5 text-blue-500/80" />
+                {text}
               </span>
-              {item}
-            </span>
-          ))}
+            ),
+          )}
         </div>
       </div>
     </section>
