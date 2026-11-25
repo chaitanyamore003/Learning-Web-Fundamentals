@@ -1,7 +1,9 @@
 // src/components/chat/ChatListPanel.jsx
+import { useState, useEffect } from "react";
 import { Search, Plus, MessageSquare, Loader2 } from "lucide-react";
 import ChatListItem from "./ChatListItem";
 import { Link } from "react-router-dom";
+import { useSocket } from "../../context/SocketContext"; // 👈 Import Socket
 
 const getMessagePreview = (message) => {
   if (!message) return "No messages yet";
@@ -9,7 +11,6 @@ const getMessagePreview = (message) => {
   const type = message.message_type || message.messageType || "TEXT";
   const text = message.content || "";
 
-  // If the text looks like an S3 URL but there's no type, infer it
   if (type === "TEXT" && text.startsWith("http")) {
     if (text.match(/\.(jpeg|jpg|gif|png|webp)$/i)) return "📷 Image";
     if (text.match(/\.(mp4|webm|ogg|mov)$/i)) return "🎥 Video";
@@ -17,7 +18,6 @@ const getMessagePreview = (message) => {
     if (text.match(/\.(pdf|doc|docx|xls|xlsx|txt)$/i)) return "📄 Document";
   }
 
-  // If it's a media type, prepend an emoji
   if (type === "IMAGE") return text ? `📷 ${text}` : "📷 Image";
   if (type === "VIDEO") return text ? `🎥 ${text}` : "🎥 Video";
   if (type === "AUDIO") return text ? `🎵 ${text}` : "🎵 Audio";
@@ -35,6 +35,37 @@ const ChatListPanel = ({
   onCreateGroup,
   isGroupTab,
 }) => {
+  const { socket } = useSocket(); // 👈 Get socket instance
+
+  // 👇 State to track real-time online statuses
+  const [onlineStatuses, setOnlineStatuses] = useState({});
+
+  // 👇 Listen to Socket.IO online/offline events
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleInitialOnlineUsers = (onlineUserIds) => {
+      const statuses = {};
+      onlineUserIds.forEach((id) => (statuses[id] = true));
+      setOnlineStatuses(statuses);
+    };
+
+    const handleStatusChange = ({ userId, isOnline }) => {
+      setOnlineStatuses((prev) => ({
+        ...prev,
+        [userId]: isOnline,
+      }));
+    };
+
+    socket.on("initial_online_users", handleInitialOnlineUsers);
+    socket.on("user_status_change", handleStatusChange);
+
+    return () => {
+      socket.off("initial_online_users", handleInitialOnlineUsers);
+      socket.off("user_status_change", handleStatusChange);
+    };
+  }, [socket]);
+
   return (
     <div
       className={`w-full flex-col border-r border-slate-200/60 bg-white/40 backdrop-blur-xl dark:border-white/10 dark:bg-[#09090b]/40 sm:flex sm:w-[350px] lg:w-[400px] ${
@@ -100,17 +131,26 @@ const ChatListPanel = ({
             </p>
           </div>
         ) : (
-          chats.map((chat) => (
-            <ChatListItem
-              key={chat.id}
-              chat={chat}
-              isActive={activeChat?.id === chat.id}
-              onClick={() => onChatSelect(chat)}
-              lastMessagePreview={getMessagePreview(
-                chat.lastMessage || chat.last_message,
-              )}
-            />
-          ))
+          chats.map((chat) => {
+            // 👇 Determine real-time online status
+            // Use the socket status if it exists, otherwise fallback to the API's static status
+            const isOnline =
+              onlineStatuses[chat.id] !== undefined
+                ? onlineStatuses[chat.id]
+                : chat.online;
+
+            return (
+              <ChatListItem
+                key={chat.id}
+                chat={{ ...chat, online: isOnline }} // 👈 Pass updated status to child
+                isActive={activeChat?.id === chat.id}
+                onClick={() => onChatSelect(chat)}
+                lastMessagePreview={getMessagePreview(
+                  chat.lastMessage || chat.last_message,
+                )}
+              />
+            );
+          })
         )}
       </div>
     </div>

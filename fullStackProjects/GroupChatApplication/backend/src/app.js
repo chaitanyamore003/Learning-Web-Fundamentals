@@ -12,6 +12,7 @@ import userRouter from "./modules/routes/user.routes.js";
 import conversationRouter from "./modules/routes/conversation.routes.js";
 import messageRouter from "./modules/routes/message.routes.js";
 import mediaRouter from "./modules/routes/media.routes.js";
+import aiRouter from "./modules/routes/ai.routes.js";
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use("/api/users", userRouter);
 app.use("/api/conversations", conversationRouter);
 app.use("/api/messages", mediaRouter);
 app.use("/api/messages", messageRouter);
+app.use("/api/ai", aiRouter);
 
 app.use(errorHandler);
 

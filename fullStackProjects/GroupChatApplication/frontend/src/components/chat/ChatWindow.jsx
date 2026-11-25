@@ -1,47 +1,79 @@
+// src/components/chat/ChatWindow.jsx
 import { useEffect, useState, useRef } from "react";
 import { ArrowLeft, Loader2, Settings2 } from "lucide-react";
 import MessageBubble from "./MessageBubble";
 import MessageInput from "./MessageInput";
 import api from "../../lib/axios";
 import { useSocket } from "../../context/SocketContext";
+import { useAuth } from "../../context/AuthContext";
 
 const ChatWindow = ({ activeChat, showMobileChat, onBack, onEditClick }) => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // State for typing indicator
+  const [typingUser, setTypingUser] = useState(null);
+  const typingTimeoutRef = useRef(null);
+
+  // 👇 State for Online Status
+  const [isOnline, setIsOnline] = useState(activeChat?.online || false);
+
   const { socket } = useSocket();
+  const { user } = useAuth();
   const messagesEndRef = useRef(null);
+
+  const lastIncomingMessage = [...messages]
+    .reverse()
+    .find(
+      (m) => String(m.sender_id ?? m.senderId) !== String(user?.id),
+    )?.content;
+
+  // 👇 Sync local online state when activeChat changes
+  useEffect(() => {
+    setIsOnline(activeChat?.online || false);
+  }, [activeChat]);
+
+  // 👇 Listen for Online/Offline Socket Events
+  useEffect(() => {
+    if (!socket || !activeChat) return;
+
+    const handleInitialOnlineUsers = (onlineUserIds) => {
+      // Check if the active chat's user is in the initial online list
+      if (onlineUserIds.includes(String(activeChat.id))) {
+        setIsOnline(true);
+      }
+    };
+
+    const handleStatusChange = ({ userId, isOnline }) => {
+      // Update status only if the event is for the active chat
+      if (String(activeChat.id) === String(userId)) {
+        setIsOnline(isOnline);
+      }
+    };
+
+    socket.on("initial_online_users", handleInitialOnlineUsers);
+    socket.on("user_status_change", handleStatusChange);
+
+    return () => {
+      socket.off("initial_online_users", handleInitialOnlineUsers);
+      socket.off("user_status_change", handleStatusChange);
+    };
+  }, [socket, activeChat]);
 
   // Join and leave conversation rooms
   useEffect(() => {
     if (!socket || !activeChat?.id) return;
 
     const conversationId = activeChat.id;
+    const joinRoom = () => socket.emit("join_conversation", conversationId);
+    const leaveRoom = () => socket.emit("leave_conversation", conversationId);
 
-    const joinRoom = () => {
-      
-      socket.emit("join_conversation", conversationId);
-    };
-
-    const leaveRoom = () => {
-    
-      socket.emit("leave_conversation", conversationId);
-    };
-
-    // Join immediately if already connected
-    if (socket.connected) {
-      joinRoom();
-    }
-
-    // Rejoin automatically after reconnection
+    if (socket.connected) joinRoom();
     socket.on("connect", joinRoom);
 
     return () => {
       socket.off("connect", joinRoom);
-
-      if (socket.connected) {
-        leaveRoom();
-      }
+      if (socket.connected) leaveRoom();
     };
   }, [socket, activeChat?.id]);
 
@@ -53,30 +85,20 @@ const ChatWindow = ({ activeChat, showMobileChat, onBack, onEditClick }) => {
     }
 
     let cancelled = false;
-
     const fetchMessages = async () => {
       setMessages([]);
       setLoading(true);
-
       try {
         const res = await api.get(`/messages/${activeChat.id}`);
-
-        if (!cancelled) {
-          setMessages(res.data.messages);
-        }
+        if (!cancelled) setMessages(res.data.messages);
       } catch (err) {
-        if (!cancelled) {
-          console.error("Failed to load messages", err);
-        }
+        if (!cancelled) console.error("Failed to load messages", err);
       } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+        if (!cancelled) setLoading(false);
       }
     };
 
     fetchMessages();
-
     return () => {
       cancelled = true;
     };
@@ -85,52 +107,60 @@ const ChatWindow = ({ activeChat, showMobileChat, onBack, onEditClick }) => {
   // Listen for incoming real-time messages
   useEffect(() => {
     if (!socket) return;
-
     const handleReceiveMessage = (message) => {
-      if (String(message.conversation_id) !== String(activeChat?.id)) {
-        return;
-      }
-
+      if (String(message.conversation_id) !== String(activeChat?.id)) return;
       setMessages((prev) => {
-        if (prev.some((msg) => msg.id === message.id)) {
-          return prev;
-        }
-
+        if (prev.some((msg) => msg.id === message.id)) return prev;
         return [...prev, message];
       });
+      setTypingUser(null);
+    };
+    socket.on("receive_message", handleReceiveMessage);
+    return () => socket.off("receive_message", handleReceiveMessage);
+  }, [socket, activeChat?.id]);
+
+  // Listen for typing events
+  useEffect(() => {
+    if (!socket) return;
+    const handleUserTyping = ({ conversationId, userName }) => {
+      if (String(conversationId) === String(activeChat?.id)) {
+        setTypingUser(userName);
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = setTimeout(() => setTypingUser(null), 3000);
+      }
+    };
+    const handleUserStoppedTyping = ({ conversationId }) => {
+      if (String(conversationId) === String(activeChat?.id))
+        setTypingUser(null);
     };
 
-    socket.on("receive_message", handleReceiveMessage);
+    socket.on("user_typing", handleUserTyping);
+    socket.on("user_stopped_typing", handleUserStoppedTyping);
 
     return () => {
-      socket.off("receive_message", handleReceiveMessage);
+      socket.off("user_typing", handleUserTyping);
+      socket.off("user_stopped_typing", handleUserStoppedTyping);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     };
   }, [socket, activeChat?.id]);
 
-  // Handle messages sent by current user
   const handleMessageSent = (newMessage) => {
     setMessages((prev) => {
-      if (prev.some((msg) => msg.id === newMessage.id)) {
-        return prev;
-      }
-
+      if (prev.some((msg) => msg.id === newMessage.id)) return prev;
       return [...prev, newMessage];
     });
   };
 
-  // Automatically scroll to the latest message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "end",
     });
-  }, [messages, loading]);
+  }, [messages, loading, typingUser]);
 
   return (
     <div
-      className={`flex-1 flex-col bg-[#f8faff]/50 dark:bg-[#080b14]/50 sm:flex ${
-        showMobileChat ? "flex" : "hidden"
-      }`}
+      className={`flex-1 flex-col bg-[#f8faff]/50 dark:bg-[#080b14]/50 sm:flex ${showMobileChat ? "flex" : "hidden"}`}
     >
       {/* Chat Header */}
       <div className="flex items-center justify-between border-b border-slate-200/60 bg-white/60 px-4 py-3 backdrop-blur-xl dark:border-white/10 dark:bg-[#09090b]/60">
@@ -159,7 +189,13 @@ const ChatWindow = ({ activeChat, showMobileChat, onBack, onEditClick }) => {
               {activeChat?.name || "Chat"}
             </h2>
             <p className="text-[12px] text-slate-500 dark:text-slate-400">
-              {activeChat?.online ? "Online" : "Last seen recently"}
+              {typingUser ? (
+                <span className="text-blue-500 font-medium">typing...</span>
+              ) : isOnline ? ( // 👈 Use the isOnline state here
+                <span className="text-emerald-500 font-medium">Online</span>
+              ) : (
+                "Last seen recently"
+              )}
             </p>
           </div>
         </div>
@@ -194,7 +230,6 @@ const ChatWindow = ({ activeChat, showMobileChat, onBack, onEditClick }) => {
               <div className="mb-4 rounded-full bg-slate-200/80 px-4 py-2 text-[13px] font-medium text-slate-600 backdrop-blur-sm dark:bg-slate-800/80 dark:text-slate-300">
                 No messages yet
               </div>
-
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 Say hi to {activeChat?.name?.split(" ")[0] || "them"} to start
                 the conversation!
@@ -204,14 +239,39 @@ const ChatWindow = ({ activeChat, showMobileChat, onBack, onEditClick }) => {
             messages.map((msg) => <MessageBubble key={msg.id} message={msg} />)
           )}
 
+          {typingUser && (
+            <div className="flex w-full justify-start animate-in fade-in slide-in-from-bottom-2">
+              <div className="rounded-2xl rounded-tl-sm bg-slate-100 px-4 py-2 text-xs text-slate-500 dark:bg-slate-800 dark:text-slate-400 flex items-center gap-2">
+                <span className="font-semibold">{typingUser}</span> is typing
+                <span className="flex gap-0.5">
+                  <span
+                    className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400"
+                    style={{ animationDelay: "0ms" }}
+                  ></span>
+                  <span
+                    className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400"
+                    style={{ animationDelay: "150ms" }}
+                  ></span>
+                  <span
+                    className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400"
+                    style={{ animationDelay: "300ms" }}
+                  ></span>
+                </span>
+              </div>
+            </div>
+          )}
+
           <div ref={messagesEndRef} />
         </div>
       </div>
 
-      <MessageInput
-        conversationId={activeChat?.id}
-        onMessageSent={handleMessageSent}
-      />
+      {activeChat && (
+        <MessageInput
+          conversationId={activeChat.id}
+          onMessageSent={handleMessageSent}
+          lastIncomingMessage={lastIncomingMessage}
+        />
+      )}
     </div>
   );
 };
