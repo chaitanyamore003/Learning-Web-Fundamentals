@@ -3,44 +3,27 @@ import { Search, Plus, MessageSquare, Loader2 } from "lucide-react";
 import ChatListItem from "./ChatListItem";
 import { Link } from "react-router-dom";
 
-// Helper function to format the last message preview
 const getMessagePreview = (message) => {
   if (!message) return "No messages yet";
 
-  // --- CASE 1: If the backend sends a full object (Ideal scenario) ---
-  if (typeof message === "object") {
-    const type = message.message_type || message.messageType || "TEXT";
-    switch (type) {
-      case "IMAGE":
-        return "📷 Image";
-      case "VIDEO":
-        return "🎥 Video";
-      case "AUDIO":
-        return "🎵 Audio";
-      case "DOCUMENT":
-        return "📄 Document";
-      default:
-        return message.content || "";
-    }
+  const type = message.message_type || message.messageType || "TEXT";
+  const text = message.content || "";
+
+  // If the text looks like an S3 URL but there's no type, infer it
+  if (type === "TEXT" && text.startsWith("http")) {
+    if (text.match(/\.(jpeg|jpg|gif|png|webp)$/i)) return "📷 Image";
+    if (text.match(/\.(mp4|webm|ogg|mov)$/i)) return "🎥 Video";
+    if (text.match(/\.(mp3|wav|m4a)$/i)) return "🎵 Audio";
+    if (text.match(/\.(pdf|doc|docx|xls|xlsx|txt)$/i)) return "📄 Document";
   }
 
-  // --- CASE 2: If the backend sends just a string (Your current situation) ---
-  if (typeof message === "string") {
-    // Check if it's an S3 URL based on file extension
-    if (message.startsWith("http")) {
-      const lowerUrl = message.toLowerCase();
-      if (lowerUrl.match(/\.(jpeg|jpg|gif|png|webp)$/)) return "📷 Image";
-      if (lowerUrl.match(/\.(mp4|webm|ogg|mov)$/)) return "🎥 Video";
-      if (lowerUrl.match(/\.(mp3|wav|m4a)$/)) return "🎵 Audio";
-      if (lowerUrl.match(/\.(pdf|doc|docx|xls|xlsx|txt)$/))
-        return "📄 Document";
-      return "📎 Attachment"; // Fallback for unknown URLs
-    }
-    // It's just a regular text message
-    return message;
-  }
+  // If it's a media type, prepend an emoji
+  if (type === "IMAGE") return text ? `📷 ${text}` : "📷 Image";
+  if (type === "VIDEO") return text ? `🎥 ${text}` : "🎥 Video";
+  if (type === "AUDIO") return text ? `🎵 ${text}` : "🎵 Audio";
+  if (type === "DOCUMENT") return text ? `📄 ${text}` : "📄 Document";
 
-  return "";
+  return text;
 };
 
 const ChatListPanel = ({
@@ -58,24 +41,20 @@ const ChatListPanel = ({
         showMobileChat ? "hidden" : "flex"
       }`}
     >
-      {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-200/60 px-4 py-3 dark:border-white/10">
         <Link to={"/"} className="text-xl font-extrabold tracking-tighter">
           Said Hi<span className="text-blue-600">.</span>
         </Link>
-
         {isGroupTab && (
           <button
             onClick={onCreateGroup}
             className="grid h-8 w-8 cursor-pointer place-items-center rounded-full bg-blue-100 text-blue-600 transition hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-            title="Create New Group"
           >
             <Plus className="h-5 w-5" />
           </button>
         )}
       </div>
 
-      {/* Search & Filters */}
       <div className="border-b border-slate-200/60 p-3 dark:border-white/10">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -101,7 +80,6 @@ const ChatListPanel = ({
         </div>
       </div>
 
-      {/* List */}
       <div className="flex-1 overflow-y-auto">
         {loading ? (
           <div className="flex h-full items-center justify-center">
@@ -128,7 +106,6 @@ const ChatListPanel = ({
               chat={chat}
               isActive={activeChat?.id === chat.id}
               onClick={() => onChatSelect(chat)}
-              // Pass the formatted preview
               lastMessagePreview={getMessagePreview(
                 chat.lastMessage || chat.last_message,
               )}

@@ -6,6 +6,8 @@ import ConversationMember from "./conversationMember.model.js";
 import Message from "./message.model.js";
 import Attachment from "./attachment.model.js";
 import MessageReceipt from "./messageReceipt.model.js";
+import ArchivedMessage from "./archivedMessage.model.js";
+import ArchivedAttachment from "./archivedAttachment.model.js";
 
 /**
  * ============================================================
@@ -654,6 +656,22 @@ User.hasMany(Conversation, {
 Conversation.belongsTo(User, {
   foreignKey: "created_by",
   as: "creator",
+});
+
+/**
+ * ============================================================
+ * 10. ARCHIVED MESSAGE → ARCHIVED ATTACHMENT (ONE-TO-MANY)
+ * ============================================================
+ * Just like live messages, archived messages need their files.
+ */
+ArchivedMessage.hasMany(ArchivedAttachment, {
+  foreignKey: "message_id",
+  as: "attachments",
+  onDelete: "CASCADE",
+});
+
+ArchivedAttachment.belongsTo(ArchivedMessage, {
+  foreignKey: "message_id",
 });
 
 /**

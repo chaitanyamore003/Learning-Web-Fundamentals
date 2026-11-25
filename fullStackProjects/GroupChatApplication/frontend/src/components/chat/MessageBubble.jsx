@@ -5,100 +5,121 @@ import { useAuth } from "../../context/AuthContext";
 const MessageBubble = ({ message }) => {
   const { user } = useAuth();
 
-  // Determine message ownership
   const isMine =
     String(message.sender_id ?? message.senderId) === String(user?.id);
-
-  // Message content and type
-  const content = message.content || "";
   const messageType = message.message_type || message.messageType || "TEXT";
 
-  // Format timestamp
+  // Extract attachment data (handles both array and single object)
+  const attachments = message.attachments || message.Attachment;
+  const attachment = Array.isArray(attachments) ? attachments[0] : attachments;
+
+  const fileUrl = attachment?.file_url;
+  const fileName = attachment?.file_name || "Download File";
+
+  const content = message.content || "";
+
+  // 👇 FIX: Only show the text/caption if it's NOT the same as the file URL
+  const showCaption = content.trim() !== "" && content !== fileUrl;
+
   const formattedTime =
     message.createdAt || message.created_at
       ? new Date(message.createdAt || message.created_at).toLocaleTimeString(
           [],
-          {
-            hour: "2-digit",
-            minute: "2-digit",
-          },
+          { hour: "2-digit", minute: "2-digit" },
         )
       : "";
 
-  // Detect URLs for text messages
   const urlRegex = /(https?:\/\/[^\s]+)/g;
-
-  // Extract a readable filename from the S3 URL (e.g., "171234567-my_file.pdf" -> "my_file.pdf")
-  const getFileName = (url) => {
-    try {
-      const decoded = decodeURIComponent(url);
-      const parts = decoded.split("/").pop().split("-");
-      // Remove the timestamp prefix we added in the backend (e.g., "1712345678-")
-      if (parts.length > 1 && !isNaN(parts[0])) {
-        return parts.slice(1).join("-");
-      }
-      return parts.pop();
-    } catch {
-      return "Download File";
-    }
-  };
 
   const renderContent = () => {
     switch (messageType) {
       case "IMAGE":
         return (
-          <img
-            src={content}
-            alt="Shared image"
-            className="max-h-[300px] w-auto max-w-full cursor-pointer rounded-xl object-cover transition hover:opacity-90"
-            onClick={() => window.open(content, "_blank")}
-          />
+          <div className="flex flex-col gap-2">
+            <img
+              src={fileUrl || content}
+              alt={fileName}
+              className="max-h-[300px] w-auto max-w-full cursor-pointer rounded-xl object-cover transition hover:opacity-90"
+              onClick={() => window.open(fileUrl || content, "_blank")}
+            />
+            {/* Only render caption if showCaption is true */}
+            {showCaption && (
+              <p className="px-1 text-sm whitespace-pre-wrap break-words">
+                {content}
+              </p>
+            )}
+          </div>
         );
       case "VIDEO":
         return (
-          <video
-            src={content}
-            controls
-            className="max-h-[300px] w-full max-w-[300px] rounded-xl bg-black/10"
-          />
+          <div className="flex flex-col gap-2">
+            <video
+              src={fileUrl || content}
+              controls
+              className="max-h-[300px] w-full max-w-[300px] rounded-xl bg-black/10"
+            />
+            {showCaption && (
+              <p className="px-1 text-sm whitespace-pre-wrap break-words">
+                {content}
+              </p>
+            )}
+          </div>
         );
       case "AUDIO":
         return (
-          <audio src={content} controls className="mt-1 w-[240px] max-w-full" />
+          <div className="flex flex-col gap-2">
+            <audio
+              src={fileUrl || content}
+              controls
+              className="mt-1 w-[240px] max-w-full"
+            />
+            {showCaption && (
+              <p className="px-1 text-sm whitespace-pre-wrap break-words">
+                {content}
+              </p>
+            )}
+          </div>
         );
       case "DOCUMENT":
         return (
-          <a
-            href={content}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`flex items-center gap-3 rounded-xl p-3 transition ${
-              isMine
-                ? "bg-blue-700/50 hover:bg-blue-700/70"
-                : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/50 dark:hover:bg-slate-700"
-            }`}
-          >
-            <div
-              className={`rounded-lg p-2 ${isMine ? "bg-blue-600" : "bg-white dark:bg-slate-800"}`}
+          <div className="flex flex-col gap-2">
+            <a
+              href={fileUrl || content}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`flex items-center gap-3 rounded-xl p-3 transition ${
+                isMine
+                  ? "bg-blue-700/50 hover:bg-blue-700/70"
+                  : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/50 dark:hover:bg-slate-700"
+              }`}
             >
-              <FileText
-                className={`h-5 w-5 ${isMine ? "text-white" : "text-blue-600 dark:text-blue-400"}`}
-              />
-            </div>
-            <div className="flex min-w-0 flex-1 flex-col">
-              <span className="truncate text-sm font-semibold max-w-[150px]">
-                {getFileName(content)}
-              </span>
-              <span
-                className={`text-[11px] ${isMine ? "text-blue-200" : "text-slate-500"}`}
+              <div
+                className={`rounded-lg p-2 ${isMine ? "bg-blue-600" : "bg-white dark:bg-slate-800"}`}
               >
-                Click to download
-              </span>
-            </div>
-            <Download
-              className={`h-4 w-4 shrink-0 ${isMine ? "text-blue-200" : "text-slate-400"}`}
-            />
-          </a>
+                <FileText
+                  className={`h-5 w-5 ${isMine ? "text-white" : "text-blue-600 dark:text-blue-400"}`}
+                />
+              </div>
+              <div className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate text-sm font-semibold max-w-[150px]">
+                  {fileName}
+                </span>
+                <span
+                  className={`text-[11px] ${isMine ? "text-blue-200" : "text-slate-500"}`}
+                >
+                  Click to download
+                </span>
+              </div>
+              <Download
+                className={`h-4 w-4 shrink-0 ${isMine ? "text-blue-200" : "text-slate-400"}`}
+              />
+            </a>
+            {showCaption && (
+              <p className="px-1 text-sm whitespace-pre-wrap break-words">
+                {content}
+              </p>
+            )}
+          </div>
         );
       case "TEXT":
       default:
@@ -111,11 +132,7 @@ const MessageBubble = ({ message }) => {
                   href={part}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`underline ${
-                    isMine
-                      ? "text-blue-200 hover:text-white"
-                      : "text-blue-600 hover:text-blue-700 dark:text-blue-400"
-                  }`}
+                  className={`underline ${isMine ? "text-blue-200 hover:text-white" : "text-blue-600 hover:text-blue-700 dark:text-blue-400"}`}
                 >
                   {part}
                 </a>
@@ -128,7 +145,6 @@ const MessageBubble = ({ message }) => {
     }
   };
 
-  // Adjust padding based on message type (less padding for media to make it look nice)
   const isMedia = ["IMAGE", "VIDEO"].includes(messageType);
   const paddingClass = isMedia ? "p-1.5" : "px-3.5 py-2";
 
@@ -143,11 +159,10 @@ const MessageBubble = ({ message }) => {
       >
         {renderContent()}
 
-        {/* Time and Read Receipts */}
         <div
           className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${
             isMine ? "text-blue-200" : "text-slate-400"
-          } ${isMedia ? "px-2 pb-1" : ""}`} // Add slight padding for timestamp on media
+          } ${isMedia ? "px-2 pb-1" : ""}`}
         >
           <span>{formattedTime}</span>
           {isMine && <CheckCheck className="h-3 w-3" />}

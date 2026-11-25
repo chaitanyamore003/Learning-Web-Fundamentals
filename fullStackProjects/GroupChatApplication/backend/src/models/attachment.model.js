@@ -9,35 +9,29 @@ const Attachment = db.define(
       primaryKey: true,
       autoIncrement: true,
     },
-
     message_id: {
       type: DataTypes.BIGINT,
       allowNull: false,
     },
-
     file_url: {
       type: DataTypes.STRING(1000),
       allowNull: false,
     },
-
     file_name: {
       type: DataTypes.STRING(255),
       allowNull: false,
     },
-
     mime_type: {
       type: DataTypes.STRING(150),
       allowNull: false,
     },
-
     file_size: {
       type: DataTypes.BIGINT,
       allowNull: false,
     },
-
     storage_provider: {
       type: DataTypes.STRING(50),
-      defaultValue: "CLOUDINARY",
+      defaultValue: "S3", // Changed from CLOUDINARY
     },
   },
   {

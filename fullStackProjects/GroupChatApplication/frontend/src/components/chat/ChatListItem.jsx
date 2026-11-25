@@ -1,5 +1,4 @@
 // src/components/chat/ChatListItem.jsx
-
 const ChatListItem = ({ chat, isActive, onClick, lastMessagePreview }) => (
   <div
     onClick={onClick}
@@ -32,7 +31,6 @@ const ChatListItem = ({ chat, isActive, onClick, lastMessagePreview }) => (
         <p
           className={`truncate text-[13px] ${chat.unread > 0 ? "font-medium text-slate-700 dark:text-slate-300" : "text-slate-500 dark:text-slate-400"}`}
         >
-          {/* 👇 CHANGED THIS LINE 👇 */}
           {lastMessagePreview || chat.lastMessage}
         </p>
         {chat.unread > 0 && (

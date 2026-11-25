@@ -2,7 +2,7 @@
 import { useState, useRef } from "react";
 import { Send, Paperclip, Loader2, X } from "lucide-react";
 import api from "../../lib/axios";
-import { uploadToS3 } from "../../utils/s3Upload"; // Import the utility
+import { uploadToS3 } from "../../utils/s3Upload";
 
 const MessageInput = ({ conversationId, onMessageSent }) => {
   const [text, setText] = useState("");
@@ -15,7 +15,6 @@ const MessageInput = ({ conversationId, onMessageSent }) => {
     const selected = e.target.files?.[0];
     if (!selected) return;
 
-    // Optional: Add a max file size check (e.g., 25MB for chat media)
     if (selected.size > 25 * 1024 * 1024) {
       alert("File is too large. Maximum size is 25MB.");
       return;
@@ -33,32 +32,39 @@ const MessageInput = ({ conversationId, onMessageSent }) => {
     setSending(true);
 
     try {
-      let content = text.trim();
       let messageType = "TEXT";
+      let attachmentData = null;
 
-      // 1. If there's a file, upload it to S3 first
+      // 1. If there's a file, upload it to S3 first and prepare metadata
       if (file) {
         setUploading(true);
         const { secure_url } = await uploadToS3(file, "chat-media");
-        content = secure_url; // The message content becomes the S3 URL
 
-        // Determine message type for the frontend to render correctly
         if (file.type.startsWith("image/")) messageType = "IMAGE";
         else if (file.type.startsWith("video/")) messageType = "VIDEO";
         else if (file.type.startsWith("audio/")) messageType = "AUDIO";
         else messageType = "DOCUMENT";
+
+        attachmentData = {
+          file_url: secure_url,
+          file_name: file.name,
+          mime_type: file.type,
+          file_size: file.size,
+          storage_provider: "S3",
+        };
       }
 
-      // 2. Send the message to the backend
+      // 2. Send both the text (content) and the attachment data to the backend
       const res = await api.post("/messages", {
         conversationId,
-        content,
-        message_type: messageType, // Send the type!
+        content: text.trim(),
+        message_type: messageType,
+        attachment: attachmentData,
       });
 
       onMessageSent(res.data.message);
       setText("");
-      setFile(null); // Clear file after sending
+      setFile(null);
     } catch (err) {
       console.error("Failed to send message", err);
       alert(err.response?.data?.message || "Failed to send message.");
@@ -75,7 +81,6 @@ const MessageInput = ({ conversationId, onMessageSent }) => {
       onSubmit={handleSend}
       className="border-t border-slate-200/60 bg-white/60 p-4 backdrop-blur-xl dark:border-white/10 dark:bg-[#09090b]/60"
     >
-      {/* File Preview Area (Shows above input if a file is selected) */}
       {file && (
         <div className="mb-3 flex items-center justify-between rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
           <span className="truncate max-w-[200px] font-medium">
@@ -92,7 +97,6 @@ const MessageInput = ({ conversationId, onMessageSent }) => {
       )}
 
       <div className="flex items-center gap-2">
-        {/* Hidden File Input */}
         <input
           type="file"
           ref={fileInputRef}
@@ -101,7 +105,6 @@ const MessageInput = ({ conversationId, onMessageSent }) => {
           accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.zip"
         />
 
-        {/* Attachment Button */}
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
