@@ -12,12 +12,10 @@ const STORAGE_KEY = "saidhi.theme";
 export const ThemeContext = createContext(null);
 
 const getInitialTheme = () => {
-  if (typeof window === "undefined") return "light";
+  if (typeof window === "undefined") return "dark";
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored === "light" || stored === "dark") return stored;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+  return "light";
 };
 
 export function ThemeProvider({ children }) {
@@ -25,7 +23,6 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     const root = document.documentElement;
-    // 👇 This adds/removes the 'dark' class on the <html> tag
     if (theme === "dark") {
       root.classList.add("dark");
     } else {

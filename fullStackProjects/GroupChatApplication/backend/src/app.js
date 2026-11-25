@@ -4,7 +4,7 @@ import cors from "cors";
 import morgan from "morgan";
 import { errorHandler } from "./middleware/errorHandler.js";
 //models
-import User from "./models/user.model.js";
+import "./models/index.js";
 
 //routes
 import authRouter from "./modules/routes/auth.routes.js";
