@@ -2,7 +2,12 @@
 import { Message, ConversationMember, User } from "../../models/index.js";
 import { AppError } from "../../utils/errors.js";
 
-export const sendMessage = async (senderId, conversationId, content) => {
+export const sendMessage = async (
+  senderId,
+  conversationId,
+  content,
+  message_type = "TEXT",
+) => {
   if (!content || content.trim() === "") {
     throw new AppError("Message content cannot be empty", 400);
   }
@@ -18,7 +23,7 @@ export const sendMessage = async (senderId, conversationId, content) => {
   const message = await Message.create({
     conversation_id: conversationId,
     sender_id: senderId,
-    message_type: "TEXT",
+    message_type: message_type, // <-- Uses the passed type (IMAGE, VIDEO, etc.)
     content: content.trim(),
   });
 

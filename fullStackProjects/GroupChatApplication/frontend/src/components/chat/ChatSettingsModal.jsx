@@ -12,7 +12,8 @@ import {
   LogOut,
 } from "lucide-react";
 import api from "../../lib/axios";
-import { uploadToCloudinary } from "../../utils/cloudinary";
+// 1. CHANGED IMPORT HERE
+import { uploadToS3 } from "../../utils/s3Upload";
 import { useAuth } from "../../context/AuthContext";
 
 const ChatSettingsModal = ({
@@ -73,8 +74,9 @@ const ChatSettingsModal = ({
     try {
       let imageUrl = activeChat.avatar;
 
+      // 2. CHANGED UPLOAD LOGIC HERE (and folder name to "groups")
       if (groupImage) {
-        const uploaded = await uploadToCloudinary(groupImage, "said-hi/groups");
+        const uploaded = await uploadToS3(groupImage, "groups");
         imageUrl = uploaded.secure_url;
       }
 

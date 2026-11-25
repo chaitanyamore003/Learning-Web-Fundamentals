@@ -3,7 +3,8 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Camera, Lock, User, Phone } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { uploadToCloudinary } from "../utils/cloudinary";
+// 1. CHANGED IMPORT HERE
+import { uploadToS3 } from "../utils/s3Upload";
 import api from "../lib/axios";
 import Navbar from "../components/common/Navbar"; // Fixed path
 
@@ -75,13 +76,10 @@ const SettingsPage = () => {
 
     setLoading(true);
     try {
-      // 1. Upload to Cloudinary directly
-      const { secure_url, public_id } = await uploadToCloudinary(
-        file,
-        "said-hi/avatars",
-      );
+      // 2. CHANGED UPLOAD LOGIC HERE (and folder name to "avatars")
+      const { secure_url, public_id } = await uploadToS3(file, "avatars");
 
-      // 2. Send URL + public_id to backend
+      // 3. Send URL + public_id to backend
       const res = await api.put("/users/avatar", { secure_url, public_id });
 
       setUser(res.data.user);

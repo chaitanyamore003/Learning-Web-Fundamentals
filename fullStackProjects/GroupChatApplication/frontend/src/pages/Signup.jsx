@@ -14,7 +14,8 @@ import {
 } from "lucide-react";
 import { isEmail, isPhone } from "../utils/validators";
 import AuthLayout from "../components/layout/AuthLayout";
-import { uploadToCloudinary } from "../utils/cloudinary";
+// 1. CHANGED IMPORT HERE
+import { uploadToS3 } from "../utils/s3Upload";
 import { useAuth } from "../context/AuthContext";
 
 const initialValues = { name: "", email: "", phone: "", password: "" };
@@ -141,9 +142,10 @@ const Signup = ({ onSubmit }) => {
       const payload = { ...values };
 
       if (uploadedFile) {
-        const { secure_url, public_id } = await uploadToCloudinary(
+        // 2. CHANGED FUNCTION CALL HERE (and folder name to "avatars")
+        const { secure_url, public_id } = await uploadToS3(
           uploadedFile,
-          "said-hi/avatars",
+          "avatars",
         );
         payload.profile_picture = secure_url;
         payload.profile_picture_public_id = public_id;
@@ -151,7 +153,7 @@ const Signup = ({ onSubmit }) => {
         payload.profile_picture = selectedPreset;
       }
 
-      await signup(payload); // 3. use it here
+      await signup(payload);
 
       navigate("/chat", { replace: true });
     } catch (err) {

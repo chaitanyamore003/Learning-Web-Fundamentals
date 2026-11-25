@@ -2,7 +2,8 @@
 import { useEffect, useState, useRef } from "react";
 import { X, Search, Loader2, Check, Camera } from "lucide-react";
 import api from "../../lib/axios";
-import { uploadToCloudinary } from "../../utils/cloudinary";
+// 1. CHANGED IMPORT HERE
+import { uploadToS3 } from "../../utils/s3Upload";
 
 const CreateGroupModal = ({ onClose, onGroupCreated }) => {
   const [name, setName] = useState("");
@@ -67,14 +68,14 @@ const CreateGroupModal = ({ onClose, onGroupCreated }) => {
       let imageUrl = null;
       let imagePublicId = null;
 
-      // 1. Upload image to Cloudinary first (if one was selected)
+      // 2. CHANGED UPLOAD LOGIC HERE (and folder name to "groups")
       if (groupImage) {
-        const uploaded = await uploadToCloudinary(groupImage, "said-hi/groups");
+        const uploaded = await uploadToS3(groupImage, "groups");
         imageUrl = uploaded.secure_url;
         imagePublicId = uploaded.public_id;
       }
 
-      // 2. Create the group in the database
+      // Create the group in the database
       const res = await api.post("/conversations/group", {
         name,
         memberIds: selectedIds,

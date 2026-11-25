@@ -1,5 +1,6 @@
 // src/components/chat/ChatListItem.jsx
-const ChatListItem = ({ chat, isActive, onClick }) => (
+
+const ChatListItem = ({ chat, isActive, onClick, lastMessagePreview }) => (
   <div
     onClick={onClick}
     className={`flex cursor-pointer items-center gap-3 border-b border-slate-100 p-3 transition hover:bg-slate-50 dark:border-slate-800/50 dark:hover:bg-slate-800/50 ${
@@ -31,7 +32,8 @@ const ChatListItem = ({ chat, isActive, onClick }) => (
         <p
           className={`truncate text-[13px] ${chat.unread > 0 ? "font-medium text-slate-700 dark:text-slate-300" : "text-slate-500 dark:text-slate-400"}`}
         >
-          {chat.lastMessage}
+          {/* 👇 CHANGED THIS LINE 👇 */}
+          {lastMessagePreview || chat.lastMessage}
         </p>
         {chat.unread > 0 && (
           <span className="ml-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-blue-600 px-1 text-[10px] font-bold text-white">

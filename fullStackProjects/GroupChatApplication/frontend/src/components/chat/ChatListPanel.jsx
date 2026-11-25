@@ -3,14 +3,54 @@ import { Search, Plus, MessageSquare, Loader2 } from "lucide-react";
 import ChatListItem from "./ChatListItem";
 import { Link } from "react-router-dom";
 
+// Helper function to format the last message preview
+const getMessagePreview = (message) => {
+  if (!message) return "No messages yet";
+
+  // --- CASE 1: If the backend sends a full object (Ideal scenario) ---
+  if (typeof message === "object") {
+    const type = message.message_type || message.messageType || "TEXT";
+    switch (type) {
+      case "IMAGE":
+        return "📷 Image";
+      case "VIDEO":
+        return "🎥 Video";
+      case "AUDIO":
+        return "🎵 Audio";
+      case "DOCUMENT":
+        return "📄 Document";
+      default:
+        return message.content || "";
+    }
+  }
+
+  // --- CASE 2: If the backend sends just a string (Your current situation) ---
+  if (typeof message === "string") {
+    // Check if it's an S3 URL based on file extension
+    if (message.startsWith("http")) {
+      const lowerUrl = message.toLowerCase();
+      if (lowerUrl.match(/\.(jpeg|jpg|gif|png|webp)$/)) return "📷 Image";
+      if (lowerUrl.match(/\.(mp4|webm|ogg|mov)$/)) return "🎥 Video";
+      if (lowerUrl.match(/\.(mp3|wav|m4a)$/)) return "🎵 Audio";
+      if (lowerUrl.match(/\.(pdf|doc|docx|xls|xlsx|txt)$/))
+        return "📄 Document";
+      return "📎 Attachment"; // Fallback for unknown URLs
+    }
+    // It's just a regular text message
+    return message;
+  }
+
+  return "";
+};
+
 const ChatListPanel = ({
   chats,
   activeChat,
   onChatSelect,
   showMobileChat,
   loading,
-  onCreateGroup, // New prop
-  isGroupTab, // New prop
+  onCreateGroup,
+  isGroupTab,
 }) => {
   return (
     <div
@@ -24,7 +64,6 @@ const ChatListPanel = ({
           Said Hi<span className="text-blue-600">.</span>
         </Link>
 
-        {/* Show + button only on the Groups tab */}
         {isGroupTab && (
           <button
             onClick={onCreateGroup}
@@ -65,12 +104,10 @@ const ChatListPanel = ({
       {/* List */}
       <div className="flex-1 overflow-y-auto">
         {loading ? (
-          // Loading State
           <div className="flex h-full items-center justify-center">
             <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
           </div>
         ) : chats.length === 0 ? (
-          // Empty State
           <div className="flex h-full flex-col items-center justify-center p-6 text-center">
             <div className="mb-3 grid h-12 w-12 place-items-center rounded-full bg-slate-100 dark:bg-slate-800">
               <MessageSquare className="h-6 w-6 text-slate-400" />
@@ -85,13 +122,16 @@ const ChatListPanel = ({
             </p>
           </div>
         ) : (
-          // Dynamic Chat List
           chats.map((chat) => (
             <ChatListItem
               key={chat.id}
               chat={chat}
               isActive={activeChat?.id === chat.id}
               onClick={() => onChatSelect(chat)}
+              // Pass the formatted preview
+              lastMessagePreview={getMessagePreview(
+                chat.lastMessage || chat.last_message,
+              )}
             />
           ))
         )}

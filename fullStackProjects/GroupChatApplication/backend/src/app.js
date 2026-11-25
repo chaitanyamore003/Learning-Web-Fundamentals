@@ -11,6 +11,7 @@ import authRouter from "./modules/routes/auth.routes.js";
 import userRouter from "./modules/routes/user.routes.js";
 import conversationRouter from "./modules/routes/conversation.routes.js";
 import messageRouter from "./modules/routes/message.routes.js";
+import mediaRouter from "./modules/routes/media.routes.js";
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/users", userRouter);
 app.use("/api/conversations", conversationRouter);
+app.use("/api/messages", mediaRouter);
 app.use("/api/messages", messageRouter);
 
 app.use(errorHandler);
