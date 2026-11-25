@@ -1,14 +1,6 @@
 // src/components/layout/SidebarNav.jsx
 import { useNavigate } from "react-router-dom";
-import {
-  Users,
-  Settings,
-  LogOut,
-  Sun,
-  Moon,
-  MessageCircle,
-  Compass,
-} from "lucide-react";
+import { Users, LogOut, Sun, Moon, MessageCircle, Compass } from "lucide-react";
 import { useTheme } from "../../hooks/useTheme";
 import { useAuth } from "../../context/AuthContext";
 import { cn } from "../../utils/cn";
@@ -75,13 +67,6 @@ const SidebarNav = ({ activeTab, setActiveTab }) => {
           icon={theme === "dark" ? Sun : Moon}
           label="Toggle Theme"
           onClick={toggleTheme}
-        />
-
-        {/* This now routes to Settings */}
-        <NavItem
-          icon={Settings}
-          label="Settings"
-          onClick={() => navigate("/settings")}
         />
 
         <NavItem icon={LogOut} label="Log out" onClick={handleLogout} />

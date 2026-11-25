@@ -143,7 +143,7 @@ const MessageInput = ({
                 setText(reply);
                 clearReplies();
               }}
-              className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs text-blue-700 transition hover:bg-blue-100 dark:border-blue-800/50 dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-blue-900/40"
+              className="cursor-pointer rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs text-blue-700 transition hover:bg-blue-100 dark:border-blue-800/50 dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-blue-900/40"
             >
               {reply}
             </button>
@@ -158,9 +158,9 @@ const MessageInput = ({
           <button
             type="button"
             onClick={applySuggestion}
-            className="flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition"
+            className="cursor-pointer flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition"
           >
-            {suggestion} <span className="text-[10px] opacity-50">(Tab)</span>
+            {suggestion} <span className=" text-[10px] opacity-50">(Tab)</span>
           </button>
         </div>
       )}
@@ -194,7 +194,7 @@ const MessageInput = ({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={sending || uploading}
-            className="grid h-10 w-10 place-items-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="cursor-pointer grid h-10 w-10 place-items-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
           >
             <Paperclip className="h-5 w-5" />
           </button>
@@ -212,7 +212,7 @@ const MessageInput = ({
           <button
             type="submit"
             disabled={(!text.trim() && !file) || sending || uploading}
-            className="grid h-10 w-10 place-items-center rounded-full bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+            className="cursor-pointer grid h-10 w-10 place-items-center rounded-full bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
           >
             {sending || uploading ? (
               <Loader2 className="h-4 w-4 animate-spin" />

@@ -10,9 +10,9 @@ import {
   UserPlus,
   UserMinus,
   LogOut,
+  Info,
 } from "lucide-react";
 import api from "../../lib/axios";
-// 1. CHANGED IMPORT HERE
 import { uploadToS3 } from "../../utils/s3Upload";
 import { useAuth } from "../../context/AuthContext";
 
@@ -60,6 +60,7 @@ const ChatSettingsModal = ({
 
   // Handle Image Selection
   const handleImageChange = (e) => {
+    if (!isAdmin) return; // Extra safety
     const file = e.target.files?.[0];
     if (!file) return;
     setGroupImage(file);
@@ -69,19 +70,18 @@ const ChatSettingsModal = ({
 
   // Save Changes (Name & Image)
   const handleSaveChanges = async () => {
-    if (!name.trim()) return;
+    if (!isAdmin || !name.trim()) return;
     setSaving(true);
     try {
       let imageUrl = activeChat.avatar;
 
-      // 2. CHANGED UPLOAD LOGIC HERE (and folder name to "groups")
       if (groupImage) {
         const uploaded = await uploadToS3(groupImage, "groups");
         imageUrl = uploaded.secure_url;
       }
 
       const res = await api.put(`/conversations/${activeChat.id}`, {
-        name: isAdmin ? name : undefined, // Only send name if admin
+        name: name,
         group_image: imageUrl,
       });
 
@@ -168,11 +168,23 @@ const ChatSettingsModal = ({
         <div className="flex-1 overflow-y-auto p-6">
           {isGroup ? (
             <div className="space-y-6">
+              {/* 👇 Member Info Banner (Visible only to non-admins) */}
+              {!isAdmin && (
+                <div className="flex items-start gap-2.5 rounded-xl bg-slate-50 px-4 py-3 text-xs text-slate-600 dark:bg-slate-800/50 dark:text-slate-400">
+                  <Info className="h-4 w-4 shrink-0 mt-0.5 text-blue-500" />
+                  <p>
+                    Group chat settings can only be edited by the group admin.
+                  </p>
+                </div>
+              )}
+
               {/* Avatar Upload */}
               <div className="flex flex-col items-center">
                 <div
-                  onClick={() => fileInputRef.current?.click()}
-                  className="group relative h-24 w-24 cursor-pointer overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"
+                  onClick={() => isAdmin && fileInputRef.current?.click()}
+                  className={`group relative h-24 w-24 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700 ${
+                    isAdmin ? "cursor-pointer" : "cursor-default"
+                  }`}
                 >
                   {imagePreview ? (
                     <img
@@ -185,9 +197,13 @@ const ChatSettingsModal = ({
                       {name.charAt(0).toUpperCase()}
                     </div>
                   )}
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition group-hover:opacity-100">
-                    <Camera className="h-6 w-6 text-white" />
-                  </div>
+
+                  {/* Show Hover Effect only if Admin */}
+                  {isAdmin && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition group-hover:opacity-100">
+                      <Camera className="h-6 w-6 text-white" />
+                    </div>
+                  )}
                 </div>
                 <input
                   type="file"
@@ -196,12 +212,14 @@ const ChatSettingsModal = ({
                   accept="image/*"
                   className="hidden"
                 />
-                <p className="mt-2 text-xs text-slate-500">
-                  Click to change group icon
-                </p>
+                {isAdmin && (
+                  <p className="mt-2 text-xs text-slate-500">
+                    Click to change group icon
+                  </p>
+                )}
               </div>
 
-              {/* Group Name Input (Admin only) */}
+              {/* Group Name Input */}
               <div>
                 <label className="mb-1 block text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Group Name
@@ -211,7 +229,7 @@ const ChatSettingsModal = ({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   disabled={!isAdmin}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-blue-500 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-blue-500 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 />
               </div>
 
@@ -276,7 +294,7 @@ const ChatSettingsModal = ({
                   </div>
                 )}
 
-                {/* List */}
+                {/* Members List */}
                 <div className="space-y-2">
                   {members.map((m) => (
                     <div
@@ -284,7 +302,7 @@ const ChatSettingsModal = ({
                       className="flex items-center justify-between rounded-lg p-2 hover:bg-slate-50 dark:hover:bg-slate-800"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-slate-200 overflow-hidden">
+                        <div className="h-8 w-8 rounded-full bg-slate-200 overflow-hidden shrink-0">
                           {m.avatar ? (
                             <img
                               src={m.avatar}
@@ -335,10 +353,11 @@ const ChatSettingsModal = ({
 
         {/* Footer Actions */}
         <div className="flex flex-col gap-3 border-t border-slate-200 p-4 dark:border-slate-800 shrink-0">
-          {isGroup && (
+          {/* 👇 Save Changes Button (Admin Only) */}
+          {isGroup && isAdmin && (
             <button
               onClick={handleSaveChanges}
-              disabled={(!name.trim() && isAdmin) || saving || deleting}
+              disabled={!name.trim() || saving || deleting}
               className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
             >
               {saving ? (
@@ -350,6 +369,7 @@ const ChatSettingsModal = ({
             </button>
           )}
 
+          {/* Delete/Leave Button */}
           <button
             onClick={handleDelete}
             disabled={saving || deleting}

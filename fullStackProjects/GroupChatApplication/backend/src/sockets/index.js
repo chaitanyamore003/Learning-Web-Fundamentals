@@ -29,6 +29,15 @@ export const setupSockets = (io) => {
     // Standard handlers (join rooms, typing, etc.)
     connectionHandler(io, socket);
 
+    // 👇 THIS IS THE MISSING PIECE 👇
+    // Handle request to check a specific user's status
+    socket.on("check_user_status", ({ userId: targetId }, callback) => {
+      if (callback) {
+        // Returns true if the target user is in the online map
+        callback(onlineUsers.has(String(targetId)));
+      }
+    });
+
     // Handle typing indicators
     socket.on("typing", ({ conversationId, userName }) => {
       socket

@@ -48,3 +48,26 @@ export const getAll = async (req, res) => {
       .json({ success: false, message: "Failed to fetch messages" });
   }
 };
+
+export const deleteMessage = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+
+    // Call the service (which verifies ownership)
+    const { conversationId } = await messageService.deleteMessage(
+      req.user.id,
+      messageId,
+    );
+
+    // 👇 Broadcast to the room so the message disappears instantly for everyone
+    const io = req.app.get("io");
+    io.to(`conversation_${conversationId}`).emit("message_deleted", {
+      messageId,
+    });
+
+    res.status(200).json({ success: true, message: "Message deleted" });
+  } catch (error) {
+    console.error("Error deleting message:", error);
+    res.status(403).json({ success: false, message: error.message });
+  }
+};

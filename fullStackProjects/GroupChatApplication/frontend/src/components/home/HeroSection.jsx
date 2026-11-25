@@ -1,3 +1,4 @@
+// src/components/home/HeroSection.jsx
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -6,14 +7,17 @@ import {
   Zap,
   Globe,
   Users,
+  ShieldCheck,
+  Image as ImageIcon,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 const tickerItems = [
-  { icon: MessageCircle, text: "Real-time conversations" },
-  { icon: Zap, text: "Instant delivery" },
-  { icon: Globe, text: "Made for everyone, everywhere" },
-  { icon: Users, text: "Rooms & group chats" },
+  { icon: Sparkles, text: "AI-powered smart replies" },
+  { icon: Zap, text: "Lightning-fast WebSockets" },
+  { icon: MessageCircle, text: "Real-time typing indicators" },
+  { icon: ImageIcon, text: "Seamless media sharing" },
+  { icon: ShieldCheck, text: "Secure & private chats" },
 ];
 
 export default function HeroSection() {
@@ -67,7 +71,7 @@ export default function HeroSection() {
         <div className="text-blue-600 mb-10 inline-flex items-center gap-2.5 rounded-full border border-slate-200/80 bg-white/70 py-1.5 pl-3 pr-4 text-xs font-medium shadow-[0_2px_16px_rgba(15,23,42,0.05)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-300">
           <span className="h-2 w-2 animate-[pulse-dot_2.2s_ease-in-out_infinite] rounded-full bg-emerald-500" />
           <Sparkles className="h-3.5 w-3.5 text-blue-500" />
-          Conversations, made better.
+          Real-time, AI-driven, and secure.
         </div>
 
         {/* Heading with animated gradient word */}
@@ -110,8 +114,8 @@ export default function HeroSection() {
         {/* Description */}
         <p className="mx-auto mt-9 max-w-xl text-pretty text-base leading-8 text-slate-600 dark:text-slate-400 sm:text-lg">
           {isAuthed
-            ? "Your conversations are waiting. Pick up where you left off — or start something new."
-            : "More than just messages. Share moments, exchange ideas, and stay close to the people who make every day better."}
+            ? "Your conversations are waiting. Get smart AI replies, share media instantly, and pick up right where you left off."
+            : "More than just messages. Share media, get AI-powered replies, and stay connected to the people who make every day better."}
         </p>
 
         {/* CTAs */}

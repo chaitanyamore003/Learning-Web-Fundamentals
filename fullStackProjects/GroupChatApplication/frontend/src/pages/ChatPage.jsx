@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 import SidebarNav from "../components/layout/SidebarNav";
 import ChatListPanel from "../components/chat/ChatListPanel";
 import ChatWindow from "../components/chat/ChatWindow";
-import ChatSettingsModal from "../components/chat/ChatSettingsModal"; // Import new modal
+import ChatSettingsModal from "../components/chat/ChatSettingsModal";
 import DiscoverPanel from "../components/chat/DiscoverPanel";
 import CreateGroupModal from "../components/chat/CreateGroupModal";
 import { startDirectConversation } from "../api/conversations";
@@ -19,7 +19,7 @@ const ChatPage = () => {
 
   // Modals state
   const [showGroupModal, setShowGroupModal] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false); // New state
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   const location = useLocation();
 
@@ -69,7 +69,6 @@ const ChatPage = () => {
     setShowMobileChat(false);
   };
 
-  // New: Handle updated chat info
   const handleChatUpdated = (updatedChat) => {
     setChats((prev) =>
       prev.map((c) => (c.id === updatedChat.id ? updatedChat : c)),
@@ -119,6 +118,11 @@ const ChatPage = () => {
     handleChatSelect(newGroupChat);
   };
 
+  // 👇 NEW: Handler for the "All" / "Groups" tabs inside ChatListPanel
+  const handleChatListTabChange = (isGroup) => {
+    setActiveTab(isGroup ? "groups" : "chats");
+  };
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-[#f8faff] font-sans text-slate-900 dark:bg-[#080b14] dark:text-white">
       <SidebarNav activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -132,6 +136,7 @@ const ChatPage = () => {
           showMobileChat={showMobileChat}
           onCreateGroup={() => setShowGroupModal(true)}
           isGroupTab={activeTab === "groups"}
+          onTabChange={handleChatListTabChange} // 👈 Wire up the tab change
         />
       )}
 
@@ -144,7 +149,7 @@ const ChatPage = () => {
           activeChat={activeChat}
           showMobileChat={showMobileChat}
           onBack={() => setShowMobileChat(false)}
-          onEditClick={() => setShowSettingsModal(true)} // Open the new settings modal
+          onEditClick={() => setShowSettingsModal(true)}
         />
       ) : (
         <div className="hidden flex-1 flex-col items-center justify-center bg-slate-50/50 dark:bg-[#080b14] md:flex">

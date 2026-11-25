@@ -1,3 +1,4 @@
+// src/components/home/FeaturesSection.jsx
 import { useEffect, useRef, useState } from "react";
 import { features } from "./homeData";
 
@@ -43,7 +44,7 @@ export default function FeaturesSection() {
               }`}
             >
               <span className="h-px w-6 bg-blue-600 dark:bg-blue-400" />
-              Made for connection
+              Built for the future
             </p>
             <h2
               className={`mt-4 bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 bg-clip-text text-3xl font-extrabold tracking-[-0.04em] text-transparent transition-all delay-100 duration-700 ease-out dark:from-white dark:via-slate-100 dark:to-blue-200 sm:text-4xl md:text-5xl ${
@@ -58,8 +59,8 @@ export default function FeaturesSection() {
               inView ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
             }`}
           >
-            The essentials for better conversations, brought together in one
-            clean and easy-to-use space.
+            From AI-powered suggestions to lightning-fast real-time connections,
+            discover the tools that make your conversations effortless.
           </p>
         </div>
 

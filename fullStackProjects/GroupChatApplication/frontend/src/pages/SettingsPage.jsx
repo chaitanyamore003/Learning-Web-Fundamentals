@@ -104,7 +104,7 @@ const SettingsPage = () => {
           <ArrowLeft className="h-4 w-4" /> Back to Chats
         </button>
 
-        <h1 className="text-3xl font-extrabold tracking-tight">Settings</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight">My Account</h1>
         <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
           Manage your account settings and preferences.
         </p>

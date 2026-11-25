@@ -10,17 +10,24 @@ import { useAuth } from "../../context/AuthContext";
 const ChatWindow = ({ activeChat, showMobileChat, onBack, onEditClick }) => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  // State for typing indicator
   const [typingUser, setTypingUser] = useState(null);
+  const [isOnline, setIsOnline] = useState(false);
+
   const typingTimeoutRef = useRef(null);
-
-  // 👇 State for Online Status
-  const [isOnline, setIsOnline] = useState(activeChat?.online || false);
-
   const { socket } = useSocket();
   const { user } = useAuth();
   const messagesEndRef = useRef(null);
+
+  const partnerId = String(
+    activeChat?.partnerId ||
+      activeChat?.user_id ||
+      activeChat?.otherUser?.id ||
+      (user?.id &&
+        activeChat?.members?.find((m) => String(m.id) !== String(user?.id))
+          ?.id) ||
+      activeChat?.members?.[0]?.id ||
+      "",
+  );
 
   const lastIncomingMessage = [...messages]
     .reverse()
@@ -28,62 +35,39 @@ const ChatWindow = ({ activeChat, showMobileChat, onBack, onEditClick }) => {
       (m) => String(m.sender_id ?? m.senderId) !== String(user?.id),
     )?.content;
 
-  // 👇 Sync local online state when activeChat changes
+  // Online Status Socket Events
   useEffect(() => {
-    setIsOnline(activeChat?.online || false);
-  }, [activeChat]);
-
-  // 👇 Listen for Online/Offline Socket Events
-  useEffect(() => {
-    if (!socket || !activeChat) return;
-
-    const handleInitialOnlineUsers = (onlineUserIds) => {
-      // Check if the active chat's user is in the initial online list
-      if (onlineUserIds.includes(String(activeChat.id))) {
-        setIsOnline(true);
-      }
-    };
+    if (!socket || !activeChat || !partnerId) return;
+    socket.emit("check_user_status", { userId: partnerId }, setIsOnline);
 
     const handleStatusChange = ({ userId, isOnline }) => {
-      // Update status only if the event is for the active chat
-      if (String(activeChat.id) === String(userId)) {
-        setIsOnline(isOnline);
-      }
+      if (String(userId) === partnerId) setIsOnline(isOnline);
     };
-
-    socket.on("initial_online_users", handleInitialOnlineUsers);
     socket.on("user_status_change", handleStatusChange);
+    return () => socket.off("user_status_change", handleStatusChange);
+  }, [socket, activeChat, partnerId]);
 
-    return () => {
-      socket.off("initial_online_users", handleInitialOnlineUsers);
-      socket.off("user_status_change", handleStatusChange);
-    };
-  }, [socket, activeChat]);
-
-  // Join and leave conversation rooms
+  // Join/Leave Room
   useEffect(() => {
     if (!socket || !activeChat?.id) return;
-
     const conversationId = activeChat.id;
     const joinRoom = () => socket.emit("join_conversation", conversationId);
     const leaveRoom = () => socket.emit("leave_conversation", conversationId);
 
     if (socket.connected) joinRoom();
     socket.on("connect", joinRoom);
-
     return () => {
       socket.off("connect", joinRoom);
       if (socket.connected) leaveRoom();
     };
   }, [socket, activeChat?.id]);
 
-  // Fetch messages whenever active chat changes
+  // Fetch Messages
   useEffect(() => {
     if (!activeChat?.id) {
       setMessages([]);
       return;
     }
-
     let cancelled = false;
     const fetchMessages = async () => {
       setMessages([]);
@@ -97,20 +81,20 @@ const ChatWindow = ({ activeChat, showMobileChat, onBack, onEditClick }) => {
         if (!cancelled) setLoading(false);
       }
     };
-
     fetchMessages();
     return () => {
       cancelled = true;
     };
   }, [activeChat?.id]);
 
-  // Listen for incoming real-time messages
+  // Real-time Messages
   useEffect(() => {
     if (!socket) return;
     const handleReceiveMessage = (message) => {
       if (String(message.conversation_id) !== String(activeChat?.id)) return;
       setMessages((prev) => {
-        if (prev.some((msg) => msg.id === message.id)) return prev;
+        if (prev.some((msg) => String(msg.id) === String(message.id)))
+          return prev;
         return [...prev, message];
       });
       setTypingUser(null);
@@ -119,7 +103,7 @@ const ChatWindow = ({ activeChat, showMobileChat, onBack, onEditClick }) => {
     return () => socket.off("receive_message", handleReceiveMessage);
   }, [socket, activeChat?.id]);
 
-  // Listen for typing events
+  // Typing Indicators
   useEffect(() => {
     if (!socket) return;
     const handleUserTyping = ({ conversationId, userName }) => {
@@ -133,10 +117,8 @@ const ChatWindow = ({ activeChat, showMobileChat, onBack, onEditClick }) => {
       if (String(conversationId) === String(activeChat?.id))
         setTypingUser(null);
     };
-
     socket.on("user_typing", handleUserTyping);
     socket.on("user_stopped_typing", handleUserStoppedTyping);
-
     return () => {
       socket.off("user_typing", handleUserTyping);
       socket.off("user_stopped_typing", handleUserStoppedTyping);
@@ -146,10 +128,23 @@ const ChatWindow = ({ activeChat, showMobileChat, onBack, onEditClick }) => {
 
   const handleMessageSent = (newMessage) => {
     setMessages((prev) => {
-      if (prev.some((msg) => msg.id === newMessage.id)) return prev;
+      if (prev.some((msg) => String(msg.id) === String(newMessage.id)))
+        return prev;
       return [...prev, newMessage];
     });
   };
+
+  // 👇 Real-time Delete Listener (Fixed String comparison)
+  useEffect(() => {
+    if (!socket) return;
+    const handleMessageDeleted = ({ messageId }) => {
+      setMessages((prev) =>
+        prev.filter((msg) => String(msg.id) !== String(messageId)),
+      );
+    };
+    socket.on("message_deleted", handleMessageDeleted);
+    return () => socket.off("message_deleted", handleMessageDeleted);
+  }, [socket]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
@@ -171,7 +166,6 @@ const ChatWindow = ({ activeChat, showMobileChat, onBack, onEditClick }) => {
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-
           {activeChat?.avatar ? (
             <img
               src={activeChat.avatar}
@@ -183,7 +177,6 @@ const ChatWindow = ({ activeChat, showMobileChat, onBack, onEditClick }) => {
               {activeChat?.name?.charAt(0).toUpperCase() || "?"}
             </div>
           )}
-
           <div>
             <h2 className="text-[15px] font-semibold text-slate-900 dark:text-white">
               {activeChat?.name || "Chat"}
@@ -191,7 +184,7 @@ const ChatWindow = ({ activeChat, showMobileChat, onBack, onEditClick }) => {
             <p className="text-[12px] text-slate-500 dark:text-slate-400">
               {typingUser ? (
                 <span className="text-blue-500 font-medium">typing...</span>
-              ) : isOnline ? ( // 👈 Use the isOnline state here
+              ) : isOnline ? (
                 <span className="text-emerald-500 font-medium">Online</span>
               ) : (
                 "Last seen recently"
@@ -199,7 +192,6 @@ const ChatWindow = ({ activeChat, showMobileChat, onBack, onEditClick }) => {
             </p>
           </div>
         </div>
-
         <button
           onClick={onEditClick}
           className="flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 px-4 py-1.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
@@ -219,7 +211,6 @@ const ChatWindow = ({ activeChat, showMobileChat, onBack, onEditClick }) => {
             backgroundSize: "24px 24px",
           }}
         />
-
         <div className="relative z-10 flex h-full flex-col gap-2">
           {loading ? (
             <div className="flex h-full items-center justify-center">
@@ -236,7 +227,18 @@ const ChatWindow = ({ activeChat, showMobileChat, onBack, onEditClick }) => {
               </p>
             </div>
           ) : (
-            messages.map((msg) => <MessageBubble key={msg.id} message={msg} />)
+            messages.map((msg) => (
+              <MessageBubble
+                key={msg.id}
+                message={msg}
+                // 👇 Optimistically remove from UI immediately upon successful API call
+                onDeleteSuccess={(id) =>
+                  setMessages((prev) =>
+                    prev.filter((m) => String(m.id) !== String(id)),
+                  )
+                }
+              />
+            ))
           )}
 
           {typingUser && (
@@ -260,7 +262,6 @@ const ChatWindow = ({ activeChat, showMobileChat, onBack, onEditClick }) => {
               </div>
             </div>
           )}
-
           <div ref={messagesEndRef} />
         </div>
       </div>
